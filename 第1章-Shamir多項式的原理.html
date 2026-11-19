@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>第 1 章 · Shamir 多項式的原理</title>
+    <!-- 所有視覺樣式都在 風格.css：其他章節沿用同一支檔案即可維持一致風格 -->
+    <link rel="stylesheet" href="風格.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 1 章 Shamir 多項式的原理">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">Shamir 多項式的原理</h1>
+          <p class="lede rise">
+            從一次函數的直覺出發，理解 (r, n) 門檻式機密分享：<br />
+            為什麼「點」的數量，就是解密的門檻。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">CH. 01</span>
+            <span>我的筆記</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">01</div>
+      </section>
+
+      <!-- 2 ─ 一次多項式 =================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="一次多項式">
+        <header class="slide__head">
+          <p class="eyebrow rise">1-1 · 一次多項式</p>
+          <h2 class="h2 rise">兩個點，就能還原一條直線</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <div class="formula rise">
+              <span class="formula__label">一般式</span>
+              <span class="math"><i>y</i> = <i>ax</i> + <i>b</i></span>
+            </div>
+
+            <p class="body-text rise">
+              以 <span class="math"><i>y</i> = 3<i>x</i> + 4</span> 為例，這條線上可以取出無限多個點：
+            </p>
+
+            <ul class="chips rise">
+              <li class="chip">(1, 7)</li>
+              <li class="chip">(2, 10)</li>
+              <li class="chip">(3, 13)</li>
+              <li class="chip chip--brand">…</li>
+            </ul>
+
+            <p class="callout rise">
+              <strong>只有一個點</strong>：沒辦法得知原本的多項式長怎樣。<br />
+              <strong>有兩個點</strong>：就能唯一決定 <span class="math">y = 3x + 4</span>。
+            </p>
+          </div>
+
+          <figure class="figure rise">
+            <img
+              src="img/2026/我的筆記/file-20261115155446757.png"
+              width="450"
+              height="580"
+              alt="直線 y = 3x + 4 的圖形，圖上標出 (−2, −2) 與 (1, 7) 兩個點"
+            />
+            <figcaption>直線上的任兩點，都決定同一條直線</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 3 ─ 二次多項式 =================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="二次多項式">
+        <header class="slide__head">
+          <p class="eyebrow rise">1-2 · 二次多項式</p>
+          <h2 class="h2 rise">三個點，才能決定一條曲線</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <div class="formula rise">
+              <span class="formula__label">一般式</span>
+              <span class="math"><i>y</i> = <i>ax</i><sup>2</sup> + <i>bx</i> + <i>c</i></span>
+            </div>
+
+            <p class="body-text rise">
+              以 <span class="math"><i>y</i> = 2<i>x</i><sup>2</sup> + 3<i>x</i> + 4</span> 為例，拋物線上同樣有無限多個點：
+            </p>
+
+            <ul class="chips rise">
+              <li class="chip">(−2, 6)</li>
+              <li class="chip">(−1, 3)</li>
+              <li class="chip">(1, 9)</li>
+              <li class="chip chip--brand">…</li>
+            </ul>
+
+            <p class="callout rise">
+              需要其中 <strong>三個點</strong>，才能解出原本的多項式
+              <span class="math">y = 2x<sup>2</sup> + 3x + 4</span>。
+            </p>
+
+            <p class="small muted rise">
+              → 一般化：<span class="math math--sm">r − 1</span> 次多項式，就需要 <span class="math math--sm">r</span> 個點。
+            </p>
+          </div>
+
+          <figure class="figure rise">
+            <img
+              src="img/2026/我的筆記/file-20261115155502412.png"
+              width="450"
+              height="580"
+              alt="拋物線 y = 2x² + 3x + 4 的圖形，圖上標出 (−2, 6)、(−1, 3)、(1, 9) 三個點"
+            />
+            <figcaption>二次曲線：三個點才唯一</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 4 ─ 核心想法 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="Secret 藏在常數項裡">
+        <header class="slide__head">
+          <p class="eyebrow rise">1-3 · 核心想法</p>
+          <h2 class="h2 rise">把 Secret 藏在常數項裡</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="formula formula--hero rise">
+            <span class="formula__label">r − 1 次多項式</span>
+            <span class="math math--xl">
+              <i>f</i>(<i>x</i>) =
+              <span class="term-secret"><i>a</i><sub>0</sub></span>
+              + <i>a</i><sub>1</sub><i>x</i>
+              + <i>a</i><sub>2</sub><i>x</i><sup>2</sup>
+              + ⋯ +
+              <i>a</i><sub><i>r</i>−1</sub><i>x</i><sup><i>r</i>−1</sup>
+            </span>
+          </div>
+
+          <div class="grid-2 grid-2--even">
+            <p class="callout callout--secret rise">
+              <strong>常數項 <span class="math">a<sub>0</sub></span> 就是機密本身</strong><br />
+              要分享的資料（一個數字）直接放進 <span class="math">a<sub>0</sub></span>，其餘位置不留痕跡。
+            </p>
+
+            <p class="callout rise">
+              <strong>其他係數全部隨機</strong><br />
+              少於 <span class="math">r</span> 個點時，每個可能的 Secret 都一樣有可能 ——
+              這就是「看不出來」的來源。
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 5 ─ (r, n) 門檻機制 ============================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="產生 r, n 分享">
+        <header class="slide__head">
+          <p class="eyebrow rise">1-4 · 門檻機制</p>
+          <h2 class="h2 rise">產生 (r, n) 分享：三個步驟</h2>
+          <p class="lede rise">
+            n 個 Share 分給 n 個人；任 r 個人才能解密，少於 r 個則完全無法還原。
+          </p>
+        </header>
+
+        <div class="slide__body grid-2">
+          <ol class="steps">
+            <li class="step rise">
+              <span class="step__num">1</span>
+              <span class="step__body">
+                <span class="step__title">造一條最高次為 r−1 的多項式</span>
+                係數打亂，Secret（一個數字）放在常數項。
+              </span>
+            </li>
+            <li class="step rise">
+              <span class="step__num">2</span>
+              <span class="step__body">
+                <span class="step__title">取 n 個點，分給其他人</span>
+                每個點就是一份 Share，單獨看只是一組毫無意義的座標。
+              </span>
+            </li>
+            <li class="step rise">
+              <span class="step__num">3</span>
+              <span class="step__body">
+                <span class="step__title">任 r 個人才能解出多項式</span>
+                湊到 r 個點就能還原整條多項式，包含藏在
+                <span class="math">a<sub>0</sub></span> 的 Secret。
+              </span>
+            </li>
+          </ol>
+
+          <figure class="figure rise">
+            <svg
+              class="diagram"
+              viewBox="0 0 400 300"
+              role="img"
+              aria-label="曲線上的五個點，任取三個即可還原同一條曲線"
+            >
+              <path class="axis" d="M28 250H380" />
+              <path class="axis" d="M372 244l8 6-8 6" />
+              <path class="axis" d="M40 264V22" />
+              <path class="axis" d="M34 30l6-8 6 8" />
+              <text x="386" y="262">x</text>
+              <text x="22" y="26">y</text>
+
+              <path
+                class="curve"
+                d="M40 238.4L70 232.6L100 223.9L130 212.3L160 197.8L190 180.4L220 160.1L250 136.9L280 110.8L310 81.8L340 49.9"
+              />
+
+              <circle class="dot dot--on" cx="100" cy="223.9" r="6" />
+              <circle class="dot" cx="160" cy="197.8" r="6" />
+              <circle class="dot dot--on" cx="220" cy="160.1" r="6" />
+              <circle class="dot" cx="280" cy="110.8" r="6" />
+              <circle class="dot dot--on" cx="340" cy="49.9" r="6" />
+              <circle class="dot--ring" cx="100" cy="223.9" r="12" />
+              <circle class="dot--ring" cx="220" cy="160.1" r="12" />
+              <circle class="dot--ring" cx="340" cy="49.9" r="12" />
+
+              <text x="93" y="274">x<tspan baseline-shift="sub" font-size="10">1</tspan></text>
+              <text x="153" y="274">x<tspan baseline-shift="sub" font-size="10">2</tspan></text>
+              <text x="213" y="274">x<tspan baseline-shift="sub" font-size="10">3</tspan></text>
+              <text x="273" y="274">x<tspan baseline-shift="sub" font-size="10">4</tspan></text>
+              <text x="333" y="274">x<tspan baseline-shift="sub" font-size="10">5</tspan></text>
+            </svg>
+            <ul class="legend">
+              <li><span class="legend__dot"></span>已取得的 Share（r = 3）</li>
+              <li><span class="legend__dot legend__dot--off"></span>未取得</li>
+            </ul>
+            <figcaption>示意圖：任取 3 個點，都能還原同一條曲線</figcaption>
+          </figure>
+        </div>
+      </section>
+
+
+      <!-- 6 ─ 本章小結 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="本章小結">
+        <header class="slide__head">
+          <p class="eyebrow rise">1-5 · 本章小結</p>
+          <h2 class="h2 rise">接下來要處理的三件事</h2>
+          <p class="lede rise">
+            本章建立了「點 ↔ 多項式」的直覺；真正動手之前，還有三個問題要回答。
+          </p>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="cards">
+            <article class="card rise">
+              <p class="card__index">01</p>
+              <h3 class="card__title">為什麼需要 Galois Field？</h3>
+              <p class="card__text">
+                普通整數會洩漏大小、數值無限膨脹，除法也做不到精準還原。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02</p>
+              <h3 class="card__title">如何解出多項式？</h3>
+              <p class="card__text">
+                拉格朗日插值、行列式（克拉瑪公式）、高斯消去法，三條路都能取回
+                <span class="math math--sm">a<sub>0</sub></span>。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03</p>
+              <h3 class="card__title">如何把圖片藏起來？</h3>
+              <p class="card__text">
+                把 R、G、B 彩度當成 Secret，在
+                <span class="math math--sm">GF(2<sup>8</sup>)</span> 裡逐像素拆分與還原。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>下一章</strong>：先用例子說明「只用普通整數」會壞在哪裡，再走進
+            <span class="math">GF(p)</span> 與 <span class="math">GF(2<sup>8</sup>)</span> 的運算。
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 06</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（←）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <script>
+      /*
+       * 簡報播放器：舞台固定 1280×720，依視窗大小等比縮放。
+       * 操作：← → / 空白鍵 / PageUp、PageDown 翻頁，Home、End 跳首尾，
+       *       F 全螢幕，P 列印（存成 PDF），支援觸控滑動與 #頁碼 深層連結。
+       */
+      (function () {
+        var BASE_W = 1280;
+        var BASE_H = 720;
+        var deck = document.getElementById("deck");
+        var slides = Array.prototype.slice.call(deck.querySelectorAll(".slide"));
+        var progressBar = document.querySelector(".hud__progress > i");
+        var counter = document.querySelector(".hud__count");
+        var prevBtn = document.querySelector('[data-nav="prev"]');
+        var nextBtn = document.querySelector('[data-nav="next"]');
+        var fullBtn = document.querySelector('[data-nav="fullscreen"]');
+        var index = 0;
+
+        function pad2(n) {
+          return (n < 10 ? "0" : "") + n;
+        }
+
+        function fit() {
+          var scale = Math.min(
+            window.innerWidth / BASE_W,
+            window.innerHeight / BASE_H
+          );
+          deck.style.setProperty("--deck-scale", Math.max(0.2, scale).toFixed(4));
+        }
+
+        function currentFromHash() {
+          var n = parseInt(String(location.hash).replace("#", ""), 10);
+          return isNaN(n) ? 0 : n - 1;
+        }
+
+        function show(target, keepHash) {
+          var next = Math.max(0, Math.min(slides.length - 1, target));
+          slides.forEach(function (slide, i) {
+            var active = i === next;
+            slide.classList.toggle("is-active", active);
+            slide.setAttribute("aria-hidden", active ? "false" : "true");
+            if (active) {
+              slide.removeAttribute("inert");
+            } else {
+              slide.setAttribute("inert", "");
+            }
+          });
+          index = next;
+          counter.textContent = pad2(index + 1) + " / " + pad2(slides.length);
+          progressBar.style.width =
+            ((index + 1) / slides.length) * 100 + "%";
+          prevBtn.disabled = index === 0;
+          nextBtn.disabled = index === slides.length - 1;
+          if (!keepHash && window.history && history.replaceState) {
+            history.replaceState(null, "", "#" + (index + 1));
+          }
+        }
+
+        function toggleFullscreen() {
+          if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen().catch(function () {});
+            }
+          } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+
+        document.addEventListener("keydown", function (e) {
+          if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+          var tag = (e.target && e.target.tagName) || "";
+          if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
+          // 焦點在按鈕上時，讓空白鍵／Enter 維持「按下按鈕」的預設行為
+          if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
+
+          switch (e.key) {
+            case "ArrowRight":
+            case "ArrowDown":
+            case "PageDown":
+            case " ":
+            case "Enter":
+              e.preventDefault();
+              show(index + 1);
+              break;
+            case "ArrowLeft":
+            case "ArrowUp":
+            case "PageUp":
+            case "Backspace":
+              e.preventDefault();
+              show(index - 1);
+              break;
+            case "Home":
+              e.preventDefault();
+              show(0);
+              break;
+            case "End":
+              e.preventDefault();
+              show(slides.length - 1);
+              break;
+            case "f":
+            case "F":
+              toggleFullscreen();
+              break;
+            case "p":
+            case "P":
+              window.print();
+              break;
+            default:
+              break;
+          }
+        });
+
+        prevBtn.addEventListener("click", function () {
+          show(index - 1);
+        });
+
+        nextBtn.addEventListener("click", function () {
+          show(index + 1);
+        });
+
+        fullBtn.addEventListener("click", toggleFullscreen);
+
+        var touchX = null;
+        var touchY = null;
+
+        document.addEventListener(
+          "touchstart",
+          function (e) {
+            if (e.touches.length !== 1) return;
+            touchX = e.touches[0].clientX;
+            touchY = e.touches[0].clientY;
+          },
+          { passive: true }
+        );
+
+        document.addEventListener(
+          "touchend",
+          function (e) {
+            if (touchX === null || !e.changedTouches.length) return;
+            var dx = e.changedTouches[0].clientX - touchX;
+            var dy = e.changedTouches[0].clientY - touchY;
+            if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
+              show(index + (dx < 0 ? 1 : -1));
+            }
+            touchX = null;
+            touchY = null;
+          },
+          { passive: true }
+        );
+
+        window.addEventListener("resize", fit);
+        window.addEventListener("hashchange", function () {
+          show(currentFromHash(), true);
+        });
+
+        fit();
+        show(currentFromHash());
+      })();
+    </script>
+  </body>
+</html>
+

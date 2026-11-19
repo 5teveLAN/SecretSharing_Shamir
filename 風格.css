@@ -1,0 +1,924 @@
+@charset "UTF-8";
+/*!
+ * 風格.css — 簡報共用樣式基準 v1.0
+ * ---------------------------------------------------------------------------
+ * 用途：所有章節簡報共用同一套視覺語言（色彩、字體、版面、元件）。
+ *      新簡報只要 <link rel="stylesheet" href="風格.css">，HTML 內不寫樣式。
+ *
+ * 舞台規格：固定 1280 × 720（16:9），由腳本換算 --deck-scale 縮放填滿視窗，
+ *          因此每台電腦、每個投影機看到的比例都一樣；列印時每頁一張投影片。
+ *
+ * 結構約定：
+ *   body > .deck > section.slide(.is-active)
+ *     .slide--cover        封面（深色）
+ *     .slide__head         標題區（.eyebrow / .h2 / .lede）
+ *     .slide__body         內容區（.grid-2 / .stack / .cards …）
+ *   .hud                   底部控制列（不屬於舞台，固定在視窗上）
+ *
+ * 想調整整體風格，只改「1. 設計變數」即可；不要在個別 HTML 裡覆寫顏色。
+ * ---------------------------------------------------------------------------
+ */
+
+/* ===========================================================================
+   1. 設計變數
+   =========================================================================== */
+:root {
+  /* 字體：以系統／Noto 為主，離線也能正常顯示 */
+  --font-sans: "Noto Sans TC", "Noto Sans CJK TC", "PingFang TC",
+    "Microsoft JhengHei", "Heiti TC", system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-serif: "Noto Serif TC", "Noto Serif CJK TC", "Songti TC", "SimSun",
+    "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "DejaVu Sans Mono", ui-monospace,
+    "SFMono-Regular", Menlo, monospace;
+
+  /* 中性色 */
+  --ink-900: #121a2b;
+  --ink-700: #28324a;
+  --ink-500: #4b5670;
+  --ink-300: #7b869c;
+  --line: #e3e8f1;
+  --line-2: #ccd4e3;
+  --paper: #ffffff;
+  --paper-dim: #f5f7fc;
+  --bg: #e8ecf5;
+
+  /* 主題色（品牌藍）＋ 兩個語意色 */
+  --brand: #2f57d6;
+  --brand-600: #22409f;
+  --brand-soft: #ecf0ff;
+  --accent: #d97706; /* Secret／關鍵重點 */
+  --accent-soft: #fff3e0;
+  --ok: #0e8f80;
+  --ok-soft: #e3f6f2;
+
+  /* 圓角與陰影 */
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --shadow-sm: 0 1px 2px rgba(18, 26, 43, 0.06),
+    0 8px 20px -12px rgba(18, 26, 43, 0.18);
+  --shadow-md: 0 2px 4px rgba(18, 26, 43, 0.05),
+    0 24px 48px -24px rgba(18, 26, 43, 0.32);
+
+  /* 舞台尺寸與內距 */
+  --slide-w: 1280px;
+  --slide-h: 720px;
+  --pad-x: 72px;
+  --pad-y: 56px;
+  --gap-row: 26px;
+}
+
+/* ===========================================================================
+   2. 基礎重設
+   =========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: grid;
+  place-content: center; /* 讓 1280px 軌道本身也置中：小視窗時才不會偏右 */
+  place-items: center;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--ink-900);
+  background:
+    radial-gradient(1100px 640px at 10% -8%, #dde5ff 0%, transparent 62%),
+    radial-gradient(900px 620px at 102% 108%, #dde9f6 0%, transparent 58%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+img {
+  max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+}
+
+/* ===========================================================================
+   3. 舞台與投影片
+   =========================================================================== */
+.deck {
+  position: relative;
+  flex: none;
+  width: var(--slide-w);
+  height: var(--slide-h);
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: var(--shadow-md);
+  transform: scale(var(--deck-scale, 1));
+  transform-origin: center center;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--gap-row);
+  padding: var(--pad-y) var(--pad-x);
+  color: var(--ink-900);
+  background-color: var(--paper);
+  /* 極淡的點陣，讓白底不至於空虛 */
+  background-image: radial-gradient(
+    rgba(47, 87, 214, 0.1) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+  background-position: 14px 14px;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(0.995);
+  transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s linear;
+}
+
+.slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.slide__head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 900px;
+}
+
+.slide__body {
+  min-height: 0;
+  align-content: start;
+}
+
+/* 內容區若直接使用 .stack，讓內容在剩餘高度中垂直置中，
+   避免短頁面全部擠在上方、下方留一大片空白 */
+.slide__body.stack {
+  justify-content: center;
+}
+
+/* ===========================================================================
+   4. 文字
+   =========================================================================== */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.h1 {
+  font-size: 68px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.h2 {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.h3 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.lede {
+  max-width: 46em;
+  font-size: 20px;
+  line-height: 1.65;
+  color: var(--ink-500);
+}
+
+.body-text {
+  font-size: 19px;
+  line-height: 1.75;
+  color: var(--ink-700);
+}
+
+.muted {
+  color: var(--ink-300);
+}
+
+.small {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+strong {
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.hl {
+  padding: 0 0.12em;
+  border-radius: 3px;
+  background: linear-gradient(transparent 60%, var(--brand-soft) 60%);
+  font-weight: 700;
+}
+
+.hl--secret {
+  background: linear-gradient(transparent 60%, #ffe2b0 60%);
+}
+
+/* 數學式：襯線體＋斜體變數，不需要任何外部套件 */
+.math {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  color: var(--ink-900);
+}
+
+.math i,
+.math var {
+  font-style: italic;
+  font-family: var(--font-serif);
+}
+
+.math sub,
+.math sup {
+  font-size: 0.62em;
+  line-height: 0;
+}
+
+.math--xl {
+  font-size: 46px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.math--sm {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* 行內數學式跟隨所在段落的字級，避免破壞行距與版面 */
+.body-text .math,
+.callout .math,
+.card__text .math,
+.step__body .math {
+  font-size: 1em;
+  line-height: inherit;
+}
+
+/* ===========================================================================
+   5. 版面
+   =========================================================================== */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1.06fr 0.94fr;
+  gap: 52px;
+  align-items: center;
+  min-height: 0;
+}
+
+.grid-2--even {
+  grid-template-columns: 1fr 1fr;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.stack--tight {
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+/* ===========================================================================
+   6. 元件
+   =========================================================================== */
+
+/* 6-1 公式牌 */
+.formula {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 16px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-dim);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.formula__label {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ink-300);
+}
+
+.formula--plain {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* 大型公式：用於「本頁只有一個重點公式」的投影片 */
+.formula--hero {
+  align-items: center;
+  padding: 30px 34px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+  border-left: 5px solid var(--brand);
+}
+
+.formula--hero .math--xl {
+  font-size: 50px;
+}
+
+/* 公式中特別標示的項（例如被藏起來的 Secret a₀） */
+.term-secret {
+  padding: 0.04em 0.18em;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px #f1c98f;
+  color: #8a4a06;
+}
+
+/* 6-2 籤片與標籤 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+}
+
+.chip {
+  padding: 7px 15px;
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line-2), var(--shadow-sm);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--ink-700);
+}
+
+.chip--brand {
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px #c6d2fb;
+  color: var(--brand-600);
+}
+
+.chip--secret {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px #f0c88f;
+  color: #8a4a06;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  border-radius: var(--radius-xs);
+  background: var(--brand-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand-600);
+}
+
+.tag--dark {
+  background: rgba(255, 255, 255, 0.14);
+  color: #cdd9ff;
+}
+
+/* 6-3 提示框 */
+.callout {
+  --callout-color: var(--brand);
+  --callout-bg: var(--brand-soft);
+  position: relative;
+  padding: 16px 20px 16px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--callout-bg);
+  box-shadow: inset 0 0 0 1px rgba(18, 26, 43, 0.05);
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--ink-700);
+}
+
+.callout::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--callout-color);
+}
+
+.callout strong {
+  color: var(--ink-900);
+}
+
+.callout--secret {
+  --callout-color: var(--accent);
+  --callout-bg: var(--accent-soft);
+}
+
+.callout--ok {
+  --callout-color: var(--ok);
+  --callout-bg: var(--ok-soft);
+}
+
+.callout--quiet {
+  --callout-color: var(--ink-300);
+  --callout-bg: var(--paper-dim);
+}
+
+/* 6-4 步驟 */
+.steps {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 15px 20px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+}
+
+.step__num {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.step__body {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--ink-500);
+}
+
+.step__title {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.step__body .math {
+  font-size: 17px;
+}
+
+/* 6-5 卡片 */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 22px 24px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+}
+
+.card__index {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--brand);
+}
+
+.card__title {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.card__text {
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--ink-500);
+}
+
+/* 6-6 圖片 */
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.figure img {
+  display: block;
+  max-height: 424px;
+  width: auto;
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.figure figcaption {
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--ink-300);
+}
+
+/* 6-7 圖例與示意圖 */
+.legend {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  font-size: 14px;
+  color: var(--ink-500);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.legend__dot--off {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--line-2);
+}
+
+.diagram {
+  width: 100%;
+  max-width: 470px;
+  height: auto;
+  overflow: visible;
+}
+
+.diagram .axis {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1.5;
+}
+
+.diagram .curve {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.diagram .dot {
+  fill: var(--paper);
+  stroke: var(--line-2);
+  stroke-width: 2.5;
+}
+
+.diagram .dot--on {
+  fill: var(--accent);
+  stroke: var(--paper);
+  stroke-width: 3;
+}
+
+.diagram .dot--ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: 0.45;
+}
+
+.diagram text {
+  fill: var(--ink-300);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ===========================================================================
+   7. 封面
+   =========================================================================== */
+.slide--cover {
+  display: block;
+  background-color: #0d1424;
+  background-image:
+    radial-gradient(760px 520px at 84% 4%, rgba(94, 132, 255, 0.42), transparent 60%),
+    radial-gradient(620px 460px at 2% 104%, rgba(217, 119, 6, 0.22), transparent 58%),
+    radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+  background-size: auto, auto, 26px 26px;
+  color: #fff;
+}
+
+.slide--cover .eyebrow {
+  color: #93aaff;
+}
+
+.slide--cover .lede {
+  color: #b7c3dd;
+}
+
+.cover {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  height: 100%;
+  max-width: 860px;
+}
+
+.cover .h1 {
+  font-size: 72px;
+  color: #fff;
+}
+
+.cover__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: #9aa8c4;
+}
+
+.dot-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.cover__ghost {
+  position: absolute;
+  right: -16px;
+  bottom: -128px;
+  font-family: var(--font-mono);
+  font-size: 420px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ===========================================================================
+   8. 控制列（固定在視窗底部，不隨舞台縮放）
+   =========================================================================== */
+.hud {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px 14px;
+  pointer-events: none;
+}
+
+.hud__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 9px 7px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(18, 26, 43, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+  pointer-events: auto;
+}
+
+.hud__progress {
+  width: 150px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.hud__progress > i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand), #7492ff);
+  transition: width 0.35s ease;
+}
+
+.hud__count {
+  min-width: 62px;
+  text-align: center;
+}
+
+.hud__btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-500);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hud__btn:hover {
+  background: var(--brand-soft);
+  color: var(--brand-600);
+}
+
+.hud__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+.hud__btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ===========================================================================
+   9. 進場動畫（僅在 .is-active 的投影片播放）
+   =========================================================================== */
+.rise {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.slide.is-active .rise {
+  opacity: 1;
+  transform: none;
+}
+
+.slide.is-active .rise:nth-child(1) {
+  transition-delay: 0.04s;
+}
+
+.slide.is-active .rise:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.slide.is-active .rise:nth-child(3) {
+  transition-delay: 0.16s;
+}
+
+.slide.is-active .rise:nth-child(4) {
+  transition-delay: 0.22s;
+}
+
+.slide.is-active .rise:nth-child(5) {
+  transition-delay: 0.28s;
+}
+
+/* ===========================================================================
+   10. 列印／輸出 PDF：一頁一張投影片
+   =========================================================================== */
+@page {
+  size: 1280px 720px;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    display: block;
+    height: auto;
+    overflow: visible;
+    background: #fff;
+  }
+
+  .deck {
+    width: var(--slide-w);
+    height: auto;
+    overflow: visible;
+    box-shadow: none;
+    transform: none !important;
+  }
+
+  .slide {
+    position: relative;
+    inset: auto;
+    width: var(--slide-w);
+    height: var(--slide-h);
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .slide:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .rise {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hud {
+    display: none !important;
+  }
+}
+
+/* ===========================================================================
+   11. 無障礙：尊重系統的「減少動態效果」
+   =========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .slide,
+  .rise,
+  .hud__progress > i {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .slide,
+  .rise {
+    transform: none !important;
+  }
+}
+
