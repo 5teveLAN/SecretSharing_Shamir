@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>Shamir 機密分享 · 簡報</title>
+    <!-- 與各章節共用同一支樣式檔；章節檔本身也載入 style.css，單獨開啟時一樣正常 -->
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* ---------------------------------------------------------------------
+         只有 index.html 用得到的「載入中 / 載入失敗」畫面。
+         其餘視覺一律走 style.css，這裡不重複定義顏色與字體。
+         --------------------------------------------------------------------- */
+      .boot {
+        max-width: 44rem;
+        padding: 0 24px;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        line-height: 1.9;
+        letter-spacing: 0.04em;
+        text-align: center;
+        color: var(--ink-500);
+      }
+
+      .boot__title {
+        margin-bottom: 6px;
+        font-family: var(--font-sans);
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: var(--ink-900);
+      }
+
+      .boot__hint {
+        margin-top: 14px;
+        text-align: left;
+        font-size: 12.5px;
+        line-height: 1.8;
+      }
+
+      .boot__hint code,
+      .boot p code {
+        padding: 1px 6px;
+        border-radius: 6px;
+        background: var(--brand-soft);
+        font-family: inherit;
+        color: var(--brand-600);
+      }
+
+      /* 載入中的三顆小圓點（載入失敗時自動收起來） */
+      .boot__dots {
+        display: inline-flex;
+        gap: 5px;
+        margin-top: 14px;
+      }
+
+      .boot--error .boot__dots {
+        display: none;
+      }
+
+      .boot__dots > i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--brand);
+        animation: boot-blink 1.1s ease-in-out infinite;
+      }
+
+      .boot__dots > i:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      .boot__dots > i:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes boot-blink {
+        0%,
+        70%,
+        100% {
+          opacity: 0.25;
+          transform: translateY(0);
+        }
+        35% {
+          opacity: 1;
+          transform: translateY(-2px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .boot__dots > i {
+          animation: none;
+          opacity: 0.6;
+        }
+      }
+
+      @media print {
+        .boot {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 章節載入完成後會從 DOM 移除 -->
+    <div class="boot" id="boot" role="status" aria-live="polite">
+      <p class="boot__title">Shamir 機密分享</p>
+      <p id="boot-text">載入第 1 章…</p>
+      <p class="boot__dots" aria-hidden="true"><i></i><i></i><i></i></p>
+    </div>
+
+    <noscript>
+      <div class="boot">
+        <p class="boot__title">需要 JavaScript</p>
+        <p>這份簡報靠 JavaScript 載入章節與翻頁，請開啟瀏覽器的 JavaScript。</p>
+      </div>
+    </noscript>
+
+    <script>
+      /*
+       * 章節載入器：把章節檔（預設 chapter1.html）整份抓進來，掛到這個頁面的 DOM。
+       *
+       * 做法：
+       *   1. fetch() 取得章節檔，用 DOMParser 解析（不會執行任何東西）。
+       *   2. 只取章節檔的 <body> 內容：.deck 舞台、.hud 控制列、章節自己的 <script>。
+       *   3. 先把舞台與控制列插進頁面，最後才執行章節的 script；
+       *      這樣播放器執行時才抓得到 #deck、.hud 與每一張 .slide。
+       *   4. 標題沿用章節檔的 <title>，載入畫面同時移除。
+       *
+       * 之後要加第 2 章：在 CHAPTERS 多加一筆，用 ?chapter=2 開啟即可。
+       * （#後面是投影片頁碼，所以章節編號走 query string，兩者不會打架。）
+       */
+      (function () {
+        var CHAPTERS = {
+          1: { file: "chapter1.html", label: "第 1 章" },
+        };
+
+        var boot = document.getElementById("boot");
+        var bootText = document.getElementById("boot-text");
+
+        function bootError(message, hint) {
+          if (!boot) return;
+          boot.classList.add("boot--error");
+          boot.innerHTML =
+            '<p class="boot__title">載入失敗</p>' +
+            "<p>" + message + "</p>" +
+            (hint ? '<p class="boot__hint">' + hint + "</p>" : "");
+          bootText = null;
+        }
+
+        function requestedChapter() {
+          var query = new URLSearchParams(location.search);
+          var n = parseInt(query.get("chapter"), 10);
+          return CHAPTERS[n] ? n : 1;
+        }
+
+        function mount(html, chapter) {
+          var parsed = new DOMParser().parseFromString(html, "text/html");
+          var nodes = Array.prototype.slice.call(parsed.body.children);
+          var scripts = nodes.filter(function (node) {
+            return node.tagName === "SCRIPT";
+          });
+
+          // 版面與控制列先就位（保留章節檔原本的順序）
+          nodes.forEach(function (node) {
+            if (node.tagName === "SCRIPT") return;
+            document.body.appendChild(document.importNode(node, true));
+          });
+
+          // 再執行章節自己的 script：innerHTML 插入的 script 不會執行，必須重建節點
+          scripts.forEach(function (source) {
+            var script = document.createElement("script");
+            Array.prototype.forEach.call(source.attributes, function (attr) {
+              script.setAttribute(attr.name, attr.value);
+            });
+            script.textContent = source.textContent;
+            document.body.appendChild(script);
+          });
+
+          if (parsed.title) document.title = parsed.title;
+          if (parsed.documentElement.lang) {
+            document.documentElement.lang = parsed.documentElement.lang;
+          }
+
+          if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+        }
+
+        function load(n) {
+          var chapter = CHAPTERS[n];
+          if (bootText) bootText.textContent = "載入" + chapter.label + "…";
+
+          fetch(chapter.file, { cache: "no-cache" })
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error(
+                  chapter.file + " 回應 " + response.status + " " + response.statusText
+                );
+              }
+              return response.text();
+            })
+            .then(function (html) {
+              if (!/^\s*<!DOCTYPE/i.test(html) && html.indexOf("<main") === -1) {
+                throw new Error(chapter.file + " 的內容不是章節頁面");
+              }
+              mount(html, chapter);
+            })
+            .catch(function (error) {
+              bootError(
+                "抓不到 <code>" + chapter.file + "</code>：" + error.message,
+                "如果是直接雙擊打開 index.html（file://），瀏覽器會因為安全性限制擋下 " +
+                  "<code>fetch()</code>。請改用本機伺服器：<br />" +
+                  "<code>python3 -m http.server 8000</code><br />" +
+                  "然後開啟 <code>http://localhost:8000/</code>；放上 GitHub Pages 就沒有這個問題。"
+              );
+            });
+        }
+
+        load(requestedChapter());
+      })();
+    </script>
+  </body>
+</html>
