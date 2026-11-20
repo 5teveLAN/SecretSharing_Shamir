@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <title>第 1 章 · Shamir 多項式的原理</title>
-    <!-- 所有視覺樣式都在 style.css：其他章節沿用同一支檔案即可維持一致風格 -->
+    <!-- 視覺樣式在 style.css、播放器在 deck.js：其他章節沿用同一組檔案即可維持一致風格 -->
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -286,8 +286,8 @@
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
         <span class="hud__count" aria-live="polite">01 / 06</span>
-        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（←）">←</button>
-        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→）">→</button>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
           <svg
             width="14"
@@ -306,165 +306,7 @@
       </div>
     </nav>
 
-    <script>
-      /*
-       * 簡報播放器：舞台固定 1280×720，依視窗大小等比縮放。
-       * 操作：← → / 空白鍵 / PageUp、PageDown 翻頁，Home、End 跳首尾，
-       *       F 全螢幕，P 列印（存成 PDF），支援觸控滑動與 #頁碼 深層連結。
-       */
-      (function () {
-        var BASE_W = 1280;
-        var BASE_H = 720;
-        var deck = document.getElementById("deck");
-        var slides = Array.prototype.slice.call(deck.querySelectorAll(".slide"));
-        var progressBar = document.querySelector(".hud__progress > i");
-        var counter = document.querySelector(".hud__count");
-        var prevBtn = document.querySelector('[data-nav="prev"]');
-        var nextBtn = document.querySelector('[data-nav="next"]');
-        var fullBtn = document.querySelector('[data-nav="fullscreen"]');
-        var index = 0;
-
-        function pad2(n) {
-          return (n < 10 ? "0" : "") + n;
-        }
-
-        function fit() {
-          var scale = Math.min(
-            window.innerWidth / BASE_W,
-            window.innerHeight / BASE_H
-          );
-          deck.style.setProperty("--deck-scale", Math.max(0.2, scale).toFixed(4));
-        }
-
-        function currentFromHash() {
-          var n = parseInt(String(location.hash).replace("#", ""), 10);
-          return isNaN(n) ? 0 : n - 1;
-        }
-
-        function show(target, keepHash) {
-          var next = Math.max(0, Math.min(slides.length - 1, target));
-          slides.forEach(function (slide, i) {
-            var active = i === next;
-            slide.classList.toggle("is-active", active);
-            slide.setAttribute("aria-hidden", active ? "false" : "true");
-            if (active) {
-              slide.removeAttribute("inert");
-            } else {
-              slide.setAttribute("inert", "");
-            }
-          });
-          index = next;
-          counter.textContent = pad2(index + 1) + " / " + pad2(slides.length);
-          progressBar.style.width =
-            ((index + 1) / slides.length) * 100 + "%";
-          prevBtn.disabled = index === 0;
-          nextBtn.disabled = index === slides.length - 1;
-          if (!keepHash && window.history && history.replaceState) {
-            history.replaceState(null, "", "#" + (index + 1));
-          }
-        }
-
-        function toggleFullscreen() {
-          if (!document.fullscreenElement) {
-            if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen().catch(function () {});
-            }
-          } else if (document.exitFullscreen) {
-            document.exitFullscreen();
-          }
-        }
-
-        document.addEventListener("keydown", function (e) {
-          if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
-          var tag = (e.target && e.target.tagName) || "";
-          if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
-          // 焦點在按鈕上時，讓空白鍵／Enter 維持「按下按鈕」的預設行為
-          if (tag === "BUTTON" && (e.key === " " || e.key === "Enter")) return;
-
-          switch (e.key) {
-            case "ArrowRight":
-            case "ArrowDown":
-            case "PageDown":
-            case " ":
-            case "Enter":
-              e.preventDefault();
-              show(index + 1);
-              break;
-            case "ArrowLeft":
-            case "ArrowUp":
-            case "PageUp":
-            case "Backspace":
-              e.preventDefault();
-              show(index - 1);
-              break;
-            case "Home":
-              e.preventDefault();
-              show(0);
-              break;
-            case "End":
-              e.preventDefault();
-              show(slides.length - 1);
-              break;
-            case "f":
-            case "F":
-              toggleFullscreen();
-              break;
-            case "p":
-            case "P":
-              window.print();
-              break;
-            default:
-              break;
-          }
-        });
-
-        prevBtn.addEventListener("click", function () {
-          show(index - 1);
-        });
-
-        nextBtn.addEventListener("click", function () {
-          show(index + 1);
-        });
-
-        fullBtn.addEventListener("click", toggleFullscreen);
-
-        var touchX = null;
-        var touchY = null;
-
-        document.addEventListener(
-          "touchstart",
-          function (e) {
-            if (e.touches.length !== 1) return;
-            touchX = e.touches[0].clientX;
-            touchY = e.touches[0].clientY;
-          },
-          { passive: true }
-        );
-
-        document.addEventListener(
-          "touchend",
-          function (e) {
-            if (touchX === null || !e.changedTouches.length) return;
-            var dx = e.changedTouches[0].clientX - touchX;
-            var dy = e.changedTouches[0].clientY - touchY;
-            if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
-              show(index + (dx < 0 ? 1 : -1));
-            }
-            touchX = null;
-            touchY = null;
-          },
-          { passive: true }
-        );
-
-        window.addEventListener("resize", fit);
-        window.addEventListener("hashchange", function () {
-          show(currentFromHash(), true);
-        });
-
-        fit();
-        show(currentFromHash());
-      })();
-    </script>
+    <script src="deck.js"></script>
   </body>
 </html>
 

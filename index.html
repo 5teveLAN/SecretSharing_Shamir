@@ -106,7 +106,7 @@
     <!-- 章節載入完成後會從 DOM 移除 -->
     <div class="boot" id="boot" role="status" aria-live="polite">
       <p class="boot__title">Shamir 機密分享</p>
-      <p id="boot-text">載入第 1 章…</p>
+      <p id="boot-text">載入簡報…</p>
       <p class="boot__dots" aria-hidden="true"><i></i><i></i><i></i></p>
     </div>
 
@@ -117,23 +117,32 @@
       </div>
     </noscript>
 
+    <!-- 播放器：章節檔與 index 共用同一支；這裡先載入，等章節合併完再呼叫 SlideDeck.init() -->
+    <script src="deck.js"></script>
+
     <script>
       /*
-       * 章節載入器：把章節檔（預設 chapter1.html）整份抓進來，掛到這個頁面的 DOM。
+       * 章節載入器：把所有章節合成「同一份 deck」的簡報。
        *
        * 做法：
-       *   1. fetch() 取得章節檔，用 DOMParser 解析（不會執行任何東西）。
-       *   2. 只取章節檔的 <body> 內容：.deck 舞台、.hud 控制列、章節自己的 <script>。
-       *   3. 先把舞台與控制列插進頁面，最後才執行章節的 script；
-       *      這樣播放器執行時才抓得到 #deck、.hud 與每一張 .slide。
-       *   4. 標題沿用章節檔的 <title>，載入畫面同時移除。
+       *   1. 依 CHAPTERS 的章節編號順序，把每個章節檔都 fetch 進來，用 DOMParser 解析
+       *      （解析不會執行任何東西），並數出每章有幾張 .slide。
+       *   2. 依序累加頁碼：第 1 章從第 1 頁開始，下一章接在前一章最後一頁後面。
+       *      例：第 1 章 6 張（1–6）、第 6 章 6 張（7–12），整份簡報共 12 頁。
+       *      之後在中間插入新章節，只要在 CHAPTERS 多加一筆，後面頁碼會自動往後推。
+       *   3. 把所有章節的 .slide 依序放進同一個 #deck，控制列只插一次。
+       *      圖形樣式（例如 fill: url(#grid6)）是 style.css 直接以 id 參照，
+       *      所以各章 SVG defs 的 id 要保持唯一，合併時不改名。
+       *   4. 最後呼叫 deck.js 的 SlideDeck.init()：頁碼是整份簡報的 1–N，
+       *      換章節、翻頁都只是換投影片，不會再重新載入任何檔案。
        *
-       * 之後要加第 2 章：在 CHAPTERS 多加一筆，用 ?chapter=2 開啟即可。
-       * （#後面是投影片頁碼，所以章節編號走 query string，兩者不會打架。）
+       * 之後要加其他章：在 CHAPTERS 多加一筆即可（目前有 1、6）。
+       * ?chapter=N 決定從哪一章的第一頁開始；#頁碼 則是合併後的全域頁碼。
        */
       (function () {
         var CHAPTERS = {
-          1: { file: "chapter1.html", label: "第 1 章" },
+          1: { file: "chapter1.html", label: "第 1 章", name: "Shamir 多項式的原理" },
+          6: { file: "chapter6.html", label: "第 6 章", name: "實作機密影像分享" },
         };
 
         var boot = document.getElementById("boot");
@@ -155,59 +164,161 @@
           return CHAPTERS[n] ? n : 1;
         }
 
-        function mount(html, chapter) {
-          var parsed = new DOMParser().parseFromString(html, "text/html");
-          var nodes = Array.prototype.slice.call(parsed.body.children);
-          var scripts = nodes.filter(function (node) {
-            return node.tagName === "SCRIPT";
-          });
-
-          // 版面與控制列先就位（保留章節檔原本的順序）
-          nodes.forEach(function (node) {
-            if (node.tagName === "SCRIPT") return;
-            document.body.appendChild(document.importNode(node, true));
-          });
-
-          // 再執行章節自己的 script：innerHTML 插入的 script 不會執行，必須重建節點
-          scripts.forEach(function (source) {
-            var script = document.createElement("script");
-            Array.prototype.forEach.call(source.attributes, function (attr) {
-              script.setAttribute(attr.name, attr.value);
+        function chapterKeys() {
+          return Object.keys(CHAPTERS)
+            .map(Number)
+            .sort(function (a, b) {
+              return a - b;
             });
-            script.textContent = source.textContent;
-            document.body.appendChild(script);
-          });
-
-          if (parsed.title) document.title = parsed.title;
-          if (parsed.documentElement.lang) {
-            document.documentElement.lang = parsed.documentElement.lang;
-          }
-
-          if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
         }
 
-        function load(n) {
-          var chapter = CHAPTERS[n];
-          if (bootText) bootText.textContent = "載入" + chapter.label + "…";
-
-          fetch(chapter.file, { cache: "no-cache" })
+        function fetchChapter(key) {
+          var file = CHAPTERS[key].file;
+          return fetch(file, { cache: "no-cache" })
             .then(function (response) {
               if (!response.ok) {
                 throw new Error(
-                  chapter.file + " 回應 " + response.status + " " + response.statusText
+                  file + " 回應 " + response.status + " " + response.statusText
                 );
               }
               return response.text();
             })
             .then(function (html) {
               if (!/^\s*<!DOCTYPE/i.test(html) && html.indexOf("<main") === -1) {
-                throw new Error(chapter.file + " 的內容不是章節頁面");
+                throw new Error(file + " 的內容不是章節頁面");
               }
-              mount(html, chapter);
+              var parsed = new DOMParser().parseFromString(html, "text/html");
+              var slides = parsed.querySelectorAll(".slide").length;
+              if (!slides) throw new Error(file + " 裡找不到 .slide");
+              return { key: key, parsed: parsed, slides: slides };
+            });
+        }
+
+        // 依章節順序把頁碼接起來（中間插入新章節時，後面頁碼會自動往後推）
+        function mergePages(entries) {
+          var total = 0;
+          entries.forEach(function (entry) {
+            entry.offset = total; // 本章第一張之前已經有幾頁
+            entry.first = total + 1; // 本章第一頁（合併後的頁碼）
+            entry.last = total + entry.slides;
+            total += entry.slides;
+          });
+          return total;
+        }
+
+        // 章節切換：只在 index 插入控制列；連結直接跳到該章第一頁，不會重新載入
+        function mountChapterSwitch(entries) {
+          var bar = document.querySelector(".hud__bar");
+          if (!bar) return;
+
+          var group = document.createElement("div");
+          group.className = "hud__chapters";
+          group.setAttribute("role", "group");
+          group.setAttribute("aria-label", "章節");
+
+          entries.forEach(function (entry) {
+            var chapter = CHAPTERS[entry.key];
+            var label = chapter.name ? chapter.label + " · " + chapter.name : chapter.label;
+            var link = document.createElement("a");
+            link.className = "hud__chapter";
+            link.href = "#" + entry.first;
+            link.textContent = "CH." + entry.key;
+            link.title = label + "（第 " + entry.first + "–" + entry.last + " 頁）";
+            link.setAttribute("data-chapter", String(entry.key));
+            group.appendChild(link);
+          });
+
+          bar.appendChild(group);
+          document.body.classList.add("has-chapters");
+        }
+
+        function chapterOfPage(entries, page) {
+          for (var i = 0; i < entries.length; i++) {
+            if (page <= entries[i].last) return entries[i];
+          }
+          return entries[entries.length - 1];
+        }
+
+        // 換頁時同步：章節鈕選中狀態、視窗標題、網址（?chapter=N#頁碼）
+        function syncChrome(entries, page) {
+          var current = chapterOfPage(entries, page);
+
+          Array.prototype.forEach.call(
+            document.querySelectorAll(".hud__chapter"),
+            function (link) {
+              if (link.getAttribute("data-chapter") === String(current.key)) {
+                link.setAttribute("aria-current", "page");
+              } else {
+                link.removeAttribute("aria-current");
+              }
+            }
+          );
+
+          var chapter = CHAPTERS[current.key];
+          var title = chapter.name ? chapter.label + " · " + chapter.name : chapter.label;
+          if (document.title !== title) document.title = title;
+
+          if (window.history && history.replaceState) {
+            history.replaceState(null, "", "?chapter=" + current.key + "#" + page);
+          }
+        }
+
+        function mount(entries, target) {
+          if (!window.SlideDeck) {
+            bootError("找不到 <code>deck.js</code>，無法啟動播放器。");
+            return;
+          }
+
+          // 把所有章節的 .slide 依序放進同一個舞台：之後換頁不必再載入任何檔案
+          var deck = document.createElement("main");
+          deck.className = "deck";
+          deck.id = "deck";
+          deck.setAttribute("aria-roledescription", "簡報");
+          deck.setAttribute("aria-label", "Shamir 機密分享");
+
+          entries.forEach(function (entry) {
+            Array.prototype.forEach.call(
+              entry.parsed.querySelectorAll(".slide"),
+              function (slide) {
+                deck.appendChild(document.importNode(slide, true));
+              }
+            );
+          });
+
+          document.body.appendChild(deck);
+
+          // 控制列各章相同，取目標章節那份插一次就好
+          var hud = target.parsed.querySelector(".hud");
+          if (hud) document.body.appendChild(document.importNode(hud, true));
+
+          mountChapterSwitch(entries);
+
+          // 啟動播放器：從目標章節第一頁開始，換頁時同步章節鈕／標題／網址
+          window.SlideDeck.init({
+            page: target.first,
+            onChange: function (page) {
+              syncChrome(entries, page);
+            },
+          });
+
+          if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+        }
+
+        function load(n) {
+          if (bootText) bootText.textContent = "載入簡報…";
+
+          // 全部章節都要抓：先數張數，才知道每一章的頁碼從第幾頁開始
+          Promise.all(chapterKeys().map(fetchChapter))
+            .then(function (entries) {
+              mergePages(entries);
+              var target = entries.filter(function (entry) {
+                return entry.key === n;
+              })[0];
+              mount(entries, target);
             })
             .catch(function (error) {
               bootError(
-                "抓不到 <code>" + chapter.file + "</code>：" + error.message,
+                "載入章節失敗：" + error.message,
                 "如果是直接雙擊打開 index.html（file://），瀏覽器會因為安全性限制擋下 " +
                   "<code>fetch()</code>。請改用本機伺服器：<br />" +
                   "<code>python3 -m http.server 8000</code><br />" +

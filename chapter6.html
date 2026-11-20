@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>第 6 章 · 實作機密影像分享</title>
+    <!-- 視覺樣式在 style.css、播放器在 deck.js：其他章節沿用同一組檔案即可維持一致風格 -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 6 章 實作機密影像分享">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">實作機密影像分享</h1>
+          <p class="lede rise">
+            把每個像素的 R、G、B 分別藏進多項式，<br />
+            再拆成 n 張看起來只是雜訊的分享影像。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">CH. 06</span>
+            <span>我的筆記</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">06</div>
+      </section>
+
+      <!-- 2 ─ 逐像素與色彩通道 ============================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="逐像素與色彩通道">
+        <header class="slide__head">
+          <p class="eyebrow rise">6-1 · 逐像素擷取</p>
+          <h2 class="h2 rise">一個像素，就是三個 Secret</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <div class="formula rise">
+              <span class="formula__label">每個像素</span>
+              <span class="math">
+                pixel = (<span class="term-secret">R</span>, <span class="term-secret">G</span>,
+                <span class="term-secret">B</span>)
+              </span>
+            </div>
+
+            <p class="body-text rise">
+              程式逐像素讀取彩色影像，把 <strong>R、G、B 三個通道</strong>的數值分別抽出來；
+              每個值都落在 0–255，都可以當成一條多項式的常數項
+              <span class="math">a<sub>0</sub></span>。
+            </p>
+
+            <ul class="chips rise">
+              <li class="chip chip--secret">R: 0–255</li>
+              <li class="chip chip--secret">G: 0–255</li>
+              <li class="chip chip--secret">B: 0–255</li>
+            </ul>
+
+            <p class="callout rise">
+              <strong>為什麼是 <span class="math">GF(2<sup>8</sup>)</span>？</strong><br />
+              通道值共 256 種，但 256 不是質數、沒有 <span class="math">GF(256)</span>；
+              所以改用 <span class="math">GF(2<sup>8</sup>)</span>：加減用 XOR，乘除查表完成。
+            </p>
+          </div>
+
+          <figure class="figure rise">
+            <svg
+              class="diagram pixel-fig"
+              viewBox="0 0 420 300"
+              role="img"
+              aria-label="原圖左上角的一小塊像素被放大，拆成 R、G、B 三個 0–255 的通道數值"
+            >
+              <defs>
+                <pattern id="grid6b" width="18" height="18" patternUnits="userSpaceOnUse">
+                  <path d="M18 0H0V18" fill="none" stroke="#e3e8f1" stroke-width="1" />
+                </pattern>
+                <pattern
+                  id="hatch6b"
+                  width="7"
+                  height="7"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(38)"
+                >
+                  <line x1="0" y1="0" x2="0" y2="7" stroke="#d64545" stroke-width="2" />
+                </pattern>
+                <marker
+                  id="arrow6p"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="9"
+                  markerHeight="9"
+                  markerUnits="userSpaceOnUse"
+                  orient="auto"
+                >
+                  <path d="M0 0 L10 5 L0 10 z" fill="#7b869c" />
+                </marker>
+              </defs>
+
+              <text class="fig-title" x="20" y="36">Secret Image（原圖）</text>
+              <rect class="pixel-panel" x="20" y="52" width="170" height="170" rx="12" />
+              <rect class="pixel-grid" x="28" y="60" width="154" height="154" rx="6" />
+              <rect class="pixel-hatch" x="28" y="60" width="46" height="46" rx="4" />
+
+              <rect class="pixel-hatch" x="236" y="74" width="64" height="64" rx="6" />
+              <path class="pixel-zoom" d="M74 60 L236 74" />
+              <path class="pixel-zoom" d="M74 106 L236 138" />
+
+              <path class="pixel-zoom" d="M300 90 L330 78" marker-end="url(#arrow6p)" />
+              <path class="pixel-zoom" d="M300 106 L330 150" marker-end="url(#arrow6p)" />
+              <path class="pixel-zoom" d="M300 122 L330 222" marker-end="url(#arrow6p)" />
+
+              <rect class="ch ch--r" x="330" y="52" width="72" height="52" rx="8" />
+              <text class="ch__name ch__name--r" x="366" y="78" text-anchor="middle">R</text>
+              <text class="ch__value" x="366" y="94" text-anchor="middle">0–255</text>
+
+              <rect class="ch ch--g" x="330" y="124" width="72" height="52" rx="8" />
+              <text class="ch__name ch__name--g" x="366" y="150" text-anchor="middle">G</text>
+              <text class="ch__value" x="366" y="166" text-anchor="middle">0–255</text>
+
+              <rect class="ch ch--b" x="330" y="196" width="72" height="52" rx="8" />
+              <text class="ch__name ch__name--b" x="366" y="222" text-anchor="middle">B</text>
+              <text class="ch__value" x="366" y="238" text-anchor="middle">0–255</text>
+
+              <text class="pixel-note" x="20" y="252">每個像素 = (R, G, B)，各 0–255</text>
+            </svg>
+            <figcaption>左上角那一小塊像素放大後，就是三個 0–255 的數值</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 3 ─ 產生流程 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="產生分享的流程">
+        <header class="slide__head">
+          <p class="eyebrow rise">6-2 · 產生流程</p>
+          <h2 class="h2 rise">從一張原圖，到 n 張分享影像</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <figure class="figure rise">
+            <svg
+              class="flow"
+              viewBox="0 0 1040 300"
+              role="img"
+              aria-label="原圖左上角的像素區塊分出 R、G、B 三條資料流，進入多項式與硬體編碼矩陣，各自產生 S1、S2 等分享分量，最後寫入多張分享影像"
+            >
+              <defs>
+                <pattern id="grid6" width="18" height="18" patternUnits="userSpaceOnUse">
+                  <path d="M18 0H0V18" fill="none" stroke="#e3e8f1" stroke-width="1" />
+                </pattern>
+                <pattern
+                  id="hatch6a"
+                  width="7"
+                  height="7"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(38)"
+                >
+                  <line x1="0" y1="0" x2="0" y2="7" stroke="#d64545" stroke-width="2" />
+                </pattern>
+                <marker id="arrow6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#7b869c" />
+                </marker>
+                <marker id="arrow6-brand" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#2f57d6" />
+                </marker>
+                <marker id="arrow6-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#d64545" />
+                </marker>
+                <marker id="arrow6-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#0e8f80" />
+                </marker>
+                <marker id="arrow6-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#2f57d6" />
+                </marker>
+              </defs>
+
+              <!-- 原圖 -->
+              <text class="flow__title" x="20" y="34">Secret Image（原圖）</text>
+              <rect class="flow__panel" x="20" y="50" width="164" height="164" rx="12" />
+              <rect class="flow__grid" x="28" y="58" width="148" height="148" rx="6" />
+              <rect class="flow__hatch" x="28" y="58" width="46" height="46" rx="4" />
+              <text class="flow__sub" x="20" y="236">R 0–255 · G 0–255 · B 0–255</text>
+
+              <!-- 三條通道資料流 -->
+              <path class="flow__stream flow__stream--r" d="M76 68 C180 68 250 112 330 112" marker-end="url(#arrow6-r)" />
+              <path class="flow__stream flow__stream--g" d="M76 80 C180 80 250 156 330 156" marker-end="url(#arrow6-g)" />
+              <path class="flow__stream flow__stream--b" d="M76 92 C180 92 250 200 330 200" marker-end="url(#arrow6-b)" />
+              <text class="flow__label flow__label--r" x="250" y="92" text-anchor="middle">R</text>
+              <text class="flow__label flow__label--g" x="250" y="126" text-anchor="middle">G</text>
+              <text class="flow__label flow__label--b" x="250" y="161" text-anchor="middle">B</text>
+
+              <!-- 多項式／編碼矩陣 -->
+              <rect class="flow__panel flow__panel--brand" x="330" y="40" width="260" height="220" rx="14" />
+              <text class="flow__title" x="460" y="66" text-anchor="middle">多項式 ／ 編碼矩陣</text>
+              <text class="flow__sub" x="460" y="84" text-anchor="middle">HW Encoding Matrix · GF(2⁸)</text>
+
+              <rect class="flow__row" x="348" y="102" width="224" height="34" rx="8" />
+              <text x="362" y="124">R 通道</text>
+              <text class="flow__label--r" x="560" y="124" text-anchor="end">S1-R · S2-R · …</text>
+
+              <rect class="flow__row" x="348" y="146" width="224" height="34" rx="8" />
+              <text x="362" y="168">G 通道</text>
+              <text class="flow__label--g" x="560" y="168" text-anchor="end">S1-G · S2-G · …</text>
+
+              <rect class="flow__row" x="348" y="190" width="224" height="34" rx="8" />
+              <text x="362" y="212">B 通道</text>
+              <text class="flow__label--b" x="560" y="212" text-anchor="end">S1-B · S2-B · …</text>
+
+              <text class="flow__sub" x="460" y="246" text-anchor="middle">
+                x = 1, 2, …, n → S1、S2、…、Sn
+              </text>
+
+              <!-- 匯入分享影像 -->
+              <path class="flow__arrow" d="M590 150 C650 150 650 92 700 92" marker-end="url(#arrow6)" />
+              <path class="flow__arrow flow__arrow--brand" d="M590 150 C650 150 650 208 700 208" marker-end="url(#arrow6-brand)" />
+              <text class="flow__sub" x="648" y="84" text-anchor="middle">S1 分量</text>
+              <text class="flow__sub" x="648" y="232" text-anchor="middle">S2 分量</text>
+
+              <!-- 分享影像 -->
+              <text class="flow__title" x="700" y="30">Shares（分享影像）</text>
+
+              <rect class="flow__panel" x="700" y="42" width="200" height="100" rx="12" />
+              <rect class="flow__hatch" x="708" y="50" width="34" height="34" rx="4" />
+              <text class="flow__name" x="884" y="66" text-anchor="end">
+                S<tspan baseline-shift="sub" font-size="9">1</tspan>
+              </text>
+
+              <rect class="flow__panel flow__panel--share" x="700" y="158" width="200" height="100" rx="12" />
+              <rect class="flow__hatch" x="708" y="166" width="34" height="34" rx="4" />
+              <text class="flow__name flow__name--brand" x="884" y="182" text-anchor="end">
+                S<tspan baseline-shift="sub" font-size="9">2</tspan>
+              </text>
+
+              <rect class="flow__panel flow__panel--ghost" x="924" y="158" width="96" height="100" rx="12" />
+              <text class="flow__ghost" x="972" y="215" text-anchor="middle">…</text>
+              <path class="flow__arrow flow__arrow--ghost" d="M900 208 H922" />
+            </svg>
+            <figcaption>
+              R、G、B 三條資料流進入多項式（硬體上用 Encoding Matrix），各自產生 S1、S2、… 的分量
+            </figcaption>
+          </figure>
+
+          <ul class="chips rise">
+            <li class="chip">1 · 逐像素取 R、G、B</li>
+            <li class="chip">2 · 建立 r−1 次多項式</li>
+            <li class="chip">3 · 代入 x = 1…n</li>
+            <li class="chip chip--brand">4 · 寫回 n 張 share</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 4 ─ 多項式與編碼矩陣 ============================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="每個通道各自一條多項式">
+        <header class="slide__head">
+          <p class="eyebrow rise">6-3 · 多項式與編碼矩陣</p>
+          <h2 class="h2 rise">每個通道，各自一條多項式</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="formula formula--hero rise">
+            <span class="formula__label">c = R, G, B</span>
+            <span class="math math--xl">
+              <i>f</i><sub><i>c</i></sub>(<i>x</i>) =
+              <span class="term-secret"><i>c</i></span>
+              + <i>a</i><sub>1</sub><i>x</i>
+              + ⋯ +
+              <i>a</i><sub><i>r</i>−1</sub><i>x</i><sup><i>r</i>−1</sup>
+            </span>
+          </div>
+
+          <div class="cards">
+            <article class="card rise">
+              <p class="card__index">01 · R 通道</p>
+              <h3 class="card__title"><span class="math math--sm"><i>a</i><sub>0</sub> = R</span></h3>
+              <p class="card__text">
+                代入 <span class="math">x = 1…n</span>，得到 S<sub>1</sub>-R、S<sub>2</sub>-R、…、S<sub>n</sub>-R。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02 · G 通道</p>
+              <h3 class="card__title"><span class="math math--sm"><i>a</i><sub>0</sub> = G</span></h3>
+              <p class="card__text">
+                換一組亂數係數、同一組 <span class="math">x</span> 再算一次，就是 G 通道的 n 個分量。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03 · B 通道</p>
+              <h3 class="card__title"><span class="math math--sm"><i>a</i><sub>0</sub> = B</span></h3>
+              <p class="card__text">
+                三條多項式互不相干；所有運算都在 <span class="math">GF(2<sup>8</sup>)</span> 裡完成。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout rise">
+            <strong>同一組 x，三條多項式</strong><br />
+            把 <span class="math">x = i</span> 代入三個通道，就得到第 <span class="math">i</span> 張 share 的
+            <span class="math">(S<sub>i</sub>-R, S<sub>i</sub>-G, S<sub>i</sub>-B)</span>；
+            在硬體實作上，這一步就是 <span class="math">HW Encoding Matrix</span>。
+          </p>
+        </div>
+      </section>
+
+      <!-- 5 ─ 寫回分享影像 ================================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="分享影像與門檻">
+        <header class="slide__head">
+          <p class="eyebrow rise">6-4 · 分享影像</p>
+          <h2 class="h2 rise">每張 share，看起來都只是雜訊</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <p class="body-text rise">
+              每個像素位置算出的值 <span class="math">y<sub>i</sub></span>，寫回第
+              <span class="math">i</span> 張 share 的同一個位置；三個通道都寫完，
+              就得到一張完整的分享影像。
+            </p>
+
+            <ul class="chips rise">
+              <li class="chip">S1 = { S1-R, S1-G, S1-B }</li>
+              <li class="chip">S2 = { S2-R, S2-G, S2-B }</li>
+              <li class="chip chip--brand">… Sn</li>
+            </ul>
+
+            <p class="callout callout--secret rise">
+              <strong>少於 r 張：什麼都看不出來</strong><br />
+              係數 <span class="math">a<sub>1</sub> … a<sub>r−1</sub></span> 是亂數，
+              單張 share 的每個像素都均勻分布在 0 到 255 之間。
+            </p>
+
+            <p class="callout callout--ok rise">
+              <strong>任 r 張：原圖就能回來</strong><br />
+              湊到 r 個點即可解出多項式，取回常數項 <span class="math">a<sub>0</sub></span>，
+              也就是該通道的原始值。
+            </p>
+          </div>
+
+          <figure class="figure rise">
+            <svg
+              class="diagram noise-fig"
+              viewBox="0 0 420 300"
+              role="img"
+              aria-label="三張分享影像 S1、S2、Sn 的縮圖，每張都填滿隨機雜訊，左上角有對應原圖的斜線標記區塊"
+            >
+              <defs>
+                <pattern id="noise6" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <rect width="24" height="24" fill="#f5f7fc" />
+                  <rect x="2" y="3" width="4" height="4" fill="#c9d3e6" />
+                  <rect x="12" y="6" width="6" height="3" fill="#b9c6df" />
+                  <rect x="7" y="13" width="3" height="6" fill="#d9e1ef" />
+                  <rect x="17" y="15" width="5" height="5" fill="#c9d3e6" />
+                  <rect x="1" y="19" width="3" height="3" fill="#d9e1ef" />
+                </pattern>
+                <pattern
+                  id="hatch6c"
+                  width="7"
+                  height="7"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(38)"
+                >
+                  <line x1="0" y1="0" x2="0" y2="7" stroke="#d64545" stroke-width="2" />
+                </pattern>
+              </defs>
+
+              <rect class="noise__frame" x="30" y="18" width="360" height="74" rx="12" />
+              <rect class="noise__fill" x="36" y="24" width="348" height="62" rx="8" />
+              <rect class="noise__hatch" x="40" y="28" width="26" height="26" rx="4" />
+              <text class="noise__name" x="380" y="48" text-anchor="end">
+                S<tspan baseline-shift="sub" font-size="9">1</tspan>
+              </text>
+
+              <rect class="noise__frame noise__frame--brand" x="30" y="112" width="360" height="74" rx="12" />
+              <rect class="noise__fill" x="36" y="118" width="348" height="62" rx="8" />
+              <rect class="noise__hatch" x="40" y="122" width="26" height="26" rx="4" />
+              <text class="noise__name noise__name--brand" x="380" y="142" text-anchor="end">
+                S<tspan baseline-shift="sub" font-size="9">2</tspan>
+              </text>
+
+              <rect class="noise__frame noise__frame--ghost" x="30" y="206" width="360" height="74" rx="12" />
+              <rect class="noise__fill" x="36" y="212" width="348" height="62" rx="8" opacity="0.45" />
+              <rect class="noise__hatch" x="40" y="216" width="26" height="26" rx="4" opacity="0.45" />
+              <text class="noise__name noise__name--ghost" x="380" y="236" text-anchor="end">
+                S<tspan baseline-shift="sub" font-size="9">n</tspan>
+              </text>
+            </svg>
+            <figcaption>每一張都像雜訊；湊滿 r 張，才能把原圖算回來</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 6 ─ 本章小結 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="本章小結">
+        <header class="slide__head">
+          <p class="eyebrow rise">6-5 · 本章小結</p>
+          <h2 class="h2 rise">拆分完成，下一步是還原</h2>
+          <p class="lede rise">
+            本章只做「拆分」；把 shares 收回來、重組成原圖，是下一個階段的工作。
+          </p>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="cards">
+            <article class="card rise">
+              <p class="card__index">01</p>
+              <h3 class="card__title">逐像素、逐通道</h3>
+              <p class="card__text">
+                R、G、B 各自是一條多項式的常數項；三個通道都處理完，才算完成一個像素。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02</p>
+              <h3 class="card__title">全程在 GF(2⁸)</h3>
+              <p class="card__text">
+                加減用 XOR、乘除查表，所有中間值都留在 0 到 255，不會溢位，也能精準還原。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03</p>
+              <h3 class="card__title">任 r 張才是門檻</h3>
+              <p class="card__text">
+                少於 r 張只是雜訊；湊滿 r 張才能解出多項式，與藏在
+                <span class="math">a<sub>0</sub></span> 的像素值。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>下一步：還原</strong> —— 用拉格朗日插值、行列式（克拉瑪公式）或高斯消去法，
+            從 r 張 share 取回 <span class="math">a<sub>0</sub></span>，把整張原圖重建回來。
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 06</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <script src="deck.js"></script>
+  </body>
+</html>
+

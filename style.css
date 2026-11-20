@@ -3,7 +3,8 @@
  * style.css — 簡報共用樣式基準 v1.0
  * ---------------------------------------------------------------------------
  * 用途：所有章節簡報共用同一套視覺語言（色彩、字體、版面、元件）。
- *      新簡報只要 <link rel="stylesheet" href="style.css">，HTML 內不寫樣式。
+ *      新簡報只要 <link rel="stylesheet" href="style.css">，HTML 內不寫樣式；
+ *      播放器另外共用 deck.js（<script src="deck.js"></script>）。
  *
  * 舞台規格：固定 1280 × 720（16:9），由腳本換算 --deck-scale 縮放填滿視窗，
  *          因此每台電腦、每個投影機看到的比例都一樣；列印時每頁一張投影片。
@@ -661,6 +662,269 @@ strong {
   font-size: 13px;
 }
 
+/* 6-8 機密影像分享示意圖（第 6 章）
+   流程圖、像素放大圖與 share 縮圖都是內嵌 SVG，這裡只補上色票與線條，
+   顏色一律沿用上面的設計變數，不另外引入新色系。 */
+.flow {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  overflow: visible;
+}
+
+.flow text {
+  fill: var(--ink-500);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.flow .flow__title {
+  fill: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.flow .flow__sub {
+  fill: var(--ink-300);
+  font-size: 10.5px;
+}
+
+.flow .flow__panel {
+  fill: var(--paper);
+  stroke: var(--line-2);
+  stroke-width: 1.6;
+}
+
+.flow .flow__panel--brand {
+  stroke: var(--brand);
+}
+
+.flow .flow__panel--share {
+  stroke: #9fb4ea;
+}
+
+.flow .flow__panel--ghost {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-dasharray: 6 5;
+}
+
+.flow .flow__grid {
+  fill: url(#grid6);
+}
+
+.flow .flow__hatch {
+  fill: url(#hatch6a);
+  stroke: #d64545;
+  stroke-width: 1;
+}
+
+.flow .flow__row {
+  fill: var(--paper-dim);
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.flow .flow__stream {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 6 5;
+}
+
+.flow .flow__stream--r {
+  stroke: #d64545;
+}
+
+.flow .flow__stream--g {
+  stroke: var(--ok);
+}
+
+.flow .flow__stream--b {
+  stroke: var(--brand);
+}
+
+.flow .flow__arrow {
+  fill: none;
+  stroke: var(--ink-300);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.flow .flow__arrow--brand {
+  stroke: var(--brand);
+}
+
+.flow .flow__arrow--ghost {
+  stroke: var(--line-2);
+  stroke-dasharray: 5 5;
+}
+
+.flow .flow__name {
+  fill: var(--ink-700);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.flow .flow__name--brand {
+  fill: var(--brand-600);
+}
+
+.flow .flow__label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.flow .flow__label--r {
+  fill: #b93a3a;
+}
+
+.flow .flow__label--g {
+  fill: var(--ok);
+}
+
+.flow .flow__label--b {
+  fill: var(--brand-600);
+}
+
+.flow .flow__ghost {
+  fill: var(--ink-300);
+  font-size: 26px;
+}
+
+/* 資料流只在這張投影片出現時流動，避免背景持續重繪 */
+.slide.is-active .flow__stream {
+  animation: flow-dash 1.8s linear infinite;
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+/* 像素放大圖 */
+.pixel-fig .fig-title {
+  fill: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pixel-fig .pixel-panel {
+  fill: var(--paper);
+  stroke: var(--line-2);
+  stroke-width: 1.6;
+}
+
+.pixel-fig .pixel-grid {
+  fill: url(#grid6b);
+}
+
+.pixel-fig .pixel-hatch {
+  fill: url(#hatch6b);
+  stroke: #d64545;
+  stroke-width: 1;
+}
+
+.pixel-fig .pixel-zoom {
+  fill: none;
+  stroke: var(--ink-300);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.pixel-fig .ch {
+  stroke-width: 1.6;
+}
+
+.pixel-fig .ch--r {
+  fill: #fdecec;
+  stroke: #d64545;
+}
+
+.pixel-fig .ch--g {
+  fill: var(--ok-soft);
+  stroke: var(--ok);
+}
+
+.pixel-fig .ch--b {
+  fill: var(--brand-soft);
+  stroke: var(--brand);
+}
+
+.pixel-fig .ch__name {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pixel-fig .ch__name--r {
+  fill: #b93a3a;
+}
+
+.pixel-fig .ch__name--g {
+  fill: var(--ok);
+}
+
+.pixel-fig .ch__name--b {
+  fill: var(--brand-600);
+}
+
+.pixel-fig .ch__value {
+  fill: var(--ink-300);
+  font-size: 10px;
+}
+
+.pixel-fig .pixel-note {
+  fill: var(--ink-500);
+  font-size: 11.5px;
+}
+
+/* 分享影像縮圖 */
+.noise-fig .noise__frame {
+  fill: var(--paper);
+  stroke: var(--line-2);
+  stroke-width: 1.6;
+}
+
+.noise-fig .noise__frame--brand {
+  stroke: #9fb4ea;
+}
+
+.noise-fig .noise__frame--ghost {
+  fill: none;
+  stroke-dasharray: 6 5;
+}
+
+.noise-fig .noise__fill {
+  fill: url(#noise6);
+}
+
+.noise-fig .noise__hatch {
+  fill: url(#hatch6c);
+  stroke: #d64545;
+  stroke-width: 1;
+}
+
+.noise-fig .noise__name {
+  fill: var(--ink-700);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.noise-fig .noise__name--brand {
+  fill: var(--brand-600);
+}
+
+.noise-fig .noise__name--ghost {
+  fill: var(--ink-300);
+}
+
+
 /* ===========================================================================
    7. 封面
    =========================================================================== */
@@ -819,6 +1083,56 @@ strong {
   outline-offset: 2px;
 }
 
+/* 章節切換：由 index.html 的章節載入器插入；單獨開啟章節檔時不會出現 */
+.hud__chapters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 2px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.hud__chapter {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-300);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hud__chapter:hover {
+  background: var(--brand-soft);
+  color: var(--brand-600);
+}
+
+.hud__chapter[aria-current="page"] {
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.hud__chapter:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .has-chapters .hud__bar {
+    gap: 8px;
+    padding-left: 12px;
+  }
+
+  .has-chapters .hud__progress {
+    display: none;
+  }
+}
+
 /* ===========================================================================
    9. 進場動畫（僅在 .is-active 的投影片播放）
    =========================================================================== */
@@ -919,6 +1233,10 @@ strong {
   .slide,
   .rise {
     transform: none !important;
+  }
+
+  .slide.is-active .flow__stream {
+    animation: none;
   }
 }
 
