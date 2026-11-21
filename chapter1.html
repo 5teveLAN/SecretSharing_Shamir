@@ -72,7 +72,93 @@
         </div>
       </section>
 
-      <!-- 3 ─ 二次多項式 =================================================== -->
+      <!-- 3 ─ 分鏡（頁內 step）==============================================
+           這一頁的 <style> 與 <script> 都寫在 section 內：index.html 用
+           importNode(slide, true) 合併時才會一起搬過去；寫在外面會遺失。
+           分鏡內容（每一步畫什麼）之後再補，這裡先留骨架：
+             - steps：總步數（含第 0 步）
+             - init(root)：只建一次的東西（SVG、文字）；所有查詢都從 root 開始
+             - enter(step, prev, root)：每一步要做的事
+            就算不寫 init，也能只用 CSS：
+             :host(.slide[data-step="2"]) .xxx { … }
+             （一定要用 :host(...)；寫 .slide[data-step="2"] .xxx 選不到這一頁） -->
+      <section class="slide" aria-roledescription="slide" aria-label="分鏡：一次多項式">
+        <header class="slide__head">
+          <p class="eyebrow rise">1-1 · 分鏡</p>
+          <h2 class="h2 rise">一條直線，需要幾個點？</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="formula rise">
+            <span class="formula__label">一般式</span>
+            <span class="math"><i>y</i> = <i>ax</i> + <i>b</i></span>
+          </div>
+
+          <!-- 兩段文字的顯示切換（純 CSS 版 step：只看 .slide 的 data-step） -->
+          <p class="body-text story__intro">
+            按 → 走完 <span data-step-count></span> 步之後才會翻頁。
+            <span class="story__hint">（這是唯一顯示在第 0 步的文字。）</span>
+          </p>
+
+          <p class="body-text story__later">
+            走到了第 1 步：上面的提示已淡出，這一段才出現。
+          </p>
+        </div>
+
+        <noscript>
+          <p class="slide__body small muted">此頁需要 JavaScript 才能逐格播放（分鏡內容待補）。</p>
+        </noscript>
+
+        <!-- 這一頁自己的樣式：只寫 .story__* 等新名稱，不改共用元件；
+             顏色一律用 :root 的變數（var(--brand) 這類），不要寫色碼字面值。 -->
+        <style>
+          /* 依步數顯示：播放器只在 host（section.slide）上維持 data-step，
+             沒有 deck.js 時 content script 也碰不到 host，所以 :host 做 self-match：
+             :host(.slide[data-step="1"]) = 「data-step 是 1 的 section.slide」。 */
+          .story__later {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+          }
+
+          .story__hint {
+            color: var(--ink-300);
+          }
+
+          :host(.slide[data-step="1"]) .story__intro,
+          :host(.slide[data-step="1"]) .story__hint {
+            opacity: 0.35;
+          }
+
+          :host(.slide[data-step="1"]) .story__later {
+            opacity: 1;
+            transform: none;
+          }
+        </style>
+
+        <!-- 這一頁自己的動畫程式：同步賦值（播放器會依序重建並執行 script） -->
+        <script>
+          window.SlideAnim = {
+            steps: 2, // 骨架：第 0 步 → 第 1 步；分鏡內容進來時改這個數字
+            autoDelay: 1200, // 選用：自動播放間隔（毫秒）
+
+            // 只建立一次的東西。root 是這一頁的 shadow root，所有查詢都從這裡開始
+            // （禁止 document.querySelector，否則合併後會抓到別章的元素）。
+            init: function (root) {
+              // 例如：依資料產生 SVG、先備好之後要用的 <text>、設好共用的參考線。
+            },
+
+            // 每次換步時呼叫；step 是新的步數，prev 是上一步（翻回第 0 步時 prev 較大）。
+            enter: function (step, prev, root) {
+              // 骨架階段什麼都不做：外觀由上面的 CSS 依 host 的 data-step 決定。
+              // 需要「換步時才算」的東西時放這裡，例如要重算 SVG 上的座標標記。
+            },
+          };
+        </script>
+      </section>
+
+      <!-- 4 ─ 二次多項式 =================================================== -->
+
       <section class="slide" aria-roledescription="slide" aria-label="二次多項式">
         <header class="slide__head">
           <p class="eyebrow rise">1-2 · 二次多項式</p>
@@ -285,7 +371,7 @@
     <nav class="hud" aria-label="投影片控制">
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
-        <span class="hud__count" aria-live="polite">01 / 06</span>
+        <span class="hud__count" aria-live="polite">01 / 07</span>
         <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
         <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
@@ -306,7 +392,9 @@
       </div>
     </nav>
 
+    <!-- 播放器（單獨開啟本章時自動初始化）→ 接著載入頁內 step 播放器 -->
     <script src="deck.js"></script>
+    <script src="anim.js"></script>
   </body>
 </html>
 

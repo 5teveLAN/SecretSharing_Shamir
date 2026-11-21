@@ -119,6 +119,8 @@
 
     <!-- 播放器：章節檔與 index 共用同一支；這裡先載入，等章節合併完再呼叫 SlideDeck.init() -->
     <script src="deck.js"></script>
+    <!-- 頁內 step 播放器：必須比 deck.js 晚載入（keydown 的 capture listener 後註冊者先執行） -->
+    <script src="anim.js"></script>
 
     <script>
       /*
@@ -300,6 +302,10 @@
               syncChrome(entries, page);
             },
           });
+
+          // 啟動頁內 step（anim.js）：必須在 SlideDeck.init() 之後，第一個進入的頁面
+          // 才會從第 0 步開始；沒載入 anim.js 時整份簡報仍能正常翻頁
+          if (window.SlideSteps) window.SlideSteps.boot();
 
           if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
         }

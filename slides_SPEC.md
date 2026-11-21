@@ -12,6 +12,9 @@
 3. **章節檔必須能各自獨立開啟**：`chapterN.html` 直接雙擊也要能播（`deck.js` 自動初始化）。
 4. **合併播放**：`index.html` 只 import `.slide`，因此**動畫必須寫在 `.slide` 之內**（見 §2.1）。寫在 `<head>`／`</main>` 之後的 `<style>`、`<script>` 在合併時會遺失。
 5. **每一步都要能跑**：改完用 §8 的驗收清單自測，不可留下 `console.error`。
+6. **實作以現有程式為準**：§3.1（`:host(...)` 寫法）、§4.3（`SlideSteps` 完整介面與
+   `deck.js` 的 `stepOrPage`）、§4.4（按鍵只留在 `deck.js`）、§11 已是修正後版本。
+   若文件與 `anim.js`／`deck.js` 的實際行為不一致，**以程式為準**並回頭修文件。
 
 ---
 
@@ -100,19 +103,26 @@ window.SlideAnim = {
 
 ### 3.1 純 CSS 的 step（推薦）
 
-```css
-.pt { opacity: 0; transition: opacity 0.5s ease; }          /* 預設隱藏 */
+> ⚠️ **shadow root 內要寫 `:host(...)`，不能寫 `.slide[data-step="N"]`。**
+> 每一頁的內容都住在自己的 shadow root 裡，而 `section.slide` 本身在**外面**；
+> shadow root 裡的 `.slide[data-step="N"] .pt` 只能選到「內層的」`.slide`，
+> 永遠匹配不到自己這一頁 → 規則看起來寫了卻完全沒作用。
+> `:host(...)` 則是「比對宿主元素（= 自己這顆 `section.slide`）」，才對。
 
-.slide[data-step="3"] .pt,
-.slide[data-step="4"] .pt { opacity: 1; }                    /* >=3 才顯示 */
+```css
+.pt { opacity: 0; transition: opacity 0.5s ease; }                     /* 預設隱藏 */
+
+:host(.slide[data-step="3"]) .pt,
+:host(.slide[data-step="4"]) .pt { opacity: 1; }                        /* >=3 才顯示 */
 ```
 
 播放器保證：
-1. 目前頁的 `data-step` 永遠等於目前步數（同一個 frame 內更新）；
+1. 目前頁的 `data-step` 永遠等於目前步數（同一個 frame 內更新），寫在 `section.slide` 上；
 2. 頁面被翻走再翻回來，`data-step` 歸零（§4.4）。
 
 > 不想列舉 `[data-step="N"]` 組合時，可在 `enter` 切 class：
 > `root.host.classList.toggle("is-past-3", step >= 3)`，CSS 寫 `.is-past-3 .pt { opacity: 1 }`。
+> （`.is-past-3` 在 shadow root 內層元素上，用一般選擇器即可。）
 
 ---
 
@@ -180,12 +190,43 @@ if (window.SlideSteps) window.SlideSteps.onSlideChange(slides[next]);
 
 ```js
 window.SlideSteps = {
-  boot: function () {},                          // 掃描並啟動所有尚未處理的 .slide（冪等）
-  onSlideChange: function (slide) {},            // 新頁歸零；舊頁停止自動播放
-  canAdvance: function (slide) { return false; },// 是否還有下一步
-  handlesKey: function (e) { return false; },    // 備援：回傳是否已處理（見下）
+  boot: function () {},                           // 掃描並啟動所有 .slide（可重複呼叫）
+  onSlideChange: function (slide) {},             // deck.js 換頁後通知；回傳該頁控制器或 null
+  activate: function (slide) {},                  // 確保某頁已啟動；回傳控制器或 null
+  isStatic: function (slide) { return true; },    // 這一頁沒有動畫（沒有 window.SlideAnim）？
+  canAdvance: function (slide) { return false; }, // 這一頁還有下一步？
+  handlesKey: function (e) { return false; },     // 備援掛勾，目前永遠 false（見下）
+  play: function (slide) {},                      // 開始自動播放（省略 slide = 目前這頁）
+  stop: function () {},                           // 停止目前這頁的自動播放
+  reinit: function (slide, config) {},            // 換掉某頁設定並重新開始（省略 slide = 目前這頁）
 };
 ```
+
+- `slide` 參數省略時，指「目前這一頁」。
+- `deck.js` 實際**只需要** `onSlideChange`、`activate`、`isStatic`（見下方 `stepOrPage`）；
+  其餘函式是給章節作者／除錯用的，章節裡不必呼叫任何一支就能有動畫。
+
+**`deck.js` 的接法（按鍵只留在這裡**，`anim.js` 不掛 `keydown`）：
+
+```js
+function stepOrPage(delta) {
+  if (window.SlideSteps) {
+    var steps = window.SlideSteps;
+    var active = slides[index];
+    if (active) {
+      var controller = steps.activate(active);          // 第一次用到才啟動
+      if (steps.isStatic(active) === false && controller) {
+        if (delta > 0 ? controller.advance() : controller.reverse()) return; // 換步，不翻頁
+      }
+    }
+  }
+  step(delta);                                          // 沒步數了 → 原本的翻頁
+}
+```
+
+`→`／`↓`／`PageDown`／`Space`／`Enter` 走 `stepOrPage(1)`，`←`／`↑`／`PageUp`／
+`Backspace` 走 `stepOrPage(-1)`；左右鍵、按鈕、觸控滑動全部改成呼叫它。
+`Home`／`End`／`F`／`P` 完全不動。
 
 **相容性（硬性要求）**：
 
@@ -214,23 +255,26 @@ window.SlideSteps = {
 | `←` `↑` `PageUp` `Backspace` | 頁內上一步 | 翻上一頁 |
 | `Home` / `End` / `F` / `P` | 不變（`End` → 最後一頁第 0 步） | 同左 |
 
-**實作方式（優先方案）**：`anim.js` 以 capture 掛在 `window`，搶在 `deck.js` 之前處理：
+**實作方式**：按鍵**只**由 `deck.js` 的 `onKeyDown` 處理（見 §4.3 的 `stepOrPage`），
+`anim.js` **不要**再掛 `window` 的 `keydown` listener。
 
-```js
-window.addEventListener("keydown", onKey, true);
-// 需要時：e.preventDefault(); e.stopPropagation();
-```
+> 為什麼不是「兩支腳本搶 capture」：`window` 上同一個階段的 listener，執行順序
+> 在瀏覽器之間**不一致**（Chrome 實測是「後註冊者先執行」，與部分文件寫的相反）。
+> 兩支都掛 capture 時，誰先跑會變成看載入順序的巧合，很容易出現「按一下跳兩頁」。
+> 由 `deck.js` 一支負責、遇到有 step 的頁面先問 `isStatic`／`advance`，結果就完全可預測。
+> 載入順序仍固定 **`deck.js` 先、`anim.js` 後**（§5.1、§5.2），只是不再是正確性的前提。
 
-**競態風險**：`deck.js` 的 listener 也是 capture 掛在 `window`，**先註冊者先執行**。因此：
+`handlesKey` 因此保留為空實作（永遠回傳 `false`），僅作為「未來若真的需要
+`anim.js` 先處理按鍵」時的掛勾，`deck.js` 目前不會呼叫它。
 
-- 章節檔與 `index.html` 都必須 **`deck.js` 先載入、`anim.js` 後載入**（§5.1、§5.2）。
-- 備援（若順序無法保證）：`deck.js` 的 `onKeyDown` 開頭加
-  `if (window.SlideSteps && window.SlideSteps.handlesKey(e)) return;`，
-  由 `anim.js` 判斷並回傳是否已處理。**只有在優先方案不可行時才啟用備援，兩者不可同時生效。**
+**觸控**：`deck.js` 現有左右滑動改走 `stepOrPage`，所以有 step 的頁面會先換步、到底才翻頁（`anim.js` 另外在 shadow root 內掛了同樣的 touch 判斷當備援，兩者不會重複觸發）。
 
-**觸控**：`deck.js` 現有左右滑動翻頁不變；`anim.js` 可額外支援頁內滑動 step（`pointerdown`／`pointerup`，位移 > 48px）。**若時間不足可省略 step 滑動，但不得破壞既有翻頁。**
+**自動播放（選用）**：頁面若在該頁內放 `<button data-step-nav="play">`，`anim.js` 自動綁定：
+每 `autoDelay` 毫秒前進一步，到最後一步**停止**（不會自動翻頁）；翻頁時一併停止。
+按鈕的 `aria-pressed` 會跟著變化，播放中 `section.slide` 上會有 `data-playing` 屬性，
+CSS 可用它做提示。也可以直接呼叫 `window.SlideSteps.play()`／`stop()`。
 
-**自動播放（選用）**：頁面若提供 `[data-step-nav="play"]` 按鈕，`anim.js` 綁定：每 `autoDelay` 毫秒前進一步，到最後一步停止；翻頁時一併停止。`Space` 也觸發自動播放（因為 `Space` 翻頁已被 step 接管，若 `step === 0` 則播自動、否則前進，實作以「`Space` = 前進」為準，自動播放只靠按鈕）。
+`Space` 一律等於「前進」（不觸發自動播放），自動播放只靠按鈕或 API。
 
 ### 4.5 頁內腳本的執行
 
@@ -250,6 +294,10 @@ delete window.SlideAnim;
 
 - `type="module"` 支援非必要；**不建議**章節作者使用（非同步，會與 step 初始化競態）。
 - 頁內腳本錯誤應 `console.error` 並讓該頁退化為靜態頁（`steps = 1`），**不得讓整個播放器停擺**。
+
+**啟動時機（本實作）**：不是啟動時就把所有頁搬一輪，而是「第一次翻到某一頁」才建立
+shadow root、執行頁內腳本（`activate(slide)`）；`boot()` 只做第一輪與目前頁。
+`deck.js` 每次按前進也會先 `SlideSteps.activate()`，所以「剛換到頁面、按鍵先到」不會漏掉第一步。
 
 ### 4.6 `style.css` 的唯一新增
 
@@ -403,8 +451,8 @@ var STORY = {
 
 | # | 檔案 | 動作 | 對應驗收 |
 |---|---|---|---|
-| 1 | `anim.js` | 新增：`SlideSteps` 全域、`activate()`、`makeController()`、鍵盤 capture、`[data-step-count]`、`beforeprint`／`afterprint` | §8-1～§8-4 |
-| 2 | `deck.js` | `show()` 結尾加 `if (window.SlideSteps) window.SlideSteps.onSlideChange(slides[next]);` | §8-5 |
+| 1 | `anim.js` | 新增：`SlideSteps` 全域、`activate()`、`buildController()`、`[data-step-count]`、自動播放、`beforeprint`／`afterprint` | §8-1～§8-4 |
+| 2 | `deck.js` | `show()` 結尾加 `SlideSteps.onSlideChange()` 通知；`step()` 改走 `stepOrPage()`（§4.3） | §8-5 |
 | 3 | `style.css` | 新增 §4.6 的 `--step-delay` 與 reduced-motion 規則（**不加** `!important` 顯示內容） | §8-6 |
 | 4 | `chapter1.html` | 新增分鏡頁（含 section 內 `<style>`／`<script>`）；頁尾加 `<script src="anim.js"></script>`；`.hud__count` 初始文字改 `01 / 07` | §8-7 |
 | 5 | `index.html` | 加 `<script src="anim.js"></script>`；`mount()` 內 `SlideDeck.init()` 之後呼叫 `SlideSteps.boot()` | §8-8 |
@@ -433,6 +481,7 @@ var STORY = {
 1. 複製 `chapter1.html` 當骨架，改 `<title>`、`.hud`、封面與內容。
 2. 每頁一個 `<section class="slide">`。
 3. 要動畫 → 在該 section 內加 `<style>` 與 `<script>`（設定 `window.SlideAnim`）。
+   CSS 的顯示規則用 `:host(.slide[data-step="N"]) .xxx`（§3.1），不要用 `.slide[data-step="N"]`。
 4. 頁尾保留 `<script src="deck.js"></script><script src="anim.js"></script>`。
 5. 在 `index.html` 的 `CHAPTERS` 加一筆：`{ file: "chapterN.html", label: "第 N 章", name: "…" }`。
 6. **不要**改 `style.css`、`deck.js`、`anim.js`、`index.html` 的其他部分。
@@ -454,9 +503,18 @@ var STORY = {
 ## 11. 已知限制（實作時要寫進註解）
 
 1. `:host` 版面值與 `style.css` 的 `.slide` 重複，改版面時需同步兩處。
-2. `index.html` 用 `file://` 開啟時 `fetch()` 會被擋（既有問題，需 `python3 -m http.server`）。
+2. **`file://` 雙擊開啟的差異（已實測）**：
+   - `index.html` 一定得用本機伺服器（`fetch()` 被擋，既有問題）。
+   - `chapterN.html`：Firefox 可以直接讀同目錄的 `style.css`，外觀與 http 相同；
+     Chrome 會擋（CORS），有動畫的那幾頁只剩 `:host` 版面與章節自己的樣式
+     （文字會變小、互相擠在一起），console 會有一個警告指出這件事。
+     要保證一致就用 `python3 -m http.server`。
 3. 章節作者若把 `<script>` 寫在 `.slide` 外，合併後動畫不會啟動（可在 `index.html` 加一行 `console.warn` 偵測：章節解析後若 `parsed.querySelectorAll("script").length > 0` 但沒有任何 `.slide` 內含 script，提示作者）。
-4. 自動播放需頁面自備按鈕 `[data-step-nav="play"]`，否則只用手動前進。
+4. 自動播放需頁面自備按鈕 `[data-step-nav="play"]`，否則只用手動前進（或呼叫 `SlideSteps.play()`）。
+5. 列印時 `anim.js` 會把每一頁「歸零後逐步走到最後一步」（`enter` 只收到前進方向），
+   不是一次跳到 `steps - 1`；`enter` 寫成「累加」風格的動畫才不會卡住。
+6. 章節作者若想在啟動後更換某頁設定（例如 index 裡動態產生），用
+   `window.SlideSteps.reinit(slide, { steps, init, enter })`。
 
 ---
 
@@ -468,13 +526,18 @@ var STORY = {
 - 目前 deck.js 只認 .slide 與 .is-active；index.html 只用 importNode 搬 .slide 與 .hud。
 
 要求（不得偏離 SPEC.md）：
-1. 新增 anim.js，實作 window.SlideSteps（boot / onSlideChange / canAdvance / handlesKey）
-   與每頁的 step 控制器；每頁以 attachShadow({mode:"open"}) 隔離，
-   注入 style.css（<link>）與 :host 版面規則，再搬移原內容、重建 <script> 並執行。
-2. deck.js 只在 show() 結尾加一行 onSlideChange 通知（有 if 保護），翻頁語意不變。
-3. style.css 只新增 --step-delay 與 prefers-reduced-motion 的通用規則。
+1. 新增 anim.js，實作 window.SlideSteps（boot / onSlideChange / activate / isStatic /
+   canAdvance / play / stop / reinit）與每頁的 step 控制器；每頁以
+   attachShadow({mode:"open"}) 隔離，注入 style.css（優先讀 CSSOM，讀不到才 <link>）
+   與 :host 版面規則，再搬移原內容、重建 <script> 並執行；第一次翻到某頁才啟動。
+2. deck.js：show() 結尾通知 onSlideChange；把 step() 改走 stepOrPage()，
+   有 step 的頁面先換步、到底才翻頁（§4.3 有現成程式碼）。
+   **不要**在 anim.js 另掛 window 的 keydown（capture 順序在瀏覽器之間不一致）。
+3. style.css 只新增 --step-delay、prefers-reduced-motion 通用規則，
+   以及讓 .rise 在 shadow root 內仍會顯示的最小規則。
 4. chapter1.html 在「1-1 一次多項式」之後新增一頁 steps=8 的分鏡頁，
    動畫的 <style> 與 <script> 全部寫在該 <section class="slide"> 內；
+   CSS 的顯示規則一律寫 :host(.slide[data-step="N"]) .xxx（見 §3.1）；
    幾何一律由 STORY = {slope:3, intercept:4, points:[1,2,3,5], focusX:2, secondX:5, fanLines:9}
    計算，禁止手寫座標。
 5. index.html 在 SlideDeck.init() 之後呼叫 window.SlideSteps.boot()。
@@ -489,7 +552,7 @@ var STORY = {
 | 我想… | 怎麼做 |
 |---|---|
 | 一頁要 5 步動畫 | 該 `.slide` 內加 `<script>window.SlideAnim={steps:5, init(root){…}}</script>` |
-| 只要 CSS 動畫 | 不上 script，寫 `.slide[data-step="2"] .xxx { … }` 即可，但仍需 `steps`（用 `<script>window.SlideAnim={steps:3}</script>`） |
+| 只要 CSS 動畫 | 不上 script（或只寫 `<script>window.SlideAnim={steps:3}</script>`），CSS 用 `:host(.slide[data-step="2"]) .xxx { … }`（**不是** `.slide[data-step="2"]`，見 §3.1） |
 | 靜態頁 | 什麼都不加，`steps` 視為 1 |
 | 章節合併 | `index.html` 的 `CHAPTERS` 加一筆，無需其他設定 |
 | 分享給組員 | 只給 `chapterN.html` 的模板，動畫全部寫在裡面 |

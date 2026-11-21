@@ -74,10 +74,29 @@
         history.replaceState(null, "", "#" + pageNo);
       }
       if (onChange) onChange(pageNo);
+      // 通知 step 控制器（anim.js）：新頁歸零、舊頁停止自動播放。
+      // anim.js 沒載入時完全略過，deck.js 的行為與原本相同。
+      if (window.SlideSteps) window.SlideSteps.onSlideChange(slides[next]);
     }
 
     function step(delta) {
       show(index + delta);
+    }
+
+    // 頁內 step（anim.js）：這一頁還有下一步／上一步時只換步、不翻頁。
+    // 沒有 anim.js 時 window.SlideSteps 不存在，直接走原本的翻頁。
+    function stepOrPage(delta) {
+      if (window.SlideSteps) {
+        var steps = window.SlideSteps;
+        var active = slides[index];
+        if (active) {
+          var controller = steps.activate(active);
+          if (steps.isStatic(active) === false && controller) {
+            if (delta > 0 ? controller.advance() : controller.reverse()) return;
+          }
+        }
+      }
+      step(delta);
     }
 
     function toggleFullscreen() {
@@ -109,7 +128,7 @@
         case " ":
         case "Enter":
           e.preventDefault();
-          step(1);
+          stepOrPage(1);
           break;
         case "ArrowLeft":
         case "ArrowUp":
@@ -117,7 +136,7 @@
         case "PageUp":
         case "Backspace":
           e.preventDefault();
-          step(-1);
+          stepOrPage(-1);
           break;
         case "Home":
           e.preventDefault();
@@ -145,11 +164,11 @@
     window.addEventListener("keydown", onKeyDown, true);
 
     prevBtn.addEventListener("click", function () {
-      step(-1);
+      stepOrPage(-1);
     });
 
     nextBtn.addEventListener("click", function () {
-      step(1);
+      stepOrPage(1);
     });
 
     if (fullBtn) fullBtn.addEventListener("click", toggleFullscreen);
@@ -174,7 +193,7 @@
         var dx = e.changedTouches[0].clientX - touchX;
         var dy = e.changedTouches[0].clientY - touchY;
         if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
-          step(dx < 0 ? 1 : -1);
+          stepOrPage(dx < 0 ? 1 : -1);
         }
         touchX = null;
         touchY = null;

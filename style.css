@@ -1167,6 +1167,27 @@ strong {
   transition-delay: 0.28s;
 }
 
+/* 頁內 step（anim.js）的頁面：先前的 nth-child 延遲改由 --step-k 補償。
+   --step-k 在 shadow root 內的權重（!important）高於上述任一條，
+   --step-shift 只在列印前被設成極大值，用來讓 .rise 立刻顯示。 */
+.rise {
+  transition-delay: var(--step-k, 0.45s);
+}
+
+/* :host 的 specificity 高於文件層的 .slide，主樣式表的 @media print 蓋不過它；
+   除了列印，也讓「.rise 顯示」在 shadow root 內重新生效（只限有動畫的頁面）。
+   opacity 的 0→1 過渡由 style.css 開頭的「.rise」負責；transform 這裡先不加，
+   免得影響靜態頁的外觀。 */
+@supports (selector(:host)) {
+  .rise {
+    opacity: 1;
+  }
+
+  .slide:not(.is-active) .rise {
+    opacity: 0;
+  }
+}
+
 /* ===========================================================================
    10. 列印／輸出 PDF：一頁一張投影片
    =========================================================================== */
@@ -1237,6 +1258,23 @@ strong {
 
   .slide.is-active .flow__stream {
     animation: none;
+  }
+}
+
+/* ── 頁內 step（子頁）通用規則 ─────────────────────────────────────────────
+   一頁有幾步、每步長什麼樣，都由「那一頁自己」決定（寫在該 .slide 內）：
+     - 純 CSS：用 :host(.slide[data-step="3"]) .xxx { … }（播放器會維持 data-step）
+     - 需要計算：在該頁的 <script> 設 window.SlideAnim = { steps, init, enter }
+   播放器（anim.js）只負責翻頁與 data-step 切換，這裡只提供 transition 時間的共用變數。 */
+.slide {
+  --step-delay: 0.45s; /* 章節可覆寫，供自己的 transition／transition-delay 使用 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide * {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
