@@ -29,129 +29,744 @@
         <div class="cover__ghost" aria-hidden="true">01</div>
       </section>
 
-      <!-- 2 ─ 一次多項式 =================================================== -->
-      <section class="slide" aria-roledescription="slide" aria-label="一次多項式">
+      <!-- 2 ─ 一次多項式（頁內 step 分鏡，8 步）==============================
+           依「簡報 chap1 shamir.md」的分鏡：
+             0  y = ax + b 置中
+             1  代入 a = 3、b = 4 → y = 3x + 4
+             2  公式牌滑到左上角，同時出現 x、y 平面與這條線（起點就是截距 (0, 4)）
+             3  沿線一個一個點亮：線上的點有無限多個
+             4  線變透明，只留 (1, 7)、(2, 10) 兩個點
+             5  很多條線穿過這兩個點：斜率有無限多種
+             6  再出現一個符合的點 (4, 16)
+             7  只有斜率 3 的線穿過全部三個點 → 原本的線回來
+           幾何一律由 STORY 算，不手寫座標；顯示狀態一律寫 :host(.slide[data-step="N"])
+           （slides_SPEC.md §3.1）。這一頁的樣式與腳本都留在 section 內，合併才不會掉。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="一次多項式分鏡">
         <header class="slide__head">
           <p class="eyebrow rise">1-1 · 一次多項式</p>
-          <h2 class="h2 rise">兩個點，就能還原一條直線</h2>
-        </header>
-
-        <div class="slide__body grid-2">
-          <div class="stack">
-            <div class="formula rise">
-              <span class="formula__label">一般式</span>
-              <span class="math"><i>y</i> = <i>ax</i> + <i>b</i></span>
-            </div>
-
-            <p class="body-text rise">
-              以 <span class="math"><i>y</i> = 3<i>x</i> + 4</span> 為例，這條線上可以取出無限多個點：
-            </p>
-
-            <ul class="chips rise">
-              <li class="chip">(1, 7)</li>
-              <li class="chip">(2, 10)</li>
-              <li class="chip">(3, 13)</li>
-              <li class="chip chip--brand">…</li>
-            </ul>
-
-            <p class="callout rise">
-              <strong>只有一個點</strong>：沒辦法得知原本的多項式長怎樣。<br />
-              <strong>有兩個點</strong>：就能唯一決定 <span class="math">y = 3x + 4</span>。
-            </p>
-          </div>
-
-          <figure class="figure rise">
-            <img
-              src="img/2026/notes/file-20261115155446757.png"
-              width="450"
-              height="580"
-              alt="直線 y = 3x + 4 的圖形，圖上標出 (−2, −2) 與 (1, 7) 兩個點"
-            />
-            <figcaption>直線上的任兩點，都決定同一條直線</figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <!-- 3 ─ 分鏡（頁內 step）==============================================
-           這一頁的 <style> 與 <script> 都寫在 section 內：index.html 用
-           importNode(slide, true) 合併時才會一起搬過去；寫在外面會遺失。
-           分鏡內容（每一步畫什麼）之後再補，這裡先留骨架：
-             - steps：總步數（含第 0 步）
-             - init(root)：只建一次的東西（SVG、文字）；所有查詢都從 root 開始
-             - enter(step, prev, root)：每一步要做的事
-            就算不寫 init，也能只用 CSS：
-             :host(.slide[data-step="2"]) .xxx { … }
-             （一定要用 :host(...)；寫 .slide[data-step="2"] .xxx 選不到這一頁） -->
-      <section class="slide" aria-roledescription="slide" aria-label="分鏡：一次多項式">
-        <header class="slide__head">
-          <p class="eyebrow rise">1-1 · 分鏡</p>
           <h2 class="h2 rise">一條直線，需要幾個點？</h2>
         </header>
 
-        <div class="slide__body stack">
-          <div class="formula rise">
-            <span class="formula__label">一般式</span>
-            <span class="math"><i>y</i> = <i>ax</i> + <i>b</i></span>
+        <div class="slide__body">
+          <div class="story">
+            <svg class="story__plot" viewBox="0 0 620 380" role="img" aria-label="xy 平面上斜率 3、截距 4 的直線，以及線上的點"></svg>
+
+            <div class="story__cards">
+              <div class="formula story__card story__card--a">
+                <span class="formula__label">一般式</span>
+                <span class="math math--xl"><i>y</i> = <i>ax</i> + <i>b</i></span>
+              </div>
+              <div class="formula story__card story__card--b">
+                <span class="formula__label">代入 a = 3、b = 4</span>
+                <span class="math math--xl"><i>y</i> = <b class="story__coef">3</b><i>x</i> + <b class="story__coef">4</b></span>
+              </div>
+            </div>
+
+            <div class="story__side">
+              <p class="story__cap" data-for="0">一條直線，需要幾個點才能唯一決定？先從最簡單的一次多項式開始。</p>
+              <p class="story__cap" data-for="1">代入一般式：<b>a = 3</b>（斜率）、<b>b = 4</b>（截距）。</p>
+              <p class="story__cap" data-for="2">公式收進左上角，畫出 x、y 平面。這條線的起點就是截距 <span class="math math--sm">(0, 4)</span>。</p>
+              <p class="story__cap" data-for="3">沿著線取點：<b>(1, 7)、(2, 10)、(3, 13)、(5, 19)</b>…… 線上的點有無限多個。</p>
+              <p class="story__cap" data-for="4">把線淡掉，只留下 <b>(1, 7)</b> 與 <b>(2, 10)</b>。只看這兩個點，原本的線還在嗎？</p>
+              <p class="story__cap" data-for="5">穿過這兩個點的直線有無限多條：只拿到一個點時，多項式完全無法決定。</p>
+              <p class="story__cap" data-for="6">多拿到一個符合的點 <b>(4, 16)</b>：只有斜率 3 的那條線同時穿過全部三個點。</p>
+              <p class="story__cap" data-for="7"><b>兩個點</b>就能唯一決定一條直線。一般化：<span class="math math--sm">r − 1</span> 次多項式需要 <span class="math math--sm">r</span> 個點。</p>
+            </div>
+
+            <!-- 只有第 7 步顯示的結論牌（放在 caption 之外，撐開的比例由 CSS 控制） -->
+            <div class="story__result">
+              <span class="tag">結論</span>
+              <span class="math math--sm">2 個點 → 唯一一條直線</span>
+            </div>
+
+            <div class="story__bar">
+              <span class="story__count" data-step-count></span>
+              <button class="story__play" type="button" data-step-nav="play">▶ 自動播放</button>
+            </div>
           </div>
-
-          <!-- 兩段文字的顯示切換（純 CSS 版 step：只看 .slide 的 data-step） -->
-          <p class="body-text story__intro">
-            按 → 走完 <span data-step-count></span> 步之後才會翻頁。
-            <span class="story__hint">（這是唯一顯示在第 0 步的文字。）</span>
-          </p>
-
-          <p class="body-text story__later">
-            走到了第 1 步：上面的提示已淡出，這一段才出現。
-          </p>
         </div>
 
         <noscript>
-          <p class="slide__body small muted">此頁需要 JavaScript 才能逐格播放（分鏡內容待補）。</p>
+          <p class="slide__body small muted">
+            逐格播放需要 JavaScript。靜態內容：<span class="math math--sm">y = 3x + 4</span> 上的
+            <span class="math math--sm">(1, 7)</span> 與 <span class="math math--sm">(2, 10)</span> 唯一決定這條直線。
+          </p>
         </noscript>
-
-        <!-- 這一頁自己的樣式：只寫 .story__* 等新名稱，不改共用元件；
-             顏色一律用 :root 的變數（var(--brand) 這類），不要寫色碼字面值。 -->
+        <!-- 這一頁自己的樣式：只寫 .story__* 新名稱；顏色一律用 :root 的變數 -->
         <style>
-          /* 依步數顯示：播放器只在 host（section.slide）上維持 data-step，
-             沒有 deck.js 時 content script 也碰不到 host，所以 :host 做 self-match：
-             :host(.slide[data-step="1"]) = 「data-step 是 1 的 section.slide」。 */
-          .story__later {
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+          .story {
+            position: relative;
+            height: 100%;
+            min-height: 0;
           }
 
-          .story__hint {
+          /* ── 圖：右半邊（左半邊留給說明文字）────────────────────────── */
+          .story__plot {
+            position: absolute;
+            right: 16px;
+            bottom: 4px;
+            width: 600px;
+            height: 368px;
+            overflow: visible;
+            opacity: 0;
+            transition: opacity 0.6s ease 0.15s;
+          }
+
+          :host([data-step="2"]) .story__plot,
+          :host([data-step="3"]) .story__plot,
+          :host([data-step="4"]) .story__plot,
+          :host([data-step="5"]) .story__plot,
+          :host([data-step="6"]) .story__plot,
+          :host([data-step="7"]) .story__plot {
+            opacity: 1;
+          }
+
+          /* ── 公式卡：0、1 置中；第 2 步起移到左上角 ──────────────────── */
+          .story__cards {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+          }
+
+          .story__card {
+            position: absolute;
+            left: 50%;
+            top: 44%;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 22px 32px;
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            border-left: 5px solid var(--brand);
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, -50%) scale(1.12);
+            transition: opacity 0.35s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+              visibility 0.35s linear;
+          }
+
+          .story__coef {
+            color: var(--accent);
+          }
+
+          /* 置中：第 0 步是一般式、第 1 步是代入後的式子 */
+          :host([data-step="0"]) .story__card--a,
+          :host([data-step="1"]) .story__card--b {
+            opacity: 1;
+            visibility: visible;
+          }
+
+          /* 第 2 步起：縮小並滑到左上角（translate 的百分比是相對卡片自身，
+             -50% 讓卡片左緣對齊左邊界；再往上移出 header 的空間） */
+          :host([data-step="2"]) .story__card--b,
+          :host([data-step="3"]) .story__card--b,
+          :host([data-step="4"]) .story__card--b,
+          :host([data-step="5"]) .story__card--b,
+          :host([data-step="6"]) .story__card--b,
+          :host([data-step="7"]) .story__card--b {
+            opacity: 1;
+            visibility: visible;
+            left: 0;
+            top: -4px;
+            transform: translate(0, 0) scale(0.62);
+            transform-origin: left top;
+          }
+
+          /* ── 座標平面、直線 ─────────────────────────────────────────── */
+          .story__grid,
+          .story__axis {
+            opacity: 0;
+            transition: opacity 0.6s ease 0.1s;
+          }
+
+          :host([data-step="2"]) .story__grid,
+          :host([data-step="3"]) .story__grid,
+          :host([data-step="4"]) .story__grid,
+          :host([data-step="5"]) .story__grid,
+          :host([data-step="6"]) .story__grid,
+          :host([data-step="7"]) .story__grid,
+          :host([data-step="2"]) .story__axis,
+          :host([data-step="3"]) .story__axis,
+          :host([data-step="4"]) .story__axis,
+          :host([data-step="5"]) .story__axis,
+          :host([data-step="6"]) .story__axis,
+          :host([data-step="7"]) .story__axis {
+            opacity: 1;
+          }
+
+          /* 線「長出來」：--len 由 init 量測後寫入 */
+          .story__line {
+            stroke-dasharray: var(--len, 900);
+            stroke-dashoffset: var(--len, 900);
+            transition: stroke-dashoffset 1.1s cubic-bezier(0.3, 0.6, 0.2, 1),
+              opacity 0.5s ease, stroke-width 0.4s ease;
+          }
+
+          :host([data-step="2"]) .story__line,
+          :host([data-step="3"]) .story__line,
+          :host([data-step="7"]) .story__line {
+            stroke-dashoffset: 0;
+          }
+
+          /* 第 4、5 步：線變透明 */
+          :host([data-step="4"]) .story__line,
+          :host([data-step="5"]) .story__line,
+          :host([data-step="6"]) .story__line {
+            stroke-dashoffset: 0;
+            opacity: 0.16;
+          }
+
+          :host([data-step="7"]) .story__line {
+            opacity: 1;
+            stroke-width: 4.5;
+          }
+
+          /* ── 線上的點：第 3 步起沿線陸續出現（--i 交錯）──────────────── */
+          .story__dot {
+            opacity: 0;
+            transform: scale(0.2);
+            transform-box: fill-box;
+            transform-origin: center;
+            transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+            transition-delay: calc(var(--i, 0) * 0.12s);
+          }
+
+          /* 第 3 步全部出現；第 4 步起只留 keepX 那兩個 */
+          :host([data-step="3"]) .story__dot,
+          :host([data-step="4"]) .story__dot--keep,
+          :host([data-step="5"]) .story__dot--keep,
+          :host([data-step="6"]) .story__dot--keep,
+          :host([data-step="7"]) .story__dot--keep {
+            opacity: 1;
+            transform: none;
+          }
+
+          .story__dot--keep {
+            transition-delay: calc(var(--i, 0) * 0.06s);
+          }
+
+          /* 第 7 步：原線回來，但只標出三個關鍵點（(3,13)、(5,19) 的標籤藏起來）*/
+          :host([data-step="7"]) .story__dot {
+            opacity: 1;
+            transform: none;
+          }
+
+          :host([data-step="7"]) .story__dotlabel:not(.story__dotlabel--keep) {
+            opacity: 0;
+          }
+
+          /* 座標標籤：點出現時才顯示（第 4 步起只留兩個）*/
+          .story__dotlabel {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            transition-delay: calc(var(--i, 0) * 0.12s + 0.12s);
+          }
+
+          :host([data-step="3"]) .story__dotlabel,
+          :host([data-step="4"]) .story__dotlabel--keep,
+          :host([data-step="5"]) .story__dotlabel--keep,
+          :host([data-step="6"]) .story__dotlabel--keep,
+          :host([data-step="7"]) .story__dotlabel {
+            opacity: 1;
+          }
+
+          /* 第 3 步標籤是深色字；被留下的兩個點改成品牌色，強調「只剩這兩點」 */
+          :host([data-step="4"]) .story__dotlabel--keep,
+          :host([data-step="5"]) .story__dotlabel--keep {
+            font-weight: 700;
+            fill: var(--brand);
+          }
+
+          /* 第 7 步的線加粗了，被留下的兩個標籤往上挪，避免被線壓過去 */
+          :host([data-step="7"]) .story__dotlabel--keep {
+            transform: translate(-6px, -20px);
+          }
+
+          /* ── 扇形線：第 5 步穿過兩個點散開，第 6 步退到背景，第 7 步消失 ── */
+          .story__fan {
+            stroke-dasharray: var(--len, 900);
+            stroke-dashoffset: var(--len, 900);
+            opacity: 0.5;
+            transition: stroke-dashoffset 0.9s cubic-bezier(0.3, 0.6, 0.2, 1),
+              opacity 0.45s ease;
+            transition-delay: calc(var(--i, 0) * 0.1s);
+          }
+
+          :host([data-step="5"]) .story__fan,
+          :host([data-step="6"]) .story__fan,
+          :host([data-step="7"]) .story__fan {
+            stroke-dashoffset: 0;
+          }
+
+          :host([data-step="6"]) .story__fan {
+            opacity: 0.12;
+            transition-delay: 0s;
+          }
+
+          :host([data-step="7"]) .story__fan {
+            opacity: 0;
+            transition-delay: 0s;
+          }
+
+          /* 第 6 步才出現的第二個符合點 */
+          .story__dot2,
+          .story__dot2label {
+            opacity: 0;
+            transition: opacity 0.35s ease;
+          }
+
+          .story__dot2 {
+            transform: scale(0.2);
+            transform-box: fill-box;
+            transform-origin: center;
+            transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s;
+          }
+
+          :host([data-step="6"]) .story__dot2,
+          :host([data-step="7"]) .story__dot2 {
+            opacity: 1;
+            transform: none;
+          }
+
+          :host([data-step="6"]) .story__dot2label,
+          :host([data-step="7"]) .story__dot2label {
+            opacity: 1;
+            fill: var(--ok);
+            font-weight: 700;
+          }
+
+          /* 截距註記：第 2 步起出現 */
+          .story__note {
+            opacity: 0;
+            transition: opacity 0.5s ease 0.3s;
+          }
+
+          :host([data-step="2"]) .story__note,
+          :host([data-step="3"]) .story__note,
+          :host([data-step="4"]) .story__note,
+          :host([data-step="5"]) .story__note,
+          :host([data-step="6"]) .story__note,
+          :host([data-step="7"]) .story__note {
+            opacity: 1;
+          }
+
+          /* 第 4 步起線已淡掉，截距註記一起淡掉 */
+          :host([data-step="4"]) .story__note,
+          :host([data-step="5"]) .story__note {
+            opacity: 0.25;
+          }
+
+          /* ── 說明文字：左下角，一次只顯示一句 ────────────────────────── */
+          .story__side {
+            position: absolute;
+            left: 0;
+            bottom: 48px;
+            width: 470px;
+            min-height: 128px;
+            pointer-events: none;
+          }
+
+          .story__cap {
+            position: absolute;
+            inset: 0;
+            font-size: 18px;
+            line-height: 1.75;
+            color: var(--ink-700);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+          }
+
+          /* 第 4、5 步是「只剩兩個點」的轉折，用品牌色文字 */
+          .story__cap[data-for="4"],
+          .story__cap[data-for="5"] {
+            color: var(--brand-600);
+          }
+
+          :host([data-step="0"]) .story__cap[data-for="0"],
+          :host([data-step="1"]) .story__cap[data-for="1"],
+          :host([data-step="2"]) .story__cap[data-for="2"],
+          :host([data-step="3"]) .story__cap[data-for="3"],
+          :host([data-step="4"]) .story__cap[data-for="4"],
+          :host([data-step="5"]) .story__cap[data-for="5"],
+          :host([data-step="6"]) .story__cap[data-for="6"],
+          :host([data-step="7"]) .story__cap[data-for="7"] {
+            opacity: 1;
+            transform: none;
+          }
+
+          /* ── 第 7 步的結論牌（放在最後一句上方）─────────────────────── */
+          .story__result {
+            position: absolute;
+            left: 0;
+            bottom: 48px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.45s ease 0.2s, transform 0.45s ease 0.2s;
+            pointer-events: none;
+          }
+
+          :host([data-step="7"]) .story__result {
+            opacity: 1;
+            transform: none;
+          }
+
+          :host([data-step="7"]) .story__side {
+            min-height: 196px;
+          }
+
+          :host([data-step="7"]) .story__cap[data-for="7"] {
+            top: 76px;
+          }
+
+          /* ── 步數與自動播放 ─────────────────────────────────────────── */
+          .story__bar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .story__count {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.08em;
             color: var(--ink-300);
           }
 
-          :host(.slide[data-step="1"]) .story__intro,
-          :host(.slide[data-step="1"]) .story__hint {
-            opacity: 0.35;
+          .story__play {
+            padding: 6px 12px;
+            border: 0;
+            border-radius: var(--radius-xs);
+            background: var(--brand-soft);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--brand-600);
+            cursor: pointer;
           }
 
-          :host(.slide[data-step="1"]) .story__later {
-            opacity: 1;
-            transform: none;
+          .story__play[aria-pressed="true"] {
+            background: var(--brand);
+            color: var(--paper);
+          }
+
+          /* ── SVG 元素（shadow root 內，這些 class 只在這一頁有效）────── */
+          .story__gridline {
+            stroke: var(--line);
+            stroke-width: 1;
+          }
+
+          .story__axisline {
+            stroke: var(--line-2);
+            stroke-width: 1.5;
+          }
+
+          .story__tick,
+          .story__axisname {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            fill: var(--ink-300);
+          }
+
+          .story__axisname {
+            font-size: 14px;
+            font-weight: 700;
+            fill: var(--ink-500);
+          }
+
+          .story__line {
+            stroke: var(--brand);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+          }
+
+          .story__dot {
+            fill: var(--accent);
+            stroke: var(--paper);
+            stroke-width: 2;
+          }
+
+          .story__dot--keep {
+            fill: var(--brand);
+          }
+
+          .story__dot2 {
+            fill: var(--ok);
+            stroke: var(--paper);
+            stroke-width: 2;
+          }
+
+          .story__dotlabel,
+          .story__dot2label {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            fill: var(--ink-700);
+          }
+
+          .story__note {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            fill: var(--brand-600);
+          }
+
+          .story__fan {
+            stroke: var(--ink-300);
+            stroke-width: 2;
+            stroke-linecap: round;
+          }
+
+          /* 減少動態：直接切到定位，不做補間 */
+          @media (prefers-reduced-motion: reduce) {
+            .story__card,
+            .story__plot,
+            .story__grid,
+            .story__axis,
+            .story__line,
+            .story__dot,
+            .story__dotlabel,
+            .story__dot2,
+            .story__dot2label,
+            .story__fan,
+            .story__note,
+            .story__cap,
+            .story__result {
+              transition-duration: 0.01ms !important;
+              transition-delay: 0ms !important;
+            }
           }
         </style>
 
         <!-- 這一頁自己的動畫程式：同步賦值（播放器會依序重建並執行 script） -->
         <script>
           window.SlideAnim = {
-            steps: 2, // 骨架：第 0 步 → 第 1 步；分鏡內容進來時改這個數字
-            autoDelay: 1200, // 選用：自動播放間隔（毫秒）
+            steps: 8,
+            autoDelay: 1600,
 
-            // 只建立一次的東西。root 是這一頁的 shadow root，所有查詢都從這裡開始
-            // （禁止 document.querySelector，否則合併後會抓到別章的元素）。
+            // 只建立一次的東西：依 STORY 算出所有座標並產生 SVG。
+            // root 是這一頁的 shadow root，所有查詢都從這裡開始（禁止 document.querySelector）。
             init: function (root) {
-              // 例如：依資料產生 SVG、先備好之後要用的 <text>、設好共用的參考線。
+              var svg = root.querySelector(".story__plot");
+              if (!svg) return;
+
+              /* 幾何資料：換係數或取點只要改這個物件，不手寫任何座標。
+                 points = 沿線取出的點；keepX = 第 4、5 步留下的兩個；
+                 secondX = 第 6 步才出現的第三個符合點；fanLines = 扇形線條數。 */
+              var STORY = {
+                slope: 3,
+                intercept: 4,
+                points: [1, 2, 3, 5],
+                keepX: [1, 2],
+                secondX: 4,
+                fanLines: 9,
+              };
+
+              var NS = "http://www.w3.org/2000/svg";
+
+              // 座標映射：viewBox 0 0 620 380
+              // x ∈ [0, 6] → px [60, 560]；y ∈ [0, 22] → px [330, 60]（y 反向，值大往上）
+              var X0 = 60,
+                X1 = 560,
+                Y0 = 330,
+                Y1 = 60,
+                DX = 6,
+                DY = 22;
+
+              function px(x) {
+                return X0 + (x / DX) * (X1 - X0);
+              }
+              function py(y) {
+                return Y0 - (y / DY) * (Y0 - Y1);
+              }
+              function f(x) {
+                return STORY.slope * x + STORY.intercept;
+              }
+
+              function el(name, attrs) {
+                var node = document.createElementNS(NS, name);
+                if (attrs) {
+                  for (var key in attrs) {
+                    if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+                      node.setAttribute(key, String(attrs[key]));
+                    }
+                  }
+                }
+                return node;
+              }
+
+              function measure(node) {
+                try {
+                  return node.getTotalLength() || 0;
+                } catch (e) {
+                  return 0;
+                }
+              }
+
+              // 重新初始化時整張重建，不會疊出第二層圖形（冪等）
+              while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+              var plot = el("g", {});
+              var i;
+
+              // 1. 格線（每 1 單位一條淡線；軸線另外畫）
+              var grid = el("g", { class: "story__grid" });
+              for (i = 1; i <= DX; i++) {
+                grid.appendChild(
+                  el("line", { x1: px(i), y1: py(DY), x2: px(i), y2: py(0), class: "story__gridline" })
+                );
+              }
+              for (i = 2; i <= DY; i += 2) {
+                grid.appendChild(
+                  el("line", { x1: px(0), y1: py(i), x2: px(DX), y2: py(i), class: "story__gridline" })
+                );
+              }
+              plot.appendChild(grid);
+
+              // 2. 座標軸、刻度、軸名（只標這條線用得到的 y 值）
+              var axis = el("g", { class: "story__axis" });
+              axis.appendChild(el("line", { x1: px(0), y1: py(0), x2: px(DX), y2: py(0), class: "story__axisline" }));
+              axis.appendChild(el("line", { x1: px(0), y1: py(0), x2: px(0), y2: py(DY), class: "story__axisline" }));
+              for (i = 1; i <= DX; i++) {
+                var tickX = el("text", { x: px(i), y: py(0) + 20, class: "story__tick", "text-anchor": "middle" });
+                tickX.textContent = String(i);
+                axis.appendChild(tickX);
+              }
+              var tickValues = [];
+              [
+                STORY.intercept,
+                f(STORY.keepX[STORY.keepX.length - 1]),
+                f(STORY.points[STORY.points.length - 1]),
+                f(STORY.secondX),
+              ].forEach(function (value) {
+                if (value >= 0 && value <= DY && tickValues.indexOf(value) < 0) tickValues.push(value);
+              });
+              tickValues.forEach(function (value) {
+                axis.appendChild(el("line", { x1: px(0) - 5, y1: py(value), x2: px(0), y2: py(value), class: "story__axisline" }));
+                var tickY = el("text", { x: px(0) - 10, y: py(value) + 4, class: "story__tick", "text-anchor": "end" });
+                tickY.textContent = String(value);
+                axis.appendChild(tickY);
+              });
+              var nameX = el("text", { x: px(DX) + 8, y: py(0) + 5, class: "story__axisname" });
+              nameX.textContent = "x";
+              axis.appendChild(nameX);
+              var nameY = el("text", { x: px(0) - 2, y: py(DY) - 10, class: "story__axisname" });
+              nameY.textContent = "y";
+              axis.appendChild(nameY);
+              plot.appendChild(axis);
+
+              // 3. 扇形線：全部穿過 keepX 的第一個點，斜率均分，端點裁在繪圖框內。
+              //    第 5 步散開、第 6 步退到背景、第 7 步淡出只剩斜率 3 的主線。
+              var fanLayer = el("g", { class: "story__fanlayer" });
+              var fx = STORY.keepX[0];
+              var fy = f(fx);
+              var minSlope = -2;
+              var maxSlope = 10;
+              for (i = 0; i < STORY.fanLines; i++) {
+                var k =
+                  STORY.fanLines === 1 ? STORY.slope : minSlope + ((maxSlope - minSlope) * i) / (STORY.fanLines - 1);
+                // y = fy + k(x − fx) 與繪圖框 x ∈ [0,6]、y ∈ [0,DY] 的所有交集點，取最遠兩點當端點
+                var hits = [];
+                var atLeft = fy + k * (0 - fx);
+                var atRight = fy + k * (DX - fx);
+                if (atLeft >= 0 && atLeft <= DY) hits.push({ x: 0, y: atLeft });
+                if (atRight >= 0 && atRight <= DY) hits.push({ x: DX, y: atRight });
+                if (k !== 0) {
+                  [0, DY].forEach(function (yy) {
+                    var xx = fx + (yy - fy) / k;
+                    if (xx >= 0 && xx <= DX) hits.push({ x: xx, y: yy });
+                  });
+                }
+                if (hits.length < 2) continue;
+                hits.sort(function (p, q) {
+                  return p.x - q.x;
+                });
+                var from = hits[0];
+                var to = hits[hits.length - 1];
+                var fanLine = el("line", {
+                  x1: px(from.x),
+                  y1: py(from.y),
+                  x2: px(to.x),
+                  y2: py(to.y),
+                  class: "story__fan",
+                });
+                fanLine.style.setProperty("--i", String(i));
+                fanLayer.appendChild(fanLine);
+              }
+              var fanNodes = fanLayer.querySelectorAll(".story__fan");
+              for (i = 0; i < fanNodes.length; i++) {
+                fanNodes[i].style.setProperty("--len", String(Math.round(measure(fanNodes[i])) || 900));
+              }
+              plot.appendChild(fanLayer);
+
+              // 4. 主直線：起點就是截距 (0, 4)，不做「先水平再上移」的補畫
+              var mainLine = el("line", {
+                x1: px(0),
+                y1: py(f(0)),
+                x2: px(DX),
+                y2: py(f(DX)),
+                class: "story__line",
+              });
+              mainLine.style.setProperty("--len", String(Math.round(measure(mainLine)) || 900));
+              plot.appendChild(mainLine);
+
+              // 5. 線上的點與座標標籤（keepX 的兩個標成 --keep，第 4 步之後留下）
+              var dots = el("g", { class: "story__dots" });
+              STORY.points.forEach(function (x, index) {
+                var keep = STORY.keepX.indexOf(x) >= 0;
+                var dot = el("circle", {
+                  cx: px(x),
+                  cy: py(f(x)),
+                  r: keep ? 7 : 6,
+                  class: keep ? "story__dot story__dot--keep" : "story__dot",
+                });
+                dot.style.setProperty("--i", String(index));
+                dots.appendChild(dot);
+
+                var label = el("text", {
+                  x: px(x) + 13,
+                  y: py(f(x)) - 11,
+                  class: keep ? "story__dotlabel story__dotlabel--keep" : "story__dotlabel",
+                });
+                label.style.setProperty("--i", String(index));
+                label.textContent = "(" + x + ", " + f(x) + ")";
+                dots.appendChild(label);
+              });
+              plot.appendChild(dots);
+
+              // 6. 截距註記（第 2 步起出現；第 4、5 步跟著線一起淡掉）
+              var note = el("text", { x: px(0.15), y: py(f(0)) + 26, class: "story__note" });
+              note.textContent = "截距 b = " + STORY.intercept;
+              plot.appendChild(note);
+
+              // 7. 第 6 步才出現的第三個符合點
+              var second = el("circle", {
+                cx: px(STORY.secondX),
+                cy: py(f(STORY.secondX)),
+                r: 7,
+                class: "story__dot2",
+              });
+              plot.appendChild(second);
+              // 第三個點不放文字標籤：它和 (3, 13)、(5, 19) 太靠近，第 7 步會擠在一起。
+              // 強調交給綠色圓點＋說明文字，避免圖上任兩個標籤重疊。
+
+              svg.appendChild(plot);
             },
 
-            // 每次換步時呼叫；step 是新的步數，prev 是上一步（翻回第 0 步時 prev 較大）。
+            // 只做「這一步才算」的事。所有顯示狀態都由 :host([data-step]) 的 CSS 決定，
+            // 所以列印時逐步走到最後一步也不會卡住（slides_SPEC.md §11-5）。
             enter: function (step, prev, root) {
-              // 骨架階段什麼都不做：外觀由上面的 CSS 依 host 的 data-step 決定。
-              // 需要「換步時才算」的東西時放這裡，例如要重算 SVG 上的座標標記。
+              // 往回走時把交錯延遲歸零：倒放不要出現「先淡掉、再一顆顆冒出來」的拖拍
+              root.host.style.setProperty("--step-shift", step < prev ? "0s" : "");
             },
           };
         </script>
@@ -371,7 +986,7 @@
     <nav class="hud" aria-label="投影片控制">
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
-        <span class="hud__count" aria-live="polite">01 / 07</span>
+        <span class="hud__count" aria-live="polite">01 / 06</span>
         <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
         <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
