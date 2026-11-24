@@ -1,0 +1,13 @@
+{
+  "name": "secretsharing-shamir",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test code/shamir.test.mjs",
+    "bdd": "cucumber-js --tags \"not @real-gf\"",
+    "bdd:all": "cucumber-js"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^13.3.0"
+  }
+}
