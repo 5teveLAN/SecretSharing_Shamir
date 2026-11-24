@@ -62,23 +62,6 @@
               </div>
             </div>
 
-            <div class="story__side">
-              <p class="story__cap" data-for="0">一條直線，需要幾個點才能唯一決定？先從最簡單的一次多項式開始。</p>
-              <p class="story__cap" data-for="1">代入一般式：<b>a = 3</b>（斜率）、<b>b = 4</b>（截距）。</p>
-              <p class="story__cap" data-for="2">公式收進左上角，畫出 x、y 平面。這條線的起點就是截距 <span class="math math--sm">(0, 4)</span>。</p>
-              <p class="story__cap" data-for="3">沿著線取點：<b>(1, 7)、(2, 10)、(3, 13)、(5, 19)</b>…… 線上的點有無限多個。</p>
-              <p class="story__cap" data-for="4">把線淡掉，只留下 <b>(1, 7)</b> 與 <b>(2, 10)</b>。只看這兩個點，原本的線還在嗎？</p>
-              <p class="story__cap" data-for="5">穿過這兩個點的直線有無限多條：只拿到一個點時，多項式完全無法決定。</p>
-              <p class="story__cap" data-for="6">多拿到一個符合的點 <b>(4, 16)</b>：只有斜率 3 的那條線同時穿過全部三個點。</p>
-              <p class="story__cap" data-for="7"><b>兩個點</b>就能唯一決定一條直線。一般化：<span class="math math--sm">r − 1</span> 次多項式需要 <span class="math math--sm">r</span> 個點。</p>
-            </div>
-
-            <!-- 只有第 7 步顯示的結論牌（放在 caption 之外，撐開的比例由 CSS 控制） -->
-            <div class="story__result">
-              <span class="tag">結論</span>
-              <span class="math math--sm">2 個點 → 唯一一條直線</span>
-            </div>
-
             <div class="story__bar">
               <span class="story__count" data-step-count></span>
               <button class="story__play" type="button" data-step-nav="play">▶ 自動播放</button>
@@ -100,13 +83,16 @@
             min-height: 0;
           }
 
-          /* ── 圖：右半邊（左半邊留給說明文字）────────────────────────── */
+          /* ── 圖：整頁寬（這一頁只留標題，不配說明文字）──────────────── */
           .story__plot {
             position: absolute;
-            right: 16px;
-            bottom: 4px;
-            width: 600px;
-            height: 368px;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: auto;
+            height: 100%;
+            margin: 0 auto;
             overflow: visible;
             opacity: 0;
             transition: opacity 0.6s ease 0.15s;
@@ -357,76 +343,6 @@
             opacity: 0.25;
           }
 
-          /* ── 說明文字：左下角，一次只顯示一句 ────────────────────────── */
-          .story__side {
-            position: absolute;
-            left: 0;
-            bottom: 48px;
-            width: 470px;
-            min-height: 128px;
-            pointer-events: none;
-          }
-
-          .story__cap {
-            position: absolute;
-            inset: 0;
-            font-size: 18px;
-            line-height: 1.75;
-            color: var(--ink-700);
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-          }
-
-          /* 第 4、5 步是「只剩兩個點」的轉折，用品牌色文字 */
-          .story__cap[data-for="4"],
-          .story__cap[data-for="5"] {
-            color: var(--brand-600);
-          }
-
-          :host([data-step="0"]) .story__cap[data-for="0"],
-          :host([data-step="1"]) .story__cap[data-for="1"],
-          :host([data-step="2"]) .story__cap[data-for="2"],
-          :host([data-step="3"]) .story__cap[data-for="3"],
-          :host([data-step="4"]) .story__cap[data-for="4"],
-          :host([data-step="5"]) .story__cap[data-for="5"],
-          :host([data-step="6"]) .story__cap[data-for="6"],
-          :host([data-step="7"]) .story__cap[data-for="7"] {
-            opacity: 1;
-            transform: none;
-          }
-
-          /* ── 第 7 步的結論牌（放在最後一句上方）─────────────────────── */
-          .story__result {
-            position: absolute;
-            left: 0;
-            bottom: 48px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 18px;
-            border-radius: var(--radius-sm);
-            background: var(--paper);
-            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.45s ease 0.2s, transform 0.45s ease 0.2s;
-            pointer-events: none;
-          }
-
-          :host([data-step="7"]) .story__result {
-            opacity: 1;
-            transform: none;
-          }
-
-          :host([data-step="7"]) .story__side {
-            min-height: 196px;
-          }
-
-          :host([data-step="7"]) .story__cap[data-for="7"] {
-            top: 76px;
-          }
-
           /* ── 步數與自動播放 ─────────────────────────────────────────── */
           .story__bar {
             position: absolute;
@@ -538,9 +454,7 @@
             .story__dot2,
             .story__dot2label,
             .story__fan,
-            .story__note,
-            .story__cap,
-            .story__result {
+            .story__note {
               transition-duration: 0.01ms !important;
               transition-delay: 0ms !important;
             }
