@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shamir 影像機密分享 · UI 測試頁面</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        background-color: #f1f5f9;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+      .test-runner {
+        max-width: 1200px;
+        margin: 0 auto 20px auto;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+      .test-runner h2 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .test-status {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .test-status--running { background: #fef3c7; color: #92400e; }
+      .test-status--pass { background: #dcfce7; color: #166534; }
+      .test-status--fail { background: #fee2e2; color: #991b1b; }
+      .test-logs {
+        margin-top: 10px;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 12px;
+        border-radius: 8px;
+        font-family: Consolas, Monaco, "Courier New", monospace;
+        font-size: 12.5px;
+        line-height: 1.6;
+        max-height: 180px;
+        overflow-y: auto;
+      }
+      .cors-warning {
+        display: none;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #92400e;
+        padding: 14px 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .cors-warning code {
+        background: #fef3c7;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: Consolas, monospace;
+        color: #b45309;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- CORS 安全限制警告 (僅在直接雙擊 file:// 開啟時顯示) -->
+    <div id="cors-warning" class="cors-warning">
+      <strong>⚠️ 偵測到您直接以 <code>file://</code> 開啟此檔案：</strong><br />
+      現代瀏覽器（Chrome / Edge 等）因為安全性政策，預設會封鎖以 <code>file://</code> 協定讀取 JavaScript 模組（ES Modules）。<br />
+      若下方畫面未正常顯示，請在本專案目錄執行：<br />
+      <code>python -m http.server 8000</code><br />
+      然後在瀏覽器開啟：<code>http://localhost:8000/code/index.html</code>，或直接點擊專案根目錄的 <code>start_test.bat</code>。
+    </div>
+
+    <!-- 自動單元測試面板 -->
+    <div class="test-runner">
+      <h2>
+        🧪 核心功能自動測試報告
+        <span id="test-badge" class="test-status test-status--running">正在執行自我檢測...</span>
+      </h2>
+      <div id="test-logs" class="test-logs">載入 ui.js 模組中...</div>
+    </div>
+
+    <!-- UI 主容器 (ui.js 會自動掛載於此) -->
+    <div id="secret-sharing-app"></div>
+
+    <script>
+      if (location.protocol === 'file:') {
+        document.getElementById('cors-warning').style.display = 'block';
+      }
+    </script>
+
+    <!-- 引入 ui.js 並執行端對端自動化測試 -->
+    <script type="module">
+      import { generateSharesAll, reconstructAll, createTestPattern } from './ui.js';
+
+      const logEl = document.getElementById('test-logs');
+      const badgeEl = document.getElementById('test-badge');
+
+      function log(msg, isOk = true) {
+        const line = document.createElement('div');
+        line.textContent = (isOk ? '✅ ' : '❌ ') + msg;
+        if (!isOk) line.style.color = '#f87171';
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      async function runAutoTests() {
+        logEl.innerHTML = '';
+        let passCount = 0;
+        const totalTests = 5;
+
+        try {
+          // 測試 1: 匯入函式確認
+          if (typeof generateSharesAll === 'function' && typeof reconstructAll === 'function') {
+            log('測試 1/5: 核心函式 generateSharesAll 與 reconstructAll 成功匯出');
+            passCount++;
+          } else {
+            throw new Error('函式未正確匯出');
+          }
+
+          // 測試 2: 產生測試圖
+          const sampleImg = createTestPattern('color', 8);
+          if (sampleImg && sampleImg.width === 8 && sampleImg.height === 8) {
+            log('測試 2/5: 測試影像 (8×8 漸層像素) 建立成功');
+            passCount++;
+          } else {
+            throw new Error('測試影像建立失敗');
+          }
+
+          // 測試 3: 拆分分享影像 (k=3, n=5)
+          const k = 3;
+          const n = 5;
+          const shares = generateSharesAll(sampleImg, k, n);
+          if (Array.isArray(shares) && shares.length === n && shares[0].width === 8) {
+            log(`測試 3/5: generateSharesAll 成功拆分出 ${n} 張分享圖 (每張尺寸 8×8)`);
+            passCount++;
+          } else {
+            throw new Error('分享圖產出長度或格式不符合預期');
+          }
+
+          // 測試 4: 還原影像並比對像素精度 (100% 比對)
+          // 取任選的 k 張 (例如第 1, 3, 5 張)
+          const chosenShares = [shares[0], shares[2], shares[4]];
+          const reconstructed = reconstructAll(chosenShares, k);
+          let isMatch = true;
+          for (let i = 0; i < sampleImg.data.length; i++) {
+            if (sampleImg.data[i] !== reconstructed.data[i]) {
+              isMatch = false;
+              break;
+            }
+          }
+          if (isMatch) {
+            log('測試 4/5: reconstructAll 從任意 3 張分享圖還原原圖，像素 100% 精確匹配！');
+            passCount++;
+          } else {
+            throw new Error('還原影像像素與原圖不一致');
+          }
+
+          // 測試 5: 防呆機制測試 (張數小於 k 時應拋出例外)
+          let threwError = false;
+          try {
+            reconstructAll([shares[0]], k); // 只給 1 張，k=3
+          } catch (e) {
+            threwError = true;
+          }
+          if (threwError) {
+            log('測試 5/5: 防呆機制驗證通過（分享圖不足 k 張時正確攔截並報錯）');
+            passCount++;
+          } else {
+            throw new Error('分享圖不足時未拋出例外');
+          }
+
+          badgeEl.className = 'test-status test-status--pass';
+          badgeEl.textContent = `全部測試通過 (${passCount}/${totalTests}) · UI 運作正常`;
+        } catch (err) {
+          log(`測試失敗: ${err.message}`, false);
+          badgeEl.className = 'test-status test-status--fail';
+          badgeEl.textContent = `測試未通過: ${err.message}`;
+        }
+      }
+
+      runAutoTests();
+    </script>
+  </body>
+</html>
