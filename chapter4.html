@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>第 4 章 · Galois Field 性質與運算</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 4 章 Galois Field 性質與運算">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">Galois Field 性質與運算</h1>
+          <p class="lede rise">
+            承接前章「為何不能直接用整數」：<br />
+            深入 <span class="math">GF(p)</span> 與 <span class="math">GF(2<sup>8</sup>)</span> 的運算機制，搞懂 XOR 加法與查表乘除法。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">CH. 04</span>
+            <span>報告人：安</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">04</div>
+      </section>
+
+      <!-- 2 ─ GF(p) 與 GF(2^n) 核心差異 ===================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="有限體分類與差異">
+        <header class="slide__head">
+          <p class="eyebrow rise">4-1 · 有限體結構</p>
+          <h2 class="h2 rise">兩種有限體的本質與運算規則</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="card rise">
+            <div class="chip chip--dark">素數體 · GF(p)</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">整數模運算（Modular Arithmetic）</h3>
+            <p class="card__text">
+              元素為整數集合 <span class="math">{0, 1, ..., p−1}</span>。<br />
+              所有加、減、乘運算直接計算後 <span class="math">mod p</span>。<br />
+              除法乘上乘法逆元：<span class="math">a / b = a · b<sup>p−2</sup> (mod p)</span>。
+            </p>
+            <p class="callout callout--quiet" style="margin-top: var(--sp-md);">
+              <strong>缺點</strong>：若用在影像（0~255），取 <span class="math">p=257</span> 會超出 1 Byte，無法直接存成像素。
+            </p>
+          </div>
+
+          <div class="card rise">
+            <div class="chip chip--brand">擴展體 · GF(2<sup>8</sup>)</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">多項式模運算（Polynomials over GF(2)）</h3>
+            <p class="card__text">
+              元素看成最高 7 次的多項式，長度恰好 8-bit（0~255）。<br />
+              <strong>加減法</strong>：二進位無進位加法，直接等價於 <strong>XOR</strong>。<br />
+              <strong>乘除法</strong>：多項式乘除後模不可約多項式 <span class="math">P(x)</span>。
+            </p>
+            <p class="callout" style="margin-top: var(--sp-md);">
+              <strong>優點</strong>：運算結果嚴格封閉在 <span class="math">[0, 255]</span>，零浪費、不溢位。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 ─ GF(2^8) 加減法 ================================================ -->
+      <section class="slide" aria-roledescription="slide" aria-label="GF(2^8) 加減法">
+        <header class="slide__head">
+          <p class="eyebrow rise">4-2 · 加法與減法</p>
+          <h2 class="h2 rise">加法等於減法，全都是 XOR</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <p class="body-text rise">
+              在 <span class="math">GF(2<sup>8</sup>)</span> 裡，係數來自 <span class="math">GF(2) = {0, 1}</span>。模 2 的世界中：<br />
+              <span class="math">1 + 1 = 0</span>，且 <span class="math">0 − 1 = 1</span>。
+            </p>
+
+            <div class="formula rise">
+              <span class="formula__label">核心性質</span>
+              <span class="math">a + b = a − b = a ⊕ b</span>
+            </div>
+
+            <p class="callout rise">
+              <strong>程式實作</strong>：<br />
+              不用做任何 Overflow 防護或取模，單一指令搞定！
+            </p>
+            <pre class="rise" style="background: var(--code-bg); padding: var(--sp-md); border-radius: var(--rad); font-family: var(--font-mono); font-size: var(--fs-code);"><code>add(a, b) { return a ^ b; }
+sub(a, b) { return a ^ b; }</code></pre>
+          </div>
+
+          <div class="card rise">
+            <h3 class="card__title">位元運算範例</h3>
+            <p class="card__text" style="font-family: var(--font-mono); line-height: 1.8;">
+              &nbsp;&nbsp;01010011 (0x53 = 83)<br />
+              ⊕ 00110101 (0x35 = 53)<br />
+              -----------------------<br />
+              &nbsp;&nbsp;01100110 (0x66 = 102)
+            </p>
+            <ul class="chips rise" style="margin-top: var(--sp-md);">
+              <li class="chip">無進位（Carry-less）</li>
+              <li class="chip">自反性：a ⊕ a = 0</li>
+              <li class="chip chip--brand">CPU 單週期完成</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 ─ GF(2^8) 乘除法與本原多項式 ======================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="乘法與不可約多項式">
+        <header class="slide__head">
+          <p class="eyebrow rise">4-3 · 乘法與除法原理</p>
+          <h2 class="h2 rise">不可約多項式 P(x) 與乘法逆元</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <p class="body-text rise">
+              多項式直接相乘次數會超過 7 次（大於 255）。為了封閉在 8-bit 內，相乘後必須模一個<strong>不可約多項式</strong>（相當於素數體裡的質數）。
+            </p>
+
+            <div class="formula rise">
+              <span class="formula__label">本原多項式</span>
+              <span class="math">P(x) = x<sup>8</sup> + x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + 1</span>
+            </div>
+
+            <p class="body-text rise">
+              其二進位表示為 <span class="math">1 0001 1101<sub>2</sub></span>，即十六進制的 <strong>0x11d</strong>（第 8 bit 溢出時拿來 XOR 消除）。
+            </p>
+          </div>
+
+          <div class="card card--spot rise">
+            <h3 class="card__title">為什麼除法能進行？</h3>
+            <p class="card__text">
+              因為 <span class="math">P(x)</span> 是不可約多項式，<span class="math">GF(2<sup>8</sup>)</span> 形成一個<strong>體（Field）</strong>：<br /><br />
+              • 除了 0 以外，<strong>每個非零元素都存在唯一的乘法逆元 a<sup>−1</sup></strong>。<br />
+              • 除法定義為乘以其逆元：<span class="math">a / b = a · b<sup>−1</sup></span>。<br />
+              • 這保證了後續解聯立方程、拉格朗日插值一定解得出唯一解！
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 ─ 查表法演算法 =================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="查表法演算法">
+        <header class="slide__head">
+          <p class="eyebrow rise">4-4 · 演算法實作</p>
+          <h2 class="h2 rise">LOG / EXP 查表法：O(1) 達成乘除法</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <p class="body-text rise">
+              選定生成元 <span class="math">α = 2 (x)</span>，將非零元素轉為對數。<br />
+              <strong>乘法轉加法，除法轉減法</strong>：
+            </p>
+            <div class="formula rise">
+              <span class="formula__label">查表定理</span>
+              <span class="math">a · b = α<sup>log<sub>α</sub>(a) + log<sub>α</sub>(b)</sup></span>
+            </div>
+            <pre class="rise" style="background: var(--code-bg); padding: var(--sp-md); border-radius: var(--rad); font-family: var(--font-mono); font-size: var(--fs-code);"><code>mul(a, b) {
+  if (a === 0 || b === 0) return 0;
+  return EXP[LOG[a] + LOG[b]];
+}
+div(a, b) {
+  if (b === 0) throw new RangeError("Div by zero");
+  if (a === 0) return 0;
+  return EXP[LOG[a] - LOG[b] + 255];
+}</code></pre>
+          </div>
+
+          <div class="card rise">
+            <h3 class="card__title">建表初始化（一次性 255 次迴圈）</h3>
+            <pre style="background: var(--code-bg); padding: var(--sp-md); border-radius: var(--rad); font-family: var(--font-mono); font-size: var(--fs-code); line-height: 1.5;"><code>let x = 1;
+for (let i = 0; i < 255; i++) {
+  EXP[i] = x;
+  EXP[i + 255] = x; // 雙倍防溢位
+  LOG[x] = i;
+  x <<= 1;          // 乘以 α (乘 2)
+  if (x & 0x100) {
+    x ^= 0x11d;     // 超過 8-bit 取模 P(x)
+  }
+}</code></pre>
+            <p class="callout callout--quiet" style="margin-top: var(--sp-sm);">
+              <strong>巧妙技巧</strong>：`EXP` 設為 512 長度，指數相加無需再做 `% 255`。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 ─ 小結與承接下一章 ================================================ -->
+      <section class="slide" aria-roledescription="slide" aria-label="本章總結">
+        <header class="slide__head">
+          <p class="eyebrow rise">4-5 · 總結</p>
+          <h2 class="h2 rise">代數工具齊備，進入解密環節</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="grid-3">
+            <article class="card rise">
+              <p class="card__index">01</p>
+              <h3 class="card__title">GF(2<sup>8</sup>) 的完備性</h3>
+              <p class="card__text">
+                精確對齊 1 Byte（0~255）影像像素，運算全封閉，不產生數值膨脹。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02</p>
+              <h3 class="card__title">極速 O(1) 四則運算</h3>
+              <p class="card__text">
+                加減法 XOR、乘除法查 LOG/EXP 表，百萬像素拆分毫秒級完成。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03</p>
+              <h3 class="card__title">承接第 5 章</h3>
+              <p class="card__text">
+                底層代數就緒，下一步：如何用拉格朗日、行列式、高斯消去法解出秘密多項式！
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>下一章（第 5 章）</strong>：得到 Share 後，如何解出多項式 —— 比較拉格朗日插值、行列式（克拉瑪）與高斯消去法。
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 06</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <script src="deck.js"></script>
+  </body>
+</html>
