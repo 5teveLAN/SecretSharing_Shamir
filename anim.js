@@ -623,6 +623,7 @@
   function onSlideChange(slide) {
     var controller = null;
     if (slide) {
+      discardPendingConfig();
       if (current && current.slide !== slide) current.stopAuto();
       controller = activate(slide);
       if (controller) {
@@ -659,9 +660,24 @@
 
   function boot() {
     var slides = document.querySelectorAll(".slide");
-    for (var i = 0; i < slides.length; i++) activate(slides[i]);
     var active = document.querySelector(".slide.is-active");
+    for (var i = 0; i < slides.length; i++) {
+      if (slides[i] !== active) activate(slides[i]);
+    }
+    // 依序啟動時，每頁的 init 都會執行一次；最後執行的是「目前頁」的那支腳本，
+    // 所以 window.SlideAnim 的內容也必須是「目前頁」的。從目前頁開始跑，
+    // 殘留的設定才不會被別的頁（例如先啟動的封面）讀走。
     if (active) onSlideChange(active);
+    for (var j = 0; j < slides.length; j++) {
+      if (slides[j] !== active) activate(slides[j]);
+    }
+  }
+
+  // deck.js 換頁後的通知：先把殘留的 window.SlideAnim 清掉。
+  // 沒有這段的話，最後一次「啟動頁面」留在全域的設定會被下一頁的 activate 讀走，
+  // 讓沒有動畫的頁面（封面…）變成有 step 的頁，第一下前進只換步、不翻頁。
+  function discardPendingConfig() {
+    if (global.SlideAnim) delete global.SlideAnim;
   }
 
   global.SlideSteps = {

@@ -107,7 +107,7 @@
             opacity: 1;
           }
 
-          /* ── 公式卡：0、1 置中；第 2 步起移到左上角 ──────────────────── */
+          /* ── 公式卡：0、1 置中；第 2 步仍在原位；第 3 步才滑到左上角 ── */
           .story__cards {
             position: absolute;
             inset: 0;
@@ -136,16 +136,27 @@
             color: var(--accent);
           }
 
-          /* 置中：第 0 步是一般式、第 1 步是代入後的式子 */
+          /* 置中：第 0 步是一般式、第 1 步是代入後的式子（縮放以卡片中心為基準） */
           :host([data-step="0"]) .story__card--a,
           :host([data-step="1"]) .story__card--b {
             opacity: 1;
             visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
           }
 
-          /* 第 2 步起：縮小並滑到左上角（translate 的百分比是相對卡片自身，
-             -50% 讓卡片左緣對齊左邊界；再往上移出 header 的空間） */
-          :host([data-step="2"]) .story__card--b,
+          /* 第 1、2 步：代入後的式子停在原位（與第 2 步出現的平面同一個位置） */
+          :host([data-step="1"]) .story__card--b,
+          :host([data-step="2"]) .story__card--b {
+            opacity: 1;
+            visibility: visible;
+          }
+
+          /* 第 3 步起：滑到左上角並縮小，讓出右半邊給直線。
+             只動 transform（left／top 留在 css 的 50%／44% 不動），位移才會真的補間；
+             不會再像之前那樣瞬間跳到畫面外再滑回來。
+             終點是「標題下方」的內容區左上角（實測 1280×720：卡片落在 72, 165，
+             header 下緣 y≈139），用 translate(-50%,-50%) 當起點、再扣掉量出來的位移。
+             版面或字級改變時，用同樣方式重量一次（把卡片暫時放到目標位置、讀 getBoundingClientRect）。 */
           :host([data-step="3"]) .story__card--b,
           :host([data-step="4"]) .story__card--b,
           :host([data-step="5"]) .story__card--b,
@@ -153,10 +164,7 @@
           :host([data-step="7"]) .story__card--b {
             opacity: 1;
             visibility: visible;
-            left: 0;
-            top: -4px;
-            transform: translate(0, 0) scale(0.62);
-            transform-origin: left top;
+            transform: translate(calc(-50% - 482.6px), calc(-50% - 176.6px)) scale(0.62);
           }
 
           /* ── 座標平面、直線 ─────────────────────────────────────────── */
