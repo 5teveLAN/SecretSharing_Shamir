@@ -3,6 +3,7 @@
 // 數學運算全部交給 安 的 gf28.js（本原多項式 0x11d，x^8+x^4+x^3+x^2+1）。
 // 這裡只透過 gf.add / gf.mul / gf.div 操作 0–255 的位元組，不碰 Canvas。
 import { GF28 as gf } from "./gf28.js";
+import { lagrangeInterpolateAtZero } from "./Lagrange.js";
 
 /**
  * 真 GF(2^8) 是否已接上。
@@ -93,4 +94,6 @@ export function generateShares(value, k, n, randomFn = randomByte) {
  * @param {number} k
  * @returns {number} 0–255
  */
-export function reconstructPixel(points, k) {}
+export function reconstructPixel(points, k) {
+  return lagrangeInterpolateAtZero(points, k);
+}
