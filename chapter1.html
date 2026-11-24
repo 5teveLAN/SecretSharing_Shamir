@@ -35,10 +35,10 @@
              1  代入 a = 3、b = 4 → y = 3x + 4
              2  公式牌滑到左上角，同時出現 x、y 平面與這條線（起點就是截距 (0, 4)）
              3  沿線一個一個點亮：線上的點有無限多個
-             4  線變透明，只留 (1, 7)、(2, 10) 兩個點
-             5  很多條線穿過這兩個點：斜率有無限多種
+             4  線變透明，只留 (1, 7) 一個點
+             5  很多條線穿過 (1, 7)：斜率有無限多種
              6  再出現一個符合的點 (4, 16)
-             7  只有斜率 3 的線穿過全部三個點 → 原本的線回來
+             7  只有斜率 3 的線穿過這兩個點 → 原本的線回來
            幾何一律由 STORY 算，不手寫座標；顯示狀態一律寫 :host(.slide[data-step="N"])
            （slides_SPEC.md §3.1）。這一頁的樣式與腳本都留在 section 內，合併才不會掉。 -->
       <section class="slide" aria-roledescription="slide" aria-label="一次多項式分鏡">
@@ -226,7 +226,7 @@
             transition-delay: calc(var(--i, 0) * 0.12s);
           }
 
-          /* 第 3 步全部出現；第 4 步起只留 keepX 那兩個 */
+          /* 第 3 步全部出現；第 4 步起只留 keepX（只剩 (1, 7) 一個） */
           :host([data-step="3"]) .story__dot,
           :host([data-step="4"]) .story__dot--keep,
           :host([data-step="5"]) .story__dot--keep,
@@ -277,7 +277,7 @@
             transform: translate(-6px, -20px);
           }
 
-          /* ── 扇形線：第 5 步穿過兩個點散開，第 6 步退到背景，第 7 步消失 ── */
+          /* ── 扇形線：第 5 步穿過 (1, 7) 散開，第 6 步退到背景，第 7 步消失 ── */
           .story__fan {
             stroke-dasharray: var(--len, 900);
             stroke-dashoffset: var(--len, 900);
@@ -482,13 +482,13 @@
               if (!svg) return;
 
               /* 幾何資料：換係數或取點只要改這個物件，不手寫任何座標。
-                 points = 沿線取出的點；keepX = 第 4、5 步留下的兩個；
-                 secondX = 第 6 步才出現的第三個符合點；fanLines = 扇形線條數。 */
+                 points = 沿線取出的點；keepX = 第 4～6 步留下的那個（扇形也交在這裡）；
+                 secondX = 第 6 步才出現的另一個符合點；fanLines = 扇形線條數。 */
               var STORY = {
                 slope: 3,
                 intercept: 4,
                 points: [1, 2, 3, 5],
-                keepX: [1, 2],
+                keepX: [1],
                 secondX: 4,
                 fanLines: 9,
               };
@@ -586,7 +586,7 @@
               axis.appendChild(nameY);
               plot.appendChild(axis);
 
-              // 3. 扇形線：全部穿過 keepX 的第一個點，斜率均分，端點裁在繪圖框內。
+              // 3. 扇形線：全部穿過 keepX 的那個點 (1, 7)，斜率均分，端點裁在繪圖框內。
               //    第 5 步散開、第 6 步退到背景、第 7 步淡出只剩斜率 3 的主線。
               var fanLayer = el("g", { class: "story__fanlayer" });
               var fx = STORY.keepX[0];
@@ -641,7 +641,7 @@
               mainLine.style.setProperty("--len", String(Math.round(measure(mainLine)) || 900));
               plot.appendChild(mainLine);
 
-              // 5. 線上的點與座標標籤（keepX 的兩個標成 --keep，第 4 步之後留下）
+              // 5. 線上的點與座標標籤（keepX 的點標成 --keep，第 4 步之後留下）
               var dots = el("g", { class: "story__dots" });
               STORY.points.forEach(function (x, index) {
                 var keep = STORY.keepX.indexOf(x) >= 0;
@@ -670,7 +670,7 @@
               note.textContent = "截距 b = " + STORY.intercept;
               plot.appendChild(note);
 
-              // 7. 第 6 步才出現的第三個符合點
+              // 7. 第 6 步才出現的另一個符合點（第二個點）
               var second = el("circle", {
                 cx: px(STORY.secondX),
                 cy: py(f(STORY.secondX)),
