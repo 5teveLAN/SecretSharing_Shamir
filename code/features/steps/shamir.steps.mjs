@@ -26,14 +26,14 @@ setWorldConstructor(ShamirWorld);
 
 // ===== 測試小工具 ============================================================
 
-/** 真 GF(2^8) 乘法（x^8+x^4+x^3+x+1），只在 @real-gf 場景用。 */
+/** 真 GF(2^8) 乘法（x^8+x^4+x^3+x^2+1，約簡常數 0x1d），只在 @real-gf 場景用。 */
 function gfMul(a, b) {
   let r = 0;
   for (let i = 0; i < 8; i++) {
     if (b & 1) r ^= a;
     const hi = a & 0x80;
     a = (a << 1) & 0xff;
-    if (hi) a ^= 0x1b;
+    if (hi) a ^= 0x1d;
     b >>= 1;
   }
   return r;

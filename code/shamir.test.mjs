@@ -21,14 +21,14 @@ import {
 
 // ===== 測試用的 oracle：獨立實作，走跟 shamir.js 不同的路徑 =====================
 
-/** 用位元迴圈算 GF(2^8) 乘法（多項式 x^8+x^4+x^3+x+1，約簡常數 0x1b）。 */
+/** 用位元迴圈算 GF(2^8) 乘法（多項式 x^8+x^4+x^3+x^2+1，約簡常數 0x1d）。 */
 function oracleGfMul(a, b) {
   let r = 0;
   for (let i = 0; i < 8; i++) {
     if (b & 1) r ^= a;
     const hi = a & 0x80;
     a = (a << 1) & 0xff;
-    if (hi) a ^= 0x1b;
+    if (hi) a ^= 0x1d;
     b >>= 1;
   }
   return r;
@@ -40,8 +40,8 @@ function oracleGfMul(a, b) {
  *
  * 為什麼墊檔狀態不拿它跟 evalPolynomial 比數值？
  * 因為墊檔的 mul 是普通乘法，跟 XOR 加法混用會破壞分配律／結合律：
- *   真 GF：Horner 與「冪次累積」都得到 24（等價）
- *   墊檔：Horner 得到 64、冪次累積得到 60（不等價 → 沒有客觀的「正確答案」）
+ *   真 GF：Horner 與「冪次累積」都等價
+ *   墊檔：兩者不等價 → 沒有客觀的「正確答案」
  * 所以在接上真的 GF28 之前，只驗結構性質，數值正確性一律留給 T5（真 GF）。
  */
 function oracleRealGfEval(coeffs, x) {
@@ -267,14 +267,14 @@ test("T4 generateShares：每次回傳新陣列，不共用", () => {
   assert.notEqual(a, b, "兩次呼叫不該共用同一個陣列");
 });
 
-// ===== T5 真 GF(2^8)：安交件前自動 skip =======================================
+// ===== T5 真 GF(2^8)：本原多項式 0x11d ========================================
 
 test(
-  "T5 真 GF：已知乘積 0x57 × 0x83 = 0xc1（AES 教科書例子）",
+  "T5 真 GF：已知乘積 0x57 × 0x83 = 0x31（0x11d 下）",
   { skip: skipReason },
   () => {
     // 驗 evalPolynomial 底層用的乘法是否為真的 GF(2^8)
-    assert.equal(evalPolynomial([0, 0x57], 0x83), 0xc1);
+    assert.equal(evalPolynomial([0, 0x57], 0x83), 0x31);
   }
 );
 
