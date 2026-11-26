@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>首頁 · 封面與目錄</title>
+    <!-- 與各章共用同一支樣式檔與播放器：單獨開啟時外觀、翻頁都與合併播放一致 -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="封面與目錄">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" data-intro aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">Shamir 機密分享</h1>
+          <p class="lede rise">
+            從多項式出發，走進 Galois Field，最後把圖片藏進多張影子影像裡。
+          </p>
+
+          <!-- 組員：學號 · 班級 · 姓名；目錄的負責人代號（蕭／安／妡）就對照這裡 -->
+          <ul class="members rise">
+            <li class="members__item">
+              <span class="members__id">12363033</span>
+              <span class="members__cls">資工四甲</span>
+              <b class="members__name">蕭宏均</b>
+              <span class="members__tag">蕭</span>
+            </li>
+            <li class="members__item">
+              <span class="members__id">13360294</span>
+              <span class="members__cls">資工三甲</span>
+              <b class="members__name">林奕妡</b>
+              <span class="members__tag">妡</span>
+            </li>
+            <li class="members__item">
+              <span class="members__id">14360303</span>
+              <span class="members__cls">資工二丙</span>
+              <b class="members__name">林奕安</b>
+              <span class="members__tag">安</span>
+            </li>
+          </ul>
+
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">INTRO</span>
+            <span>Shamir Secret Sharing</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">00</div>
+      </section>
+
+      <!-- 2 ─ 目錄 =========================================================
+           六章 ＋ 三份附錄，每一項都標「負責講的人」。
+           章名與 index.html 的 CHAPTERS 一致；改章名時兩邊要一起改。
+           .toc__row--link：合併播放時點一下就是 index.html 的 ?chapter=N 深連結，
+           直接跳到該章第一頁（切章不會重新載入）。單獨開 cover.html 時沒有其他章，
+           因而會標 aria-disabled（點了不跳），避免換到不存在的章。 -->
+      <section class="slide" data-intro aria-roledescription="slide" aria-label="目錄">
+        <header class="slide__head">
+          <p class="eyebrow rise">目錄 · CONTENTS</p>
+          <h2 class="h2 rise">六章，加上三份附錄</h2>
+          <p class="lede rise">
+            前六章是理論與實作的主線；附錄放程式 Demo、程式架構，以及這份簡報怎麼做的。
+          </p>
+        </header>
+
+        <div class="slide__body">
+          <div class="toc"><span class="toc__count" data-step-count></span>
+            <div class="toc__col">
+              <p class="toc__label rise">章節 · CHAPTERS</p>
+              <ul class="toc__list">
+                <li class="toc__row toc__row--link rise" data-href="?chapter=1">
+                  <span class="toc__num">01</span>
+                  <span class="toc__name">Shamir 多項式的原理</span>
+                  <span class="toc__who">蕭</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=2">
+                  <span class="toc__num">02</span>
+                  <span class="toc__name">Shamir 多項式的嚴謹定義</span>
+                  <span class="toc__who">蕭</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=3">
+                  <span class="toc__num">03</span>
+                  <span class="toc__name">為什麼需要 Galois Field？</span>
+                  <span class="toc__who">蕭</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=4">
+                  <span class="toc__num">04</span>
+                  <span class="toc__name">Galois Field 性質與運算</span>
+                  <span class="toc__who toc__who--alt">安</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=5">
+                  <span class="toc__num">05</span>
+                  <span class="toc__name">得到 Share 後，如何解出多項式</span>
+                  <span class="toc__who toc__who--alt">安</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=6">
+                  <span class="toc__num">06</span>
+                  <span class="toc__name">實作機密影像分享</span>
+                  <span class="toc__who toc__who--third">妡</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="toc__col">
+              <p class="toc__label rise">附錄 · APPENDIX</p>
+              <ul class="toc__list">
+                <li class="toc__row toc__row--link rise" data-href="?chapter=7">
+                  <span class="toc__num">A1</span>
+                  <span class="toc__name">
+                    程式實作 Demo
+                    <span class="toc__sub">實機操作拆分與還原</span>
+                  </span>
+                  <span class="toc__who toc__who--third">妡</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=8">
+                  <span class="toc__num">A2</span>
+                  <span class="toc__name">
+                    程式實作介紹
+                    <span class="toc__sub">gf28（安）· shamir（蕭）· ui（妡）</span>
+                  </span>
+                  <span class="toc__who toc__who--team">三人</span>
+                </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=9">
+                  <span class="toc__num">A3</span>
+                  <span class="toc__name">
+                    簡報製作介紹
+                    <span class="toc__sub">用 AI Coding 做這份簡報</span>
+                  </span>
+                  <span class="toc__who">蕭</span>
+                </li>
+              </ul>
+
+              <p class="callout callout--quiet toc__note rise">
+                <strong>講者分配</strong><br />
+                蕭：第 1–3 章；安：第 4–5 章；妡：第 6 章；附錄三人一起講。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <noscript>
+          <p class="slide__body small muted">
+            靜態內容：第 1–3 章由蕭負責、第 4–5 章由安負責、第 6 章由妡負責；
+            附錄 1 程式 Demo、附錄 2 程式架構、附錄 3 簡報製作，由三人共同講。
+          </p>
+        </noscript>
+
+        <!-- 這一頁自己的樣式：只新增 .members 與 .toc__*，顏色一律用 :root 的變數 -->
+        <style>
+          /* ── 封面：組員清單（深色底，顏色對照 .slide--cover）─────────── */
+          .members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+
+          .members__item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px 9px 16px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+            font-size: 15px;
+            line-height: 1.4;
+            color: #cdd9ff;
+          }
+
+          .members__id,
+          .members__cls {
+            font-family: var(--font-mono);
+            letter-spacing: 0.06em;
+            color: #9aa8c4;
+          }
+
+          .members__id {
+            font-size: 13px;
+          }
+
+          .members__cls {
+            font-size: 12.5px;
+          }
+
+          .members__name {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #ffffff;
+          }
+
+          .members__tag {
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(147, 170, 255, 0.2);
+            font-size: 13px;
+            font-weight: 700;
+            color: #cdd9ff;
+          }
+
+          /* ── 目錄：左欄六章、右欄三份附錄 ───────────────────────────── */
+          .toc {
+            display: grid;
+            grid-template-columns: 1.06fr 0.94fr;
+            gap: 30px;
+            height: 100%;
+            min-height: 0;
+          }
+
+          .toc__col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+          }
+
+          .toc__label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            color: var(--ink-300);
+          }
+
+          .toc__label::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--line);
+          }
+
+          /* 頁內 step 計數由 anim.js 填入；steps = 1（靜態頁）時不會有文字，整塊收起來 */
+          .toc__count:empty {
+            display: none;
+          }
+
+          .toc__count {
+            grid-column: 1 / -1;
+            justify-self: end;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            color: var(--ink-300);
+          }
+
+          .toc__list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+          }
+
+          .toc__row {
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+          }
+
+          /* 可點擊的列：合併播放時點一下跳該章第一頁 */
+          .toc__row--link {
+            cursor: pointer;
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+          }
+
+          .toc__row--link:hover {
+            background: var(--brand-soft);
+            box-shadow: inset 0 0 0 1px #c6d2fb, var(--shadow-sm);
+            transform: translateX(2px);
+          }
+
+          .toc__row--link:focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+          }
+
+          .toc__row--link[aria-disabled="true"] {
+            cursor: default;
+          }
+
+          .toc__row--link[aria-disabled="true"]:hover {
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            transform: none;
+          }
+
+          .toc__num {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--brand);
+          }
+
+          .toc__name {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 17.5px;
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--ink-900);
+          }
+
+          .toc__sub {
+            font-size: 12.5px;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            color: var(--ink-300);
+          }
+
+          /* 負責人：蕭＝品牌藍、安＝強調橙、妡＝綠，與封面上的成員代號對應 */
+          .toc__who {
+            display: grid;
+            place-items: center;
+            min-width: 34px;
+            height: 26px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--brand-soft);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--brand-600);
+          }
+
+          .toc__who--alt {
+            background: var(--accent-soft);
+            color: #8a4a06;
+          }
+
+          .toc__who--third {
+            background: var(--ok-soft);
+            color: #0b6157;
+          }
+
+          .toc__who--team {
+            background: var(--paper-dim);
+            box-shadow: inset 0 0 0 1px var(--line-2);
+            color: var(--ink-500);
+          }
+
+          .toc__note {
+            margin-top: auto;
+            font-size: 15px;
+            line-height: 1.7;
+          }
+        </style>
+
+        <!-- 目錄列的點擊行為寫在這一頁裡面：index.html 只搬 .slide 的子節點，
+             放在 </main> 之後的 script 不會被合併播放帶走（單獨開 cover.html 才會跑到）。
+             ready: 0 → 一合併進來就執行 init，不必等被翻到。 -->
+        <script>
+          /*
+           * 目錄列 → 章節跳轉，並讓「跳章」「網址」彼此一致。
+           *
+           * 跳章：合併播放（index.html）點的列帶 data-href="?chapter=N"，換網址後
+           *   index.html 依 ?chapter=N 從該章第一頁重新掛載整份 deck。
+           *   不要寫成 "?chapter=N#1"：deck.js 的 #頁碼 是「合併後的全域頁碼」，
+           *   會蓋過 ?chapter=N，結果跳回第 1 頁（封面）。
+           *   單獨開啟 cover.html 時只有這兩頁，跳到不存在的章只會載入失敗，
+           *   所以一律 aria-disabled，點了留在封面。
+           * 怎麼判斷「合併播放」：index.html 會把 CHAPTERS 掛到 window.INDEX_CHAPTERS。
+           *
+           * 換頁改寫網址：deck.js 讓每一頁顯示後把網址換成 #頁碼，蓋掉了 ?chapter=N；
+           *   index.html 換頁時靠 query 判斷目前在第幾章，沒了 query 就會被當成第 1 章，
+           *   之後點 HOME 或重新整理都會跳回第一章。這裡在換頁後補回 ?chapter=0，
+           *   讓「?chapter=0#2」這種深連結在首頁也成立。
+           *   （deck.js 的 replaceState 沒有通知，用 requestAnimationFrame 比對，
+           *     不對就補回來。）
+           */
+          (function (global) {
+            var HOME = "0"; // CHAPTERS 裡 intro 的 key
+
+            function inCombinedDeck() {
+              return !!(global.INDEX_CHAPTERS && global.INDEX_CHAPTERS[HOME]);
+            }
+
+            // 把網址改回 ?chapter=0#現在頁碼（只在不一致時動，避免無限迴圈）。
+            // 只有首頁自己的兩頁（data-intro）才補：合併播放時這段 init 在開場就會執行，
+            // 若不加判斷，其他章的 ?chapter=N 會被蓋成 ?chapter=0。
+            function keepChapterQuery() {
+              if (!inCombinedDeck()) return;
+              if (!document.querySelector(".slide.is-active[data-intro]")) return;
+              var search = location.search;
+              if (search.indexOf("chapter=" + HOME) !== -1) return;
+              var page = String(location.hash || "").replace("#", "");
+              if (!page) return;
+              history.replaceState(null, "", "?chapter=" + HOME + "#" + page);
+            }
+
+            window.COVER_KEEP_QUERY = keepChapterQuery;
+
+            window.SlideAnim = {
+              steps: 1, // 這一頁是靜態頁：只有 .rise 進場，沒有 step
+              // ready: 0 → 掛載時就執行 init（不用等到被翻到）：目錄列一合併進來就綁好點擊，
+              // 從別章翻回首頁時才不會看到「還沒處理過」的列。
+              ready: 0,
+              init: function (root) {
+                keepChapterQuery();
+                requestAnimationFrame(keepChapterQuery);
+
+                var rows = root.querySelectorAll(".toc__row--link");
+                for (var i = 0; i < rows.length; i++) {
+                  bindRow(rows[i], inCombinedDeck());
+                }
+              },
+            };
+
+            function bindRow(row, canJump) {
+              row.setAttribute("role", "link");
+              row.setAttribute("tabindex", "0");
+              // aria-disabled 一定要明確寫出 true／false：目錄列的樣式靠它分辨能不能跳
+              row.setAttribute("aria-disabled", canJump ? "false" : "true");
+              if (!canJump) {
+                row.title = "單獨開啟 cover.html 時無法跳章；請從 index.html 播放";
+              } else {
+                row.title = "跳到這一章第一頁";
+              }
+              row.addEventListener("click", function () {
+                go(row);
+              });
+              row.addEventListener("keydown", function (e) {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                go(row);
+              });
+            }
+
+            function go(row) {
+              if (row.getAttribute("aria-disabled") === "true") return;
+              var href = row.getAttribute("data-href");
+              if (href) location.href = href;
+            }
+          })(window);
+        </script>
+      </section>
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 02</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 播放器（單獨開啟本章時自動初始化）→ 接著載入頁內 step 播放器 -->
+    <script src="deck.js"></script>
+    <script src="anim.js"></script>
+  </body>
+</html>

@@ -144,9 +144,15 @@
        * 附錄檔名用 appendixN.html（附錄 1 是 appendix1.html），label 寫「附錄 N」、
        * short 寫「AN」，章節鈕才不會顯示成 CH.7 之類的章號。
        * ?chapter=N 決定從哪一章的第一頁開始；#頁碼 則是合併後的全域頁碼。
+       * key 0 是 intro（cover.html：封面＋目錄），放最前面，所以整份簡報的第 1 頁
+       * 就是封面；各章自己的深色封面仍保留（每章的第一頁），章節鈕點 HOME 回封面。
+       * cover.html 的目錄列用 ?chapter=N 跳章，靠的是 window.INDEX_CHAPTERS（見下）。
        */
       (function () {
         var CHAPTERS = {
+          // key 0＝intro（封面＋目錄）。放最前面，所以整份簡報從第 1 頁開始就是封面，
+          // 之後各章的頁碼自動往後推；章節鈕顯示 short，點「HOME」隨時回到封面。
+          0: { file: "cover.html", label: "首頁", short: "HOME", name: "封面與目錄" },
           1: { file: "chapter1.html", label: "第 1 章", short: "CH.1", name: "Shamir 多項式的原理" },
           2: { file: "chapter2.html", label: "第 2 章", short: "CH.2", name: "Shamir 多項式的嚴謹定義" },
           3: { file: "chapter3.html", label: "第 3 章", short: "CH.3", name: "為什麼需要 Galois Field？" },
@@ -160,6 +166,10 @@
 
         var boot = document.getElementById("boot");
         var bootText = document.getElementById("boot-text");
+
+        // 給 cover.html（首頁目錄）判斷「是不是合併播放」：只有合併播放時，
+        // 目錄列才能用 ?chapter=N 跳到別章；單獨開啟 cover.html 時這裡不存在。
+        window.INDEX_CHAPTERS = CHAPTERS;
 
         function bootError(message, hint) {
           if (!boot) return;
@@ -272,10 +282,16 @@
           var title = chapter.name ? chapter.label + " · " + chapter.name : chapter.label;
           if (document.title !== title) document.title = title;
 
+          // 一次 replaceState 寫入「章節＋頁碼」。deck.js 換頁當下會先改一次只有 #頁碼的網址，
+          // 緊接著這裡補回 ?chapter=N，所以重新整理或複製連結都會落在正確的章
+          // （例如首頁目錄的 ?chapter=0#2）。
           if (window.history && history.replaceState) {
             history.replaceState(null, "", "?chapter=" + current.key + "#" + page);
           }
         }
+
+        // 首頁兩頁（cover.html）換頁時自行比對並補回 ?chapter=0，見 cover.html 的腳本；
+        // 這裡只需要確認 window.INDEX_CHAPTERS 已先掛上，cover.html 才判斷得出「合併播放」。
 
         function mount(entries, target) {
           if (!window.SlideDeck) {

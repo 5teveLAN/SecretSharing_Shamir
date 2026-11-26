@@ -491,6 +491,8 @@ var STORY = {
    CSS 的顯示規則用 `:host(.slide[data-step="N"]) .xxx`（§3.1），不要用 `.slide[data-step="N"]`。
 4. 頁尾保留 `<script src="deck.js"></script><script src="anim.js"></script>`。
 5. 在 `index.html` 的 `CHAPTERS` 加一筆：`{ file: "chapterN.html", label: "第 N 章", short: "CH.N", name: "…" }`。
+   key `0` 是 intro（`cover.html`：封面＋目錄），固定放最前面，所以整份簡報第 1 頁是封面；
+   各章自己的深色封面（每章第一頁）照舊保留，章節鈕點 `HOME` 隨時回封面。
    附錄用 `appendixN.html` 命名，設定 `label: "附錄 N"`、`short: "AN"`（例如附錄 1 是
    `{ file: "appendix1.html", label: "附錄 1", short: "A1", … }`；章節鈕顯示 `short`，不會出現 `CH.N`）。
    目前：`appendix1.html`＝附錄 1 程式實作 Demo（內嵌 `code/index.html`），
@@ -569,5 +571,6 @@ var STORY = {
 | 只要 CSS 動畫 | 不上 script（或只寫 `<script>window.SlideAnim={steps:3}</script>`），CSS 用 `:host(.slide[data-step="2"]) .xxx { … }`（**不是** `.slide[data-step="2"]`，見 §3.1） |
 | 靜態頁 | 什麼都不加，`steps` 視為 1 |
 | 章節合併 | `index.html` 的 `CHAPTERS` 加一筆，無需其他設定 |
+| 目錄要能跳章 | 把目錄頁放在 `cover.html`（key `0`），列上寫 `data-href="?chapter=N"`；合併播放時 script 會把列變成可點擊（`role="link"`、Enter／空白鍵），單獨開 `cover.html` 則自動 `aria-disabled` 不跳轉 |
 | 分享給組員 | 只給 `chapterN.html` 的模板，動畫全部寫在裡面 |
 

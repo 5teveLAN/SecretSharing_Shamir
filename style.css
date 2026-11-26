@@ -1060,6 +1060,21 @@ strong {
   max-width: 860px;
 }
 
+/* .cover 內使用 flex 版面時，清單不會變成 flex item，會退回瀏覽器預設的
+   display: block 與 list-style: disc（封面會出現三顆圓點，與 .chips／.legend 不一致）。 */
+.cover ul,
+.cover ol {
+  padding: 0;
+  list-style: none;
+}
+
+/* 封面元素的間距一律交給 .cover 的 gap：.cover 是 flex column，
+   子元素的 margin 不會被合併，多出來的 margin 會把整組往上推。 */
+.cover > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .cover .h1 {
   font-size: 72px;
   color: #fff;

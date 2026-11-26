@@ -209,6 +209,20 @@
     fit();
     // 起始頁：#頁碼 優先，其次 options.page（index 依章節順序算出來的頁碼）
     show((location.hash ? pageFromHash() : options.page || 1) - 1);
+
+    // 網址同步：每次換頁先以「目前的 ?chapter=N」重寫一次 #頁碼（維持深連結的章節資訊），
+    // 再讓 onChange 補上實際所在的章。pageshow（上一頁／下一頁、bFCache 還原）也走同一條路：
+    // 網址在換頁中被改寫過，還原後 location.search 可能是舊值，不重算就會顯示錯的頁。
+    function resync() {
+      if (!window.history || !history.replaceState) return;
+      var chapterQuery = (location.search.match(/[?&]chapter=\d+/) || [""])[0];
+      if (!chapterQuery) return;
+      history.replaceState(null, "", chapterQuery + "#" + (index + 1));
+      if (onChange) onChange(index + 1);
+    }
+
+    window.addEventListener("pageshow", resync);
+    resync();
   }
 
   global.SlideDeck = { init: init };
