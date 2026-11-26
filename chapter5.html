@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>第 5 章 · 得到 Share 後，如何解出多項式</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 5 章 得到 Share 後，如何解出多項式">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">得到 Share 後，如何解出多項式</h1>
+          <p class="lede rise">
+            利用拉格朗日插值法（Lagrange Interpolation）秘密還原：<br />
+            只需常數項 <span class="math">f(0)</span>，在 <span class="math">GF(2<sup>8</sup>)</span> 模運算下套公式精準還原。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">CH. 05</span>
+            <span>報告人：安</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">05</div>
+      </section>
+
+      <!-- 2 ─ 解密核心目標：只要常數項 f(0) ================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="解密核心目標">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-1 · 還原思維</p>
+          <h2 class="h2 rise">我們不需要解出完整多項式，只要 f(0)</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <div class="card rise">
+              <div class="chip chip--dark">傳統思維 · 解聯立方程</div>
+              <h3 class="card__title" style="margin-top: var(--sp-sm);">高斯消去法求所有係數</h3>
+              <p class="card__text">
+                列出 <span class="math">k</span> 條線性方程組解 <span class="math">a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>k-1</sub></span>。<br />
+                <strong>時間複雜度</strong>：<span class="math">O(k<sup>3</sup>)</span>，矩陣求逆運算成本高、邏輯繁瑣。
+              </p>
+            </div>
+
+            <div class="card card--spot rise">
+              <div class="chip chip--brand">拉格朗日插值法（推薦）</div>
+              <h3 class="card__title" style="margin-top: var(--sp-sm);">直攻截距項 f(0)</h3>
+              <p class="card__text">
+                原秘密就存放在常數項 <span class="math">S = f(0) = a<sub>0</sub></span>。<br />
+                <strong>時間複雜度</strong>：<span class="math">O(k<sup>2</sup>)</span>，只需單純加法與連乘，套公式即得。
+              </p>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="formula rise">
+              <span class="formula__label">秘密還原等式</span>
+              <span class="math">
+                S = f(0) = &sum;<sub>i=0</sub><sup>k-1</sup> y<sub>i</sub> &middot; &ell;<sub>i</sub>(0)
+              </span>
+            </div>
+
+            <p class="body-text rise">
+              每個 Share 點 <span class="math">(x<sub>i</sub>, y<sub>i</sub>)</span> 乘上專屬基底權重 <span class="math">&ell;<sub>i</sub>(0)</span> 後相加。<br />
+              <strong>權重特性</strong>：<span class="math">&ell;<sub>i</sub>(x)</span> 在 <span class="math">x = x<sub>i</sub></span> 時為 1，在其餘給定點 <span class="math">x<sub>j</sub> (j &ne; i)</span> 皆為 0。
+            </p>
+
+            <p class="callout rise">
+              <strong>關鍵洞察</strong>：拉格朗日基底 <span class="math">&ell;<sub>i</sub>(0)</span> 僅由參與還原的點座標 <span class="math">x</span> 決定，與機密值 <span class="math">y</span> 完全無關！
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 ─ GF(2^8) 下的公式化簡 ========================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="公式化簡">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-2 · 有限體代數適配</p>
+          <h2 class="h2 rise">有限體 GF(2<sup>8</sup>) 下的公式大化簡</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <div class="formula rise">
+              <span class="formula__label">標準實數 / 模 p 公式</span>
+              <span class="math">
+                &ell;<sub>i</sub>(0) = &prod;<sub>j &ne; i</sub> <span class="math-frac"><span class="math-num">0 &minus; x<sub>j</sub></span><span class="math-den">x<sub>i</sub> &minus; x<sub>j</sub></span></span>
+              </span>
+            </div>
+
+            <p class="body-text rise">
+              傳統算式中包含負號 <span class="math">&minus;x<sub>j</sub></span> 與減法 <span class="math">x<sub>i</sub> &minus; x<sub>j</sub></span>，需要處理負數取模運算。
+            </p>
+
+            <div class="card rise">
+              <h3 class="card__title">GF(2<sup>8</sup>) 特殊代數性質</h3>
+              <ul class="chips rise" style="margin-top: var(--sp-xs);">
+                <li class="chip chip--brand">加法等於減法：a &minus; b = a &oplus; b</li>
+                <li class="chip chip--brand">相反數等於自身：&minus;x = x</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="formula formula--accent rise">
+              <span class="formula__label">GF(2<sup>8</sup>) 專用極簡公式</span>
+              <span class="math">
+                &ell;<sub>i</sub>(0) = &prod;<sub>j &ne; i</sub> <span class="math-frac"><span class="math-num">x<sub>j</sub></span><span class="math-den">x<sub>i</sub> &oplus; x<sub>j</sub></span></span>
+              </span>
+            </div>
+
+            <p class="body-text rise">
+              <strong>三大實作轉換</strong>：<br />
+              1. 分子 <span class="math">0 &minus; x<sub>j</sub></span> 直接簡化為 <span class="math">x<sub>j</sub></span>。<br />
+              2. 分母 <span class="math">x<sub>i</sub> &minus; x<sub>j</sub></span> 替換為 <span class="math">x<sub>i</sub> &oplus; x<sub>j</sub></span>（XOR）。<br />
+              3. 分數除法與累乘呼叫 <span class="math">GF28.div</span> 與 <span class="math">GF28.mul</span> 查表。
+            </p>
+
+            <p class="callout rise">
+              <strong>零負數困擾</strong>：完全不需要像整數模運算加上質數 <span class="math">p</span> 轉正，運算乾淨俐落！
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 ─ 雙點還原實例計算 (k=2) ========================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="數值演算法實例">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-3 · 數值計算實例</p>
+          <h2 class="h2 rise">兩點還原實例：以 k = 2 為例一步步算</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="card rise">
+            <div class="chip chip--dark">已知條件與 Share</div>
+            <p class="card__text" style="margin-top: var(--sp-sm);">
+              設秘密 <span class="math">S = 123</span>，多項式一次斜率 <span class="math">a<sub>1</sub> = 45</span>。<br />
+              產生兩份 Share：<br />
+              &bull; 點 1：<span class="math">(x<sub>1</sub>, y<sub>1</sub>) = (1, 86)</span><br />
+              &bull; 點 2：<span class="math">(x<sub>2</sub>, y<sub>2</sub>) = (2, 33)</span>
+            </p>
+            <div class="formula rise" style="margin-top: var(--sp-md);">
+              <span class="formula__label">分母計算</span>
+              <span class="math">x<sub>1</sub> &oplus; x<sub>2</sub> = 1 &oplus; 2 = 3</span>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card card--spot rise">
+              <h3 class="card__title">步驟 1：求基底係數 &ell;<sub>i</sub>(0)</h3>
+              <p class="card__text">
+                &bull; <span class="math">&ell;<sub>1</sub>(0) = x<sub>2</sub> / (x<sub>1</sub> &oplus; x<sub>2</sub>) = 2 / 3 = 245</span><br />
+                &bull; <span class="math">&ell;<sub>2</sub>(0) = x<sub>1</sub> / (x<sub>2</sub> &oplus; x<sub>1</sub>) = 1 / 3 = 244</span>
+              </p>
+            </div>
+
+            <div class="card rise">
+              <h3 class="card__title">步驟 2：乘上 y<sub>i</sub> 並累加（XOR）</h3>
+              <p class="card__text">
+                &bull; 項 1：<span class="math">y<sub>1</sub> &middot; &ell;<sub>1</sub>(0) = 86 &times; 245 = 100</span><br />
+                &bull; 項 2：<span class="math">y<sub>2</sub> &middot; &ell;<sub>2</sub>(0) = 33 &times; 244 = 31</span><br />
+                &bull; 還原常數項：<span class="math">S = 100 &oplus; 31 = 123</span> &check;
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 ─ 完整 JavaScript 演算法實作 ===================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="演算法實作代碼">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-4 · 程式實作</p>
+          <h2 class="h2 rise">拉格朗日插值完整 JS 實作</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <pre class="rise" style="background: var(--code-bg); padding: var(--sp-md); border-radius: var(--rad); font-family: var(--font-mono); font-size: 13px; line-height: 1.5; overflow-x: auto;"><code>export function lagrangeInterpolateAtZero(points, k) {
+  if (!points || points.length &lt; k) {
+    throw new RangeError(`至少需要 ${k} 個點`);
+  }
+  const selected = points.slice(0, k);
+  let secret = 0;
+
+  for (let i = 0; i &lt; k; i++) {
+    const xi = selected[i].x;
+    const yi = selected[i].y;
+    let li = 1;
+
+    for (let j = 0; j &lt; k; j++) {
+      if (i === j) continue;
+      const xj = selected[j].x;
+      const denom = gf.sub(xi, xj); // xi ^ xj
+      if (denom === 0) throw new RangeError("重複座標");
+      li = gf.mul(li, gf.div(xj, denom));
+    }
+
+    secret = gf.add(secret, gf.mul(yi, li)); // ^
+  }
+  return secret;
+}</code></pre>
+          </div>
+
+          <div class="stack">
+            <div class="card rise">
+              <h3 class="card__title">程式碼設計細節</h3>
+              <ul class="chips rise" style="margin-top: var(--sp-xs);">
+                <li class="chip chip--brand">防呆機制</li>
+                <li class="chip chip--dark">零開銷乘除</li>
+              </ul>
+              <p class="card__text" style="margin-top: var(--sp-sm);">
+                1. <strong>門檻過濾</strong>：隨意選取任意 <span class="math">k</span> 個點（<code>slice(0, k)</code>），多給的點不影響結果。<br />
+                2. <strong>防重檢查</strong>：若 <span class="math">x<sub>i</sub> = x<sub>j</sub></span>，分母為 0 會報錯。<br />
+                3. <strong>模運算封閉</strong>：所有加、乘、除全調用 <code>gf</code> 庫，中間計算永不溢位。
+              </p>
+            </div>
+
+            <p class="callout rise">
+              此函式正是專案 <code>Lagrange.js</code> 核心，直接對接 <code>shamir.js</code> 的 <code>reconstructPixel</code>。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 ─ 本章總結與承接下一章 ============================================ -->
+      <section class="slide" aria-roledescription="slide" aria-label="本章總結">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-5 · 總結</p>
+          <h2 class="h2 rise">掌握多項式還原，邁向像素級影像合成</h2>
+        </header>
+
+        <div class="slide__body grid-3">
+          <div class="card rise">
+            <div class="chip chip--dark">精準直攻</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">直求 f(0)</h3>
+            <p class="card__text">
+              拉格朗日基底多項式讓還原運算降至 <span class="math">O(k<sup>2</sup>)</span>，不解方程、不走彎路。
+            </p>
+          </div>
+
+          <div class="card rise">
+            <div class="chip chip--brand">代數簡化</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">無負數 XOR</h3>
+            <p class="card__text">
+              在 <span class="math">GF(2<sup>8</sup>)</span> 裡加等於減，負號全消，分子留 <span class="math">x<sub>j</sub></span>、分母變 <span class="math">x<sub>i</sub> &oplus; x<sub>j</sub></span>。
+            </p>
+          </div>
+
+          <div class="card card--spot rise">
+            <div class="chip chip--dark">承接第 6 章</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">擴展至影像 RGB</h3>
+            <p class="card__text">
+              單點數字還原完畢。下一章將此演算法套用到彩色圖片上，對數百萬個像素獨立還原！
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 播放器控制列 -->
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 06</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <span class="hud__fs-enter">全螢幕</span>
+          <span class="hud__fs-exit">離開</span>
+        </button>
+      </div>
+    </nav>
+
+    <script src="deck.js"></script>
+    <script src="anim.js"></script>
+    <script>
+      SlideDeck.init();
+    </script>
+  </body>
+</html>
