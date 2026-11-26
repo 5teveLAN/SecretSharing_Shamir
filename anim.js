@@ -81,7 +81,11 @@
     "transform:translateY(14px) scale(0.995);" +
     "transition:opacity 0.45s ease,transform 0.45s ease,visibility 0.45s linear}\n" +
     ".rise{--step-k:calc(var(--step-delay,0.45s) + var(--s2)) !important}\n" +
-    ":host(.slide.is-active) .rise{opacity:1;transform:none}\n" +
+    // 只補 transform：opacity 交給 style.css 的「@supports (selector(:host)) .rise{opacity:1}」。
+    // 若這裡也寫 opacity:1，:host(.slide.is-active) .rise 的權重（0,4,0）會蓋掉章節
+    // 自己的「.xxx{opacity:0}」（0,1,0），頁內 step 就藏不住帶 .rise 的元素
+    // （例：appendix3.html 附錄 3-2 的缺點卡，第 0 步應該只有優點卡）。
+    ":host(.slide.is-active) .rise{transform:none}\n" +
     ":host(.slide:not(.is-active)) .rise{opacity:0;transform:translateY(16px);" +
     "transition:none !important}\n" +
     ":host(.slide.is-active) .flow__stream{animation:flow-dash 1.8s linear infinite}\n";
