@@ -140,17 +140,19 @@
        *   4. 最後呼叫 deck.js 的 SlideDeck.init()：頁碼是整份簡報的 1–N，
        *      換章節、翻頁都只是換投影片，不會再重新載入任何檔案。
        *
-       * 之後要加其他章：在 CHAPTERS 多加一筆即可（目前有 1、6）。
+       * 之後要加其他章：在 CHAPTERS 多加一筆即可（目前有 1、2、3、4、6）。
+       * 附錄檔名用 appendixN.html（附錄 1 是 appendix1.html），label 寫「附錄 N」、
+       * short 寫「AN」，章節鈕才不會顯示成 CH.7 之類的章號。
        * ?chapter=N 決定從哪一章的第一頁開始；#頁碼 則是合併後的全域頁碼。
        */
       (function () {
         var CHAPTERS = {
-          1: { file: "chapter1.html", label: "第 1 章", name: "Shamir 多項式的原理" },
-          2: { file: "chapter2.html", label: "第 2 章", name: "Shamir 多項式的嚴謹定義" },
-          3: { file: "chapter3.html", label: "第 3 章", name: "為什麼需要 Galois Field？" },
-          4: { file: "chapter4.html", label: "第 4 章", name: "Galois Field 性質與運算" },
-          6: { file: "chapter6.html", label: "第 6 章", name: "實作機密影像分享" },
-          7: { file: "chapter7.html", label: "附錄 1", name: "程式實作介紹" },
+          1: { file: "chapter1.html", label: "第 1 章", short: "CH.1", name: "Shamir 多項式的原理" },
+          2: { file: "chapter2.html", label: "第 2 章", short: "CH.2", name: "Shamir 多項式的嚴謹定義" },
+          3: { file: "chapter3.html", label: "第 3 章", short: "CH.3", name: "為什麼需要 Galois Field？" },
+          4: { file: "chapter4.html", label: "第 4 章", short: "CH.4", name: "Galois Field 性質與運算" },
+          6: { file: "chapter6.html", label: "第 6 章", short: "CH.6", name: "實作機密影像分享" },
+          7: { file: "appendix1.html", label: "附錄 1", short: "A1", name: "程式實作介紹" },
         };
 
         var boot = document.getElementById("boot");
@@ -230,7 +232,8 @@
             var link = document.createElement("a");
             link.className = "hud__chapter";
             link.href = "#" + entry.first;
-            link.textContent = "CH." + entry.key;
+            // 章節鈕文字：章用 CH.N，附錄用 short（例如 A1），不要出現 CH.7
+            link.textContent = chapter.short || "CH." + entry.key;
             link.title = label + "（第 " + entry.first + "–" + entry.last + " 頁）";
             link.setAttribute("data-chapter", String(entry.key));
             group.appendChild(link);
