@@ -182,6 +182,103 @@ ol {
   justify-content: center;
 }
 
+/* 6-7 終端機區塊（附錄「程式實作」的 git 指令示範） */
+.terminal {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--ink-900);
+  box-shadow: var(--shadow-md);
+}
+
+.terminal__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #8a94a8;
+}
+
+.terminal__bar::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0876f;
+  box-shadow: 14px 0 0 #f2c46d, 28px 0 0 #6ecb8f;
+  margin-right: 30px;
+}
+
+.terminal pre {
+  margin: 0;
+  padding: 16px 20px 18px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: #dbe3f4;
+}
+
+.terminal .c {
+  color: #7b869c;
+}
+
+.terminal .ok {
+  color: #6ecb8f;
+}
+
+:host(.slide) .terminal {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--ink-900);
+  box-shadow: var(--shadow-md);
+}
+
+:host(.slide) .terminal__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #8a94a8;
+}
+
+:host(.slide) .terminal__bar::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0876f;
+  box-shadow: 14px 0 0 #f2c46d, 28px 0 0 #6ecb8f;
+  margin-right: 30px;
+}
+
+:host(.slide) .terminal pre {
+  margin: 0;
+  padding: 16px 20px 18px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: #dbe3f4;
+}
+
+:host(.slide) .terminal .c {
+  color: #7b869c;
+}
+
+:host(.slide) .terminal .ok {
+  color: #6ecb8f;
+}
+
 /* ===========================================================================
    4. 文字
    =========================================================================== */
@@ -341,6 +438,11 @@ strong {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+
+/* 兩欄卡片：項目不多、字比較多時用（附錄「技術選擇」） */
+.cards--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* ===========================================================================

@@ -121,6 +121,8 @@
     <script src="deck.js"></script>
     <!-- 頁內 step 播放器：必須比 deck.js 晚載入（keydown 的 capture listener 後註冊者先執行） -->
     <script src="anim.js"></script>
+    <!-- 附錄「程式實作」的實機 Demo：把 code/ 的按鍵轉給播放器（沒有 iframe 時什麼都不做） -->
+    <script src="embed.js"></script>
 
     <script>
       /*
@@ -144,8 +146,11 @@
       (function () {
         var CHAPTERS = {
           1: { file: "chapter1.html", label: "第 1 章", name: "Shamir 多項式的原理" },
+          2: { file: "chapter2.html", label: "第 2 章", name: "Shamir 多項式的嚴謹定義" },
+          3: { file: "chapter3.html", label: "第 3 章", name: "為什麼需要 Galois Field？" },
           4: { file: "chapter4.html", label: "第 4 章", name: "Galois Field 性質與運算" },
           6: { file: "chapter6.html", label: "第 6 章", name: "實作機密影像分享" },
+          7: { file: "chapter7.html", label: "附錄 1", name: "程式實作介紹" },
         };
 
         var boot = document.getElementById("boot");

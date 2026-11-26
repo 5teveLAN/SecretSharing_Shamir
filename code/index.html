@@ -96,6 +96,12 @@
       if (location.protocol === 'file:') {
         document.getElementById('cors-warning').style.display = 'block';
       }
+      // 簡報以 iframe 嵌入時（embed.js 會帶 ?embed），只留系統本體；
+      // 上面那塊「自我檢測」是開發用的，投影片上不需要。
+      if (new URLSearchParams(location.search).has('embed')) {
+        var runner = document.querySelector('.test-runner');
+        if (runner) runner.style.display = 'none';
+      }
     </script>
 
     <!-- 引入 ui.js 並執行端對端自動化測試 -->
