@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>附錄 3 · 簡報製作介紹</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="附錄 3 簡報製作介紹">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">簡報製作介紹</h1>
+          <p class="lede rise">
+            HTML + CSS，不裝任何套件。<br />
+            你正在看的這份簡報，也用 AI Coding 一章一章做出來。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">APPENDIX 3</span>
+            <span>安 · 蕭 · 妡</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">A3</div>
+      </section>
+
+      <!-- 2 ─ AI 簡報製作（頁內 step 分鏡，6 步）=============================
+           分鏡：
+             0  先問：簡報也能用同樣的方式生出來嗎？（列出三個條件）
+             1  用 AI Coding 做簡報：HTML + CSS ＋ 一支共用腳本
+             2  拆解：一章一個檔案，三個人各做各的章節
+             3  合併：每一頁都從 style.css 拿同一套視覺
+             4  動畫：要動的話寫在那一頁裡面（:host(.slide[data-step="N"])）
+             5  結果：約 1000 行、零依賴，還能直接把程式嵌進來
+           只讓 CSS 依 data-step 切換顯示狀態，這一頁不需要頁內 init；
+           樣式全部留在 section 內（index.html 合併時才不會掉）。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="AI 簡報製作">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 3-1 · 簡報製作</p>
+          <h2 class="h2 rise">這份簡報，也是 AI 寫的</h2>
+        </header>
+
+        <div class="slide__body">
+          <div class="mk">
+            <ol class="mk__conds">
+              <li class="mk__cond"><span class="mk__k">01</span>要好看：字體、留白、配色一致</li>
+              <li class="mk__cond"><span class="mk__k">02</span>要能動：關鍵一步用動畫講清楚</li>
+              <li class="mk__cond"><span class="mk__k">03</span>要能嵌程式：Demo 直接放進簡報裡播放</li>
+            </ol>
+
+            <div class="mk__flow" aria-hidden="true">
+              <span class="mk__node"><span class="mk__name">章節草稿</span><span class="mk__sub">我的筆記</span></span>
+              <span class="mk__arrow">→</span>
+              <span class="mk__node mk__node--brand">AI Coding<span class="mk__sub">HTML + CSS</span></span>
+              <span class="mk__arrow">→</span>
+              <span class="mk__node">一章一檔<span class="mk__sub">chapterN.html</span></span>
+              <span class="mk__arrow">→</span>
+              <span class="mk__node mk__node--ok">合併播放<span class="mk__sub">index.html</span></span>
+            </div>
+
+            <div class="mk__cards">
+              <article class="mk__card">
+                <p class="mk__card-title"><span class="math math--sm">chapterN.html</span>… 拆解</p>
+                <p class="mk__card-text">
+                  一章一個檔，每頁一個 <span class="math">section.slide</span>；
+                  分配誰做哪幾章，三個人同時動工也不會撞檔。
+                </p>
+              </article>
+
+              <article class="mk__card">
+                <p class="mk__card-title"><span class="math math--sm">style.css</span>… 風格統一</p>
+                <p class="mk__card-text">
+                  顏色、字體、卡片、公式牌都收在共用的樣式檔；
+                  分開做，看起來還是同一份簡報。
+                </p>
+              </article>
+
+              <article class="mk__card">
+                <p class="mk__card-title"><span class="math math--sm">index.html</span>… 合併</p>
+                <p class="mk__card-text">
+                  播放器自己把每一章的頁面抓進來、接上頁碼，不用手動重排整份簡報。
+                </p>
+              </article>
+
+              <article class="mk__card">
+                <p class="mk__card-title">
+                  <span class="math math--sm">data-step</span>… 動畫
+                  <span class="mk__maybe">（要動的話）</span>
+                </p>
+                <p class="mk__card-text">
+                  一頁分幾步、每步長怎樣，寫在<strong>那一頁裡面</strong>；
+                  用 <span class="math">:host(.slide[data-step="N"])</span> 切換顯示。
+                </p>
+              </article>
+            </div>
+
+            <div class="mk__result">
+              <span class="mk__stat"><b>~1000</b>行 code</span>
+              <span class="mk__stat"><b>0</b>個外部套件</span>
+              <span class="mk__stat"><b>3</b>個人各自開發</span>
+              <span class="mk__stat mk__stat--accent"><b>＋</b>程式直接嵌進簡報</span>
+            </div>
+          </div>
+        </div>
+
+        <noscript>
+          <p class="slide__body small muted">
+            逐格播放需要 JavaScript。靜態內容：一章一個 HTML 檔、共用一支 style.css，
+            由 index.html 合併成一份簡報；要動畫的頁面用 data-step 切換顯示狀態。
+          </p>
+        </noscript>
+
+        <!-- 這一頁自己的樣式：只寫 .mk__* 新名稱；顏色一律用 :root 的變數 -->
+        <style>
+          .mk {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            height: 100%;
+            min-height: 0;
+          }
+
+          /* ── 第 0 步：三個條件，第 1 步起收起來 ───────────────────── */
+          .mk__conds {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            transition: opacity 0.4s ease, transform 0.45s ease;
+          }
+
+          :host([data-step="1"]) .mk__conds,
+          :host([data-step="2"]) .mk__conds,
+          :host([data-step="3"]) .mk__conds,
+          :host([data-step="4"]) .mk__conds,
+          :host([data-step="5"]) .mk__conds {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+          }
+
+          .mk__cond {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px 10px 12px;
+            border-radius: 999px;
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line-2), var(--shadow-sm);
+            font-size: 16px;
+            color: var(--ink-700);
+          }
+
+          .mk__k {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            color: var(--brand);
+          }
+
+          /* ── 第 1 步：流程列 ─────────────────────────────────────── */
+          .mk__flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.45s ease 0.1s, transform 0.5s ease 0.1s;
+          }
+
+          :host([data-step="1"]) .mk__flow,
+          :host([data-step="2"]) .mk__flow,
+          :host([data-step="3"]) .mk__flow,
+          :host([data-step="4"]) .mk__flow,
+          :host([data-step="5"]) .mk__flow {
+            opacity: 1;
+            transform: none;
+          }
+
+          .mk__node {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: center;
+            gap: 5px;
+            min-width: 132px;
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line-2), var(--shadow-sm);
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.35;
+            text-align: center;
+            color: var(--ink-900);
+          }
+
+          .mk__node--brand {
+            background: var(--brand-soft);
+            box-shadow: inset 0 0 0 1px #c6d2fb;
+            color: var(--brand-600);
+          }
+
+          .mk__node--ok {
+            background: var(--ok-soft);
+            box-shadow: inset 0 0 0 1px #9fd9d0;
+            color: var(--ok);
+          }
+
+          /* 中文標題與 monospace 副標上下排；純檔名節點則與副標並排 */
+          .mk__node:has(.mk__name) {
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+          }
+
+          .mk__sub {
+            font-family: var(--font-mono);
+            white-space: nowrap;
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--ink-300);
+          }
+
+          .mk__arrow {
+            font-size: 22px;
+            color: var(--ink-300);
+          }
+
+          /* ── 第 2～4 步：四張卡，一張一步點亮 ──────────────────────── */
+          .mk__cards {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+          }
+
+          .mk__card {
+            min-height: 160px;
+            padding: 14px 16px 16px;
+            border-left: 4px solid var(--line-2);
+            border-radius: var(--radius-sm);
+            background: var(--paper-dim);
+            opacity: 0.3;
+            transition: opacity 0.4s ease, background-color 0.4s ease,
+              box-shadow 0.4s ease, border-color 0.4s ease;
+          }
+
+          .mk__card-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--ink-900);
+          }
+
+          .mk__card-text {
+            font-size: 14.5px;
+            line-height: 1.7;
+            color: var(--ink-500);
+          }
+
+          /* 「（要動的話）」這種保留語氣：不搶眼，但還在 */
+          .mk__maybe {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--ink-300);
+          }
+
+          :host([data-step="2"]) .mk__card:nth-child(1),
+          :host([data-step="3"]) .mk__card:nth-child(-n + 2),
+          :host([data-step="4"]) .mk__card:nth-child(-n + 3),
+          :host([data-step="5"]) .mk__card {
+            opacity: 1;
+            border-left-color: var(--brand);
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+          }
+
+          /* ── 第 5 步：結果列 ───────────────────────────────────────── */
+          .mk__result {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.45s ease, transform 0.5s ease;
+          }
+
+          :host([data-step="5"]) .mk__result {
+            opacity: 1;
+            transform: none;
+          }
+
+          .mk__stat {
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line-2), var(--shadow-sm);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--ink-500);
+          }
+
+          .mk__stat b {
+            margin-right: 4px;
+            font-size: 17px;
+            color: var(--brand-600);
+          }
+
+          .mk__stat--accent {
+            background: var(--accent-soft);
+            box-shadow: inset 0 0 0 1px #f1c98f;
+            color: #8a4a06;
+          }
+
+          .mk__stat--accent b {
+            color: #8a4a06;
+          }
+
+          /* 減少動態：直接切到定位，不做補間 */
+          @media (prefers-reduced-motion: reduce) {
+            .mk__conds,
+            .mk__flow,
+            .mk__card,
+            .mk__result {
+              transition-duration: 0.01ms !important;
+              transition-delay: 0ms !important;
+            }
+          }
+        </style>
+
+        <!-- 這一頁只有 CSS 顯示狀態：步驟數仍要告訴播放器，所以只設 steps（不需要 init） -->
+        <script>
+          window.SlideAnim = { steps: 6 };
+        </script>
+      </section>
+
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 02</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 播放器 → 頁內 step 播放器 -->
+    <script src="deck.js"></script>
+    <script src="anim.js"></script>
+  </body>
+</html>

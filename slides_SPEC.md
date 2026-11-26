@@ -487,7 +487,10 @@ var STORY = {
    附錄用 `appendixN.html` 命名，設定 `label: "附錄 N"`、`short: "AN"`（例如附錄 1 是
    `{ file: "appendix1.html", label: "附錄 1", short: "A1", … }`；章節鈕顯示 `short`，不會出現 `CH.N`）。
    目前：`appendix1.html`＝附錄 1 程式實作 Demo（內嵌 `code/index.html`），
-   `appendix2.html`＝附錄 2 程式實作介紹。`CHAPTERS` 的 key 只決定頁碼順序（附錄放最後）。
+   `appendix2.html`＝附錄 2 程式實作介紹（技術選擇／架構／介面規格／分工／AI 協作），
+   `appendix3.html`＝附錄 3 簡報製作介紹（這份簡報本身怎麼用 AI Coding 做出來，
+   含一頁 6 步的頁內 step 示範）。
+   `CHAPTERS` 的 key 只決定頁碼順序（附錄放最後）。
 6. **不要**改 `style.css`、`deck.js`、`anim.js`、`index.html` 的其他部分。
 
 ---
