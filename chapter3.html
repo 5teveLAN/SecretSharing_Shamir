@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>第 3 章 · 為什麼需要 Galois Field</title>
+    <!-- 視覺樣式在 style.css、播放器在 deck.js：其他章節沿用同一組檔案即可維持一致風格 -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 3 章 為什麼需要 Galois Field">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">為什麼需要 Galois Field？</h1>
+          <p class="lede rise">
+            「用一次函數、二次函數畫圖找交點」很直覺，<br />
+            但若只用普通整數，計算會膨脹、除法會失真 —— 兩個具體的失敗場景。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">CH. 03</span>
+            <span>我的筆記</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">03</div>
+      </section>
+
+      <!-- 2 ─ 問題一：數值膨脹 ============================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="問題一：數值膨脹">
+        <header class="slide__head">
+          <p class="eyebrow rise">3-1 · 問題一</p>
+          <h2 class="h2 rise">普通整數會「無限膨脹」</h2>
+          <p class="lede rise">
+            門檻 <span class="math">r</span> 越高，多項式次數越高；
+            在普通整數裡，<span class="math">x<sup>r−1</sup></span> 很快就變成天文數字。
+          </p>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <table class="grow">
+              <caption class="grow__cap">係數全取 255、x 取最大 share 編號 255（f(255)）</caption>
+              <thead class="grow__head">
+                <tr>
+                  <th class="grow__th" scope="col">門檻 r</th>
+                  <th class="grow__th" scope="col">次數</th>
+                  <th class="grow__th" scope="col">普通整數的值</th>
+                  <th class="grow__th" scope="col">GF(2<sup>8</sup>) 的值</th>
+                </tr>
+              </thead>
+              <tbody class="grow__body">
+                <tr class="grow__row"><td class="grow__td">2</td><td class="grow__td">1</td><td class="grow__td">65,280（5 位）</td><td class="grow__td grow__gf">0–255</td></tr>
+                <tr class="grow__row"><td class="grow__td">3</td><td class="grow__td">2</td><td class="grow__td">16,646,655（約 1.7 × 10<sup>7</sup>）</td><td class="grow__td grow__gf">0–255</td></tr>
+                <tr class="grow__row"><td class="grow__td">8</td><td class="grow__td">7</td><td class="grow__td">≈ 1.8 × 10<sup>19</sup></td><td class="grow__td grow__gf">0–255</td></tr>
+                <tr class="grow__row grow__row--last"><td class="grow__td">20</td><td class="grow__td">19</td><td class="grow__td">≈ 1.4 × 10<sup>48</sup></td><td class="grow__td grow__gf">0–255</td></tr>
+              </tbody>
+            </table>
+
+            <p class="callout rise">
+              <strong>GF 的解法：把結果鎖在集合內</strong><br />
+              每個運算都 <span class="math">mod p</span>（或模 <span class="math">P(x)</span>），
+              值永遠在 <span class="math">0 … p−1</span>；在
+              <span class="math">GF(2<sup>8</sup>)</span> 裡永遠 ≤ 255，剛好一個位元組。
+            </p>
+          </div>
+
+          <figure class="figure rise">
+            <svg
+              class="diagram grow-fig"
+              viewBox="0 0 400 300"
+              role="img"
+              aria-label="比較圖：普通整數的數值隨門檻急速上升，GF(2^8) 的數值維持在 255 以下"
+            >
+              <defs>
+                <clipPath id="grow3clip">
+                  <rect x="52" y="20" width="320" height="228" />
+                </clipPath>
+              </defs>
+              <path class="axis" d="M52 248H372" />
+              <path class="axis" d="M364 242l8 6-8 6" />
+              <path class="axis" d="M52 262V26" />
+              <path class="axis" d="M46 34l6-8 6 8" />
+              <text x="378" y="260">r</text>
+              <text x="34" y="30">值</text>
+
+              <!-- 上限線：GF(2^8) 的 255 -->
+              <line class="grow-fig__cap" x1="52" y1="236" x2="372" y2="236" />
+              <text class="grow-fig__caplabel" x="372" y="230" text-anchor="end">255（GF 上限）</text>
+
+              <!-- 普通整數：指數成長（示意，裁在繪圖框內） -->
+              <path class="grow-fig__int" clip-path="url(#grow3clip)" d="M60 236C140 234 200 210 260 150C300 108 330 60 352 18" />
+              <text class="grow-fig__intlabel" x="262" y="96">普通整數</text>
+
+              <!-- GF(2^8)：永遠在 255 以下 -->
+              <path class="grow-fig__gf" d="M60 236L352 232" />
+              <text class="grow-fig__gflabel" x="200" y="252">GF(2⁸) 永遠 ≤ 255</text>
+            </svg>
+            <figcaption>同樣的門檻，一個會爆掉、一個安穩地留在一個位元組裡</figcaption>
+          </figure>
+        </div>
+        <!-- 這一頁的表格與圖樣式：樣式只作用於自己所屬的 shadow root，
+             所以每一頁用到的規則都要在該頁內再寫一次（合併時才不會掉）。 -->
+        <!-- 本章沒有頁內 step，樣式寫在這一頁（第一張有表格的頁）裡面；
+             合併時 anim.js 會把樣式搬進 shadow root，而以元素名稱開頭的選擇器
+             （th、td、thead th …）在 shadow root 內會讓整份規則表失效，
+             所以一律從 .class 開始寫。 -->
+        <style>
+          .grow {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            font-size: 14.5px;
+            color: var(--ink-700);
+          }
+
+          .grow__cap {
+            padding: 0 0 8px;
+            text-align: left;
+            caption-side: top;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--ink-300);
+          }
+
+          .grow__th,
+          .grow__td {
+            padding: 9px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            line-height: 1.5;
+          }
+
+          .grow__th {
+            background: var(--paper-dim);
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--ink-300);
+          }
+
+          /* 數值欄用等寬字對齊；第一欄是名稱，回到正文字體 */
+          .grow__td {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+          }
+
+          .grow__td--on {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            color: var(--ink-900);
+          }
+
+          .grow__row--last .grow__td {
+            border-bottom: 0;
+          }
+
+          .grow__row--on .grow__td {
+            background: var(--accent-soft);
+          }
+
+          /* 第三欄的「是 / 否」是結論，粗體比較好讀 */
+          .grow--matrix .grow__td:last-child {
+            font-weight: 700;
+          }
+
+          .grow__bad {
+            color: var(--ink-300);
+          }
+
+          .grow__ok,
+          .grow__gf {
+            font-weight: 700;
+            color: var(--ok);
+          }
+
+          /* ── 3-1：成長示意圖 ───────────────────────────────────────────── */
+          .grow-fig__cap {
+            stroke: var(--line-2);
+            stroke-width: 1.4;
+            stroke-dasharray: 6 5;
+          }
+
+          .grow-fig__caplabel {
+            fill: var(--ink-300);
+            font-family: var(--font-mono);
+            font-size: 12px;
+          }
+
+          .grow-fig__int {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+          }
+
+          .grow-fig__intlabel {
+            fill: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .grow-fig__gf {
+            fill: none;
+            stroke: var(--ok);
+            stroke-width: 3;
+            stroke-linecap: round;
+          }
+
+          .grow-fig__gflabel {
+            fill: var(--ok);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          /* ── 3-3：三種集合的比較牌 ─────────────────────────────────────── */
+          .ring-fig__box {
+            fill: var(--paper-dim);
+            stroke: var(--line-2);
+            stroke-width: 1.4;
+          }
+
+          .ring-fig__box--on {
+            fill: var(--ok-soft);
+            stroke: var(--ok);
+            stroke-width: 1.8;
+          }
+
+          .ring-fig__title {
+            fill: var(--ink-700);
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 700;
+          }
+
+          .ring-fig__title--on {
+            fill: var(--ink-900);
+          }
+
+          .ring-fig__line {
+            fill: var(--ink-300);
+            font-family: var(--font-sans);
+            font-size: 12.5px;
+          }
+
+          .ring-fig__line--on {
+            fill: var(--ink-700);
+          }
+        </style>
+
+      </section>
+
+
+
+      <!-- 3 ─ 問題二：除法 ================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="問題二：除法與倒數">
+        <header class="slide__head">
+          <p class="eyebrow rise">3-2 · 問題二</p>
+          <h2 class="h2 rise">還原要靠除法，普通整數做不到</h2>
+          <p class="lede rise">
+            拉格朗日插值（第 5 章）的公式裡滿是除法；問題不在「除不盡」，
+            而在「除完之後，還原回來的 <span class="math">a<sub>0</sub></span> 不再是原本那個整數」。
+          </p>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack stack--tight">
+            <div class="formula rise">
+              <span class="formula__label">拉格朗日</span>
+              <span class="math">
+                <i>f</i>(0) = Σ <i>y<sub>i</sub></i> ·
+                Π<sub><i>j</i> ≠ <i>i</i></sub>
+                <i>x<sub>j</sub></i> / (<i>x<sub>i</sub></i> − <i>x<sub>j</sub></i>)
+              </span>
+            </div>
+
+            <table class="grow grow--div">
+              <thead class="grow__head">
+                <tr>
+                  <th class="grow__th" scope="col">算法</th>
+                  <th class="grow__th" scope="col">除法</th>
+                  <th class="grow__th" scope="col">算 4 ÷ 3 會得到</th>
+                </tr>
+              </thead>
+              <tbody class="grow__body">
+                <tr class="grow__row">
+                  <td class="grow__td">實數</td>
+                  <td class="grow__td">可以，但除不盡</td>
+                  <td class="grow__td grow__bad">1.333…（不是整數）</td>
+                </tr>
+                <tr class="grow__row">
+                  <td class="grow__td">浮點數</td>
+                  <td class="grow__td">近似</td>
+                  <td class="grow__td grow__bad">1.3333…（有捨入誤差）</td>
+                </tr>
+                <tr class="grow__row">
+                  <td class="grow__td">整數 ℤ</td>
+                  <td class="grow__td grow__bad">無定義</td>
+                  <td class="grow__td grow__bad">3 沒有乘法反元素</td>
+                </tr>
+                <tr class="grow__row grow__row--last">
+                  <td class="grow__td">GF(2<sup>8</sup>)</td>
+                  <td class="grow__td grow__gf">乘倒數</td>
+                  <td class="grow__td grow__gf">唯一答案，且仍是 0–255</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p class="callout callout--secret rise">
+              <strong>浮點數的坑</strong><br />
+              該是 <span class="math">3</span> 的 <span class="math">a<sub>0</sub></span>
+              可能算成 <span class="math">2.9999999</span>；像素值差 1，整張圖就走鐘。
+            </p>
+          </div>
+
+          <div class="stack">
+            <p class="callout rise">
+              <strong>GF 的解法：每個非零元素都有倒數</strong><br />
+              對所有 <span class="math"><i>a</i> ≠ 0</span>，存在唯一的
+              <span class="math"><i>a</i><sup>−1</sup></span> 使
+              <span class="math"><i>a</i> · <i>a</i><sup>−1</sup> = 1</span>；
+              除法就是 <span class="math"><i>a</i> / <i>b</i> = <i>a</i> · <i>b</i><sup>−1</sup></span>，
+              沒有小數點誤差。
+            </p>
+
+            <ul class="chips rise">
+              <li class="chip chip--brand">除以 b → 乘以 b⁻¹</li>
+              <li class="chip">查表 O(1)</li>
+              <li class="chip">結果仍在 0–255</li>
+            </ul>
+
+            <p class="callout callout--quiet rise">
+              <strong>順手更正筆記</strong><br />
+              「有倒數」只是<strong>體（field）</strong>的定義性質；GF 真正不可取代的是
+              「<strong>有限</strong>」。另外，實數的除法並非「除不盡」才算失敗 ——
+              真正壞掉的是<strong>結果不是整數</strong>。
+            </p>
+          </div>
+        </div>
+        <!-- 這一頁的表格與圖樣式：樣式只作用於自己所屬的 shadow root，
+             所以每一頁用到的規則都要在該頁內再寫一次（合併時才不會掉）。 -->
+        <!-- 本章沒有頁內 step，樣式寫在這一頁（第一張有表格的頁）裡面；
+             合併時 anim.js 會把樣式搬進 shadow root，而以元素名稱開頭的選擇器
+             （th、td、thead th …）在 shadow root 內會讓整份規則表失效，
+             所以一律從 .class 開始寫。 -->
+        <style>
+          .grow {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            font-size: 14.5px;
+            color: var(--ink-700);
+          }
+
+          .grow__cap {
+            padding: 0 0 8px;
+            text-align: left;
+            caption-side: top;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--ink-300);
+          }
+
+          .grow__th,
+          .grow__td {
+            padding: 9px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            line-height: 1.5;
+          }
+
+          .grow__th {
+            background: var(--paper-dim);
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--ink-300);
+          }
+
+          /* 數值欄用等寬字對齊；第一欄是名稱，回到正文字體 */
+          .grow__td {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+          }
+
+          .grow__td--on {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            color: var(--ink-900);
+          }
+
+          .grow__row--last .grow__td {
+            border-bottom: 0;
+          }
+
+          .grow__row--on .grow__td {
+            background: var(--accent-soft);
+          }
+
+          /* 第三欄的「是 / 否」是結論，粗體比較好讀 */
+          .grow--matrix .grow__td:last-child {
+            font-weight: 700;
+          }
+
+          .grow__bad {
+            color: var(--ink-300);
+          }
+
+          .grow__ok,
+          .grow__gf {
+            font-weight: 700;
+            color: var(--ok);
+          }
+
+          /* ── 3-1：成長示意圖 ───────────────────────────────────────────── */
+          .grow-fig__cap {
+            stroke: var(--line-2);
+            stroke-width: 1.4;
+            stroke-dasharray: 6 5;
+          }
+
+          .grow-fig__caplabel {
+            fill: var(--ink-300);
+            font-family: var(--font-mono);
+            font-size: 12px;
+          }
+
+          .grow-fig__int {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+          }
+
+          .grow-fig__intlabel {
+            fill: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .grow-fig__gf {
+            fill: none;
+            stroke: var(--ok);
+            stroke-width: 3;
+            stroke-linecap: round;
+          }
+
+          .grow-fig__gflabel {
+            fill: var(--ok);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          /* ── 3-3：三種集合的比較牌 ─────────────────────────────────────── */
+          .ring-fig__box {
+            fill: var(--paper-dim);
+            stroke: var(--line-2);
+            stroke-width: 1.4;
+          }
+
+          .ring-fig__box--on {
+            fill: var(--ok-soft);
+            stroke: var(--ok);
+            stroke-width: 1.8;
+          }
+
+          .ring-fig__title {
+            fill: var(--ink-700);
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 700;
+          }
+
+          .ring-fig__title--on {
+            fill: var(--ink-900);
+          }
+
+          .ring-fig__line {
+            fill: var(--ink-300);
+            font-family: var(--font-sans);
+            font-size: 12.5px;
+          }
+
+          .ring-fig__line--on {
+            fill: var(--ink-700);
+          }
+        </style>
+      </section>
+
+
+      <!-- 4 ─ 有限 + 體 ==================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="有限加上體才是關鍵">
+        <header class="slide__head">
+          <p class="eyebrow rise">3-3 · 關鍵</p>
+          <h2 class="h2 rise">「有限」加上「體」，兩個都要</h2>
+          <p class="lede rise">
+            前兩頁各修掉一個問題；要同時滿足「值有界」與「除法可行」，
+            數學上就需要 <strong>有限體</strong>。
+          </p>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack stack--tight">
+            <table class="grow grow--matrix">
+              <thead class="grow__head">
+                <tr>
+                  <th class="grow__th" scope="col">結構</th>
+                  <th class="grow__th" scope="col">有限？</th>
+                  <th class="grow__th" scope="col">每個非零元素有倒數？</th>
+                </tr>
+              </thead>
+              <tbody class="grow__body">
+                <tr class="grow__row">
+                  <td class="grow__td">整數 ℤ</td>
+                  <td class="grow__td grow__bad">否（無限）</td>
+                  <td class="grow__td grow__bad">否（2 沒有 1/2）</td>
+                </tr>
+                <tr class="grow__row">
+                  <td class="grow__td">實數 ℝ</td>
+                  <td class="grow__td grow__bad">否（無限）</td>
+                  <td class="grow__td grow__ok">是</td>
+                </tr>
+                <tr class="grow__row">
+                  <td class="grow__td">8-bit 整數（mod 256）</td>
+                  <td class="grow__td grow__ok">是</td>
+                  <td class="grow__td grow__bad">否（偶數沒有倒數）</td>
+                </tr>
+                <tr class="grow__row grow__row--last grow__row--on">
+                  <td class="grow__td grow__td--on">GF(2<sup>8</sup>)</td>
+                  <td class="grow__td grow__ok">是（256 個）</td>
+                  <td class="grow__td grow__ok">是</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p class="callout callout--quiet rise">
+              <strong>為什麼 8-bit 整數不行？</strong><br />
+              模 256 只是「<strong>環</strong>」：<span class="math">2 × 128 = 0</span>，
+              偶數乘什麼都回不到 1 —— 除法在那裡直接壞掉。
+            </p>
+
+            <p class="small muted rise">
+              所以 256 個元素的體不能「取模 256」，必須換成以多項式模
+              <span class="math math--sm">P(x)</span> 定義的
+              <span class="math math--sm">GF(2<sup>8</sup>)</span> —— 第 4 章。
+            </p>
+          </div>
+
+          <figure class="figure rise">
+            <svg
+              class="diagram ring-fig"
+              viewBox="0 0 400 300"
+              role="img"
+              aria-label="三個集合的比較：整數、模 256、GF(2^8)；只有 GF(2^8) 同時有界又有倒數"
+            >
+              <rect class="ring-fig__box" x="26" y="24" width="348" height="70" rx="14" />
+              <text class="ring-fig__title" x="46" y="52">整數 ℤ</text>
+              <text class="ring-fig__line" x="46" y="76">沒有上限、除法不一定整除</text>
+
+              <rect class="ring-fig__box" x="26" y="110" width="348" height="70" rx="14" />
+              <text class="ring-fig__title" x="46" y="138">8-bit 整數（mod 256）</text>
+              <text class="ring-fig__line" x="46" y="162">有界，但 2 沒有倒數 → 只是環</text>
+
+              <rect class="ring-fig__box ring-fig__box--on" x="26" y="196" width="348" height="70" rx="14" />
+              <text class="ring-fig__title ring-fig__title--on" x="46" y="224">GF(2⁸)</text>
+              <text class="ring-fig__line ring-fig__line--on" x="46" y="248">0–255 有界，且每個非零元素都有倒數</text>
+            </svg>
+            <figcaption>有限 ＋ 體：兩個條件同時成立，才是能安心做除法的地方</figcaption>
+          </figure>
+        </div>
+        <!-- 這一頁的表格與圖樣式：樣式只作用於自己所屬的 shadow root，
+             所以每一頁用到的規則都要在該頁內再寫一次（合併時才不會掉）。 -->
+        <!-- 本章沒有頁內 step，樣式寫在這一頁（第一張有表格的頁）裡面；
+             合併時 anim.js 會把樣式搬進 shadow root，而以元素名稱開頭的選擇器
+             （th、td、thead th …）在 shadow root 內會讓整份規則表失效，
+             所以一律從 .class 開始寫。 -->
+        <style>
+          .grow {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            font-size: 14.5px;
+            color: var(--ink-700);
+          }
+
+          .grow__cap {
+            padding: 0 0 8px;
+            text-align: left;
+            caption-side: top;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--ink-300);
+          }
+
+          .grow__th,
+          .grow__td {
+            padding: 9px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            line-height: 1.5;
+          }
+
+          .grow__th {
+            background: var(--paper-dim);
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--ink-300);
+          }
+
+          /* 數值欄用等寬字對齊；第一欄是名稱，回到正文字體 */
+          .grow__td {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+          }
+
+          .grow__td--on {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            color: var(--ink-900);
+          }
+
+          .grow__row--last .grow__td {
+            border-bottom: 0;
+          }
+
+          .grow__row--on .grow__td {
+            background: var(--accent-soft);
+          }
+
+          /* 第三欄的「是 / 否」是結論，粗體比較好讀 */
+          .grow--matrix .grow__td:last-child {
+            font-weight: 700;
+          }
+
+          .grow__bad {
+            color: var(--ink-300);
+          }
+
+          .grow__ok,
+          .grow__gf {
+            font-weight: 700;
+            color: var(--ok);
+          }
+
+          /* ── 3-1：成長示意圖 ───────────────────────────────────────────── */
+          .grow-fig__cap {
+            stroke: var(--line-2);
+            stroke-width: 1.4;
+            stroke-dasharray: 6 5;
+          }
+
+          .grow-fig__caplabel {
+            fill: var(--ink-300);
+            font-family: var(--font-mono);
+            font-size: 12px;
+          }
+
+          .grow-fig__int {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+          }
+
+          .grow-fig__intlabel {
+            fill: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .grow-fig__gf {
+            fill: none;
+            stroke: var(--ok);
+            stroke-width: 3;
+            stroke-linecap: round;
+          }
+
+          .grow-fig__gflabel {
+            fill: var(--ok);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          /* ── 3-3：三種集合的比較牌 ─────────────────────────────────────── */
+          .ring-fig__box {
+            fill: var(--paper-dim);
+            stroke: var(--line-2);
+            stroke-width: 1.4;
+          }
+
+          .ring-fig__box--on {
+            fill: var(--ok-soft);
+            stroke: var(--ok);
+            stroke-width: 1.8;
+          }
+
+          .ring-fig__title {
+            fill: var(--ink-700);
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 700;
+          }
+
+          .ring-fig__title--on {
+            fill: var(--ink-900);
+          }
+
+          .ring-fig__line {
+            fill: var(--ink-300);
+            font-family: var(--font-sans);
+            font-size: 12.5px;
+          }
+
+          .ring-fig__line--on {
+            fill: var(--ink-700);
+          }
+        </style>
+      </section>
+
+      <!-- 5 ─ 本章小結 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="本章小結">
+        <header class="slide__head">
+          <p class="eyebrow rise">3-4 · 本章小結</p>
+          <h2 class="h2 rise">Galois Field 同時解決兩件事</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="cards">
+            <article class="card rise">
+              <p class="card__index">01</p>
+              <h3 class="card__title">計算不膨脹</h3>
+              <p class="card__text">
+                所有運算都 mod <span class="math math--sm">p</span>（或 mod
+                <span class="math math--sm">P(x)</span>），值永遠留在集合內；
+                <span class="math math--sm">GF(2<sup>8</sup>)</span> 剛好對應一個位元組。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02</p>
+              <h3 class="card__title">還原不失真</h3>
+              <p class="card__text">
+                每個非零元素都有倒數，除法就是乘倒數，沒有小數點誤差；
+                <span class="math math--sm">a<sub>0</sub></span> 一定精準回到原值。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03</p>
+              <h3 class="card__title">安全有依據</h3>
+              <p class="card__text">
+                有限個元素才能做「均勻隨機」的係數：少於 r 張時，
+                每個可能的 Secret 機率完全相同。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>下一章</strong>：<span class="math">GF(p)</span> 與
+            <span class="math">GF(2<sup>8</sup>)</span> 到底怎麼算 ——
+            XOR 加減法、本原多項式 <span class="math">0x11d</span>、LOG / EXP 查表。
+          </p>
+        </div>
+
+        <!-- 本章沒有頁內 step；表格 `.grow` 與兩張示意圖 `.grow-fig`、`.ring-fig` 的樣式
+             放在 section 內（寫在 section 外，合併 importNode 時會被丟掉）。
+             顏色只用 style.css 的 :root 變數。 -->
+
+      </section>
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 05</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 播放器（單獨開啟本章時自動初始化）→ 接著載入頁內 step 播放器 -->
+    <script src="deck.js"></script>
+    <script src="anim.js"></script>
+  </body>
+</html>
+

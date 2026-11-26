@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>第 2 章 · Shamir 多項式的嚴謹定義</title>
+    <!-- 視覺樣式在 style.css、播放器在 deck.js：其他章節沿用同一組檔案即可維持一致風格 -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 2 章 Shamir 多項式的嚴謹定義">
+      <!-- 1 ─ 封面 ========================================================= -->
+      <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
+        <div class="cover">
+          <p class="eyebrow rise">機密分享 · 期末報告</p>
+          <h1 class="h1 rise">Shamir 多項式的嚴謹定義</h1>
+          <p class="lede rise">
+            把「點與多項式」的直覺寫成公式：<br />
+            Secret 放 <span class="math">a<sub>0</sub></span>、其餘係數在 Galois Field 裡隨機，
+            湊滿 <span class="math">r</span> 個點才解得開。
+          </p>
+          <div class="cover__meta rise">
+            <span class="tag tag--dark">CH. 02</span>
+            <span>我的筆記</span>
+            <span class="dot-sep"></span>
+            <span>2026. 11</span>
+          </div>
+        </div>
+        <div class="cover__ghost" aria-hidden="true">02</div>
+      </section>
+
+      <!-- 2 ─ GF(p) 上的多項式定義 ========================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="GF(p) 上的多項式定義">
+        <header class="slide__head">
+          <p class="eyebrow rise">2-1 · 定義</p>
+          <h2 class="h2 rise">整條多項式，都住在 GF(p) 裡</h2>
+          <p class="lede rise">
+            令 <span class="math">K = GF(p)</span>，即集合 <span class="math">{0, 1, …, p−1}</span>；
+            加減乘除一律在 <span class="math">K</span> 內完成，結果不會跑出集合外。
+          </p>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="formula formula--hero rise">
+            <span class="formula__label">r − 1 次多項式</span>
+            <span class="math math--xl">
+              <i>f</i>(<i>x</i>) =
+              <span class="term-secret"><i>a</i><sub>0</sub></span>
+              + <i>a</i><sub>1</sub><i>x</i>
+              + <i>a</i><sub>2</sub><i>x</i><sup>2</sup>
+              + ⋯ +
+              <i>a</i><sub><i>r</i>−1</sub><i>x</i><sup><i>r</i>−1</sup>
+              <span class="formula__label">(mod <i>p</i>)</span>
+            </span>
+          </div>
+
+          <div class="cards">
+            <article class="card rise">
+              <p class="card__index">01 · 常數項</p>
+              <h3 class="card__title">
+                <span class="math"><i>a</i><sub>0</sub></span> = 機密 <span class="math">D</span>
+              </h3>
+              <p class="card__text">
+                欲分享的機密直接放常數項：<span class="math"><i>D</i> ∈ K</span>。
+                還原多項式時要求的就是 <span class="math"><i>f</i>(0)</span>。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02 · 其餘係數</p>
+              <h3 class="card__title">亂數產生</h3>
+              <p class="card__text">
+                <span class="math"><i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, …,
+                <i>a</i><sub><i>r</i>−2</sub> ∈ K</span> 均可為 0；
+                「每個可能的 Secret 都一樣可能」就是這裡來的。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03 · 最高次項</p>
+              <h3 class="card__title">
+                <span class="math"><i>a</i><sub><i>r</i>−1</sub> ∈ K − {0}</span>
+              </h3>
+              <p class="card__text">
+                最高次係數不能是 0，否則次數掉下來、門檻就不到
+                <span class="math">r</span> 了。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>為什麼是 <span class="math">r − 1</span> 次？</strong>
+            <span class="math">r − 1</span> 次多項式有 <span class="math">r</span> 個未知係數，
+            需要 <span class="math">r</span> 個點才能唯一解出 —— 這就是 (r, n) 的門檻。
+          </p>
+        </div>
+      </section>
+
+      <!-- 3 ─ 係數條件與 r vs n ============================================ -->
+      <section class="slide" aria-roledescription="slide" aria-label="係數條件與 r、n 的差別">
+        <header class="slide__head">
+          <p class="eyebrow rise">2-2 · 條件</p>
+          <h2 class="h2 rise">r 是門檻，n 是張數 —— 別寫錯</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <table class="coef">
+              <caption class="coef__cap">係數的取值範圍（以 r = 3 為例）</caption>
+              <thead class="coef__head">
+                <tr>
+                  <th class="coef__th" scope="col">係數</th>
+                  <th class="coef__th" scope="col">角色</th>
+                  <th class="coef__th" scope="col">可為 0？</th>
+                </tr>
+              </thead>
+              <tbody class="coef__body">
+                <tr>
+                  <td class="coef__td coef__td--name coef__td--sec">
+                    <span class="math"><i>a</i><sub>0</sub></span>
+                  </td>
+                  <td class="coef__td coef__td--sec">機密 <span class="math">D</span></td>
+                  <td class="coef__td coef__td--sec">可以（D 本身可能是 0）</td>
+                </tr>
+                <tr>
+                  <td class="coef__td coef__td--name"><span class="math"><i>a</i><sub>1</sub></span></td>
+                  <td class="coef__td">亂數</td>
+                  <td class="coef__td">可以</td>
+                </tr>
+                <tr>
+                  <td class="coef__td coef__td--name coef__td--last">
+                    <span class="math"><i>a</i><sub>2</sub></span>
+                  </td>
+                  <td class="coef__td coef__td--last">最高次（r − 1 = 2）</td>
+                  <td class="coef__td coef__td--last"><span class="coef__no">不行</span> · ∈ K − {0}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p class="callout callout--secret rise">
+              <strong>論文有個筆誤</strong><br />
+              Shamir 的原始論文寫「<span class="math"><i>a</i><sub>n</sub> ≠ 0</span>」，
+              但最高次是 <span class="math">r − 1</span>，所以應該是
+              <span class="math"><i>a</i><sub>r−1</sub> ≠ 0</span>。
+            </p>
+
+            <ul class="chips rise">
+              <li class="chip chip--brand">r = 門檻（要幾個點）</li>
+              <li class="chip">n = 張數（發幾份）</li>
+              <li class="chip">1 ≤ r ≤ n ≤ p − 1</li>
+            </ul>
+          </div>
+
+          <figure class="figure rise">
+            <!-- 座標由 COEF = { pickX: [1..5], r: 3 } 推算後寫成靜態 SVG（不用 JS，合併時也一定畫得出來）：
+                 原點 (60, 250)；第 i 個點 x = 60 + 26 + 60i、y = 224 − 34i；
+                 前 r 個點（r = 3）框在虛線框內。改 r 或點數時，這裡的座標要一起更新。 -->
+            <svg
+              class="diagram coef-fig"
+              viewBox="0 0 400 300"
+              role="img"
+              aria-label="r 減 1 次多項式有 r 個未知係數；前 r 個點框在虛線框內，而邊界上的 f(0) 就是機密 D"
+            >
+              <path class="axis" d="M60 250H372" />
+              <path class="axis" d="M364 244l8 6-8 6" />
+              <path class="axis" d="M60 264V26" />
+              <path class="axis" d="M54 34l6-8 6 8" />
+              <text class="coef-fig__tick" x="378" y="262">x</text>
+              <text class="coef-fig__tick" x="42" y="30">y</text>
+              <text class="coef-fig__tick" x="52" y="270" text-anchor="end">0</text>
+
+              <!-- 曲線：經過這 r 個點的 r − 1 次多項式（示意） -->
+              <path class="coef-fig__curve" d="M86 224L146 190L206 156L266 122L326 88" />
+
+              <!-- 前 r = 3 個點：取得任 r 個就能還原 -->
+              <rect class="coef-fig__box" x="68" y="138" width="156" height="104" rx="12" />
+              <text class="coef-fig__note" x="68" y="128">取 r = 3 個點</text>
+
+              <circle class="dot dot--on" cx="86" cy="224" r="7" />
+              <circle class="dot dot--on" cx="146" cy="190" r="7" />
+              <circle class="dot dot--on" cx="206" cy="156" r="7" />
+              <circle class="dot" cx="266" cy="122" r="5" />
+              <circle class="dot" cx="326" cy="88" r="5" />
+
+              <text class="coef-fig__tick" x="86" y="268" text-anchor="middle">1</text>
+              <text class="coef-fig__tick" x="146" y="268" text-anchor="middle">2</text>
+              <text class="coef-fig__tick" x="206" y="268" text-anchor="middle">3</text>
+              <text class="coef-fig__tick" x="266" y="268" text-anchor="middle">4</text>
+              <text class="coef-fig__tick" x="326" y="268" text-anchor="middle">5</text>
+
+              <!-- x = 0（y 軸）上的點就是 f(0) = a0 = 機密 D -->
+              <circle class="coef-fig__secret" cx="60" cy="214" r="6.5" />
+              <text class="coef-fig__secretlabel" x="70" y="50" text-anchor="start">機密 f(0) = a₀ = D（在 x = 0 上）</text>
+            </svg>
+            <ul class="legend">
+              <li><span class="legend__dot"></span>取到的 r 個點</li>
+              <li><span class="legend__dot legend__dot--off"></span>曲線上的其他點</li>
+            </ul>
+            <figcaption>r 個點 → 唯一一條 r − 1 次多項式</figcaption>
+          </figure>
+        </div>
+        <!-- 這一頁自己的樣式：`.coef` 表格與 `.coef-fig` 圖。
+             寫在 section 內才不會在合併（index.html importNode）時掉；
+             另外，anim.js 會把樣式連進 shadow root，而以元素名稱開頭的選擇器
+             （例如 th、td、thead th）在 shadow root 內會讓整份規則表失效，
+             所以一律從「.class」開始寫。 -->
+        <style>
+          .coef {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            font-size: 15px;
+            color: var(--ink-700);
+          }
+
+          .coef__cap {
+            padding: 0 0 8px;
+            text-align: left;
+            caption-side: top;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--ink-300);
+          }
+
+          .coef__th,
+          .coef__td {
+            padding: 10px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+          }
+
+          .coef__th {
+            background: var(--paper-dim);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--ink-300);
+          }
+
+          /* 表格內所有儲存格都用等寬字對齊數字；第一欄（係數名稱）改數學字體 */
+          .coef__td,
+          .coef__cell {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+          }
+
+          .coef__td--name {
+            font-family: var(--font-serif);
+            font-size: 17px;
+          }
+
+          .coef__td--sec {
+            background: var(--accent-soft);
+          }
+
+          .coef__td--last {
+            border-bottom: 0;
+          }
+
+          .coef__no {
+            font-weight: 700;
+            color: var(--accent);
+          }
+
+          /* ── 圖：曲線、r 個點的框、刻度與機密點 f(0) = a0 ─────────────── */
+          .coef-fig__curve {
+            fill: none;
+            stroke: var(--brand);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          .coef-fig__box {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 1.4;
+            stroke-dasharray: 5 5;
+            opacity: 0.55;
+          }
+
+          .coef-fig__note {
+            fill: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            font-weight: 700;
+          }
+
+          .coef-fig__tick {
+            fill: var(--ink-300);
+            font-family: var(--font-mono);
+            font-size: 12px;
+          }
+
+          .coef-fig__secret {
+            fill: var(--accent);
+            stroke: var(--paper);
+            stroke-width: 2.5;
+          }
+
+          .coef-fig__secretlabel {
+            fill: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            font-weight: 700;
+          }
+        </style>
+      </section>
+
+      <!-- 4 ─ 數值例子 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="數值例子">
+        <header class="slide__head">
+          <p class="eyebrow rise">2-3 · 例子</p>
+          <h2 class="h2 rise">小到可以手算的 (3, 5) 分享</h2>
+          <p class="lede rise">
+            Secret = <span class="math">123</span>，先在普通整數上示範；實作時改用
+            <span class="math">GF(2<sup>8</sup>)</span>（第 4 章），避免數值膨脹。
+          </p>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="formula rise">
+            <span class="formula__label">r = 3、n = 5</span>
+            <span class="math">
+              <i>f</i>(<i>x</i>) =
+              <span class="term-secret">123</span> + 99<i>x</i> + 202<i>x</i><sup>2</sup>
+            </span>
+            <span class="formula__label">a<sub>1</sub>、a<sub>2</sub> 是亂數</span>
+          </div>
+
+          <div class="grid-2 grid-2--even">
+            <div class="stack stack--tight">
+              <p class="small muted">代入 x = 1 … 5，得到 5 張 share：</p>
+              <table class="coef">
+                <thead class="coef__head">
+                  <tr>
+                    <th class="coef__th" scope="col">x</th>
+                    <th class="coef__th" scope="col">f(x)</th>
+                    <th class="coef__th" scope="col">Share</th>
+                  </tr>
+                </thead>
+                <tbody class="coef__body">
+                  <tr><td class="coef__td">1</td><td class="coef__td">424</td><td class="coef__td">第 1 張</td></tr>
+                  <tr><td class="coef__td">2</td><td class="coef__td">1,129</td><td class="coef__td">第 2 張</td></tr>
+                  <tr><td class="coef__td">3</td><td class="coef__td">2,238</td><td class="coef__td">第 3 張</td></tr>
+                  <tr><td class="coef__td">4</td><td class="coef__td">3,751</td><td class="coef__td">第 4 張</td></tr>
+                  <tr>
+                    <td class="coef__td coef__td--last">5</td>
+                    <td class="coef__td coef__td--last">5,668</td>
+                    <td class="coef__td coef__td--last">第 5 張</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="stack">
+              <p class="callout callout--ok rise">
+                <strong>拿任意 3 張回來</strong><br />
+                3 個點 → 解 3 個未知數 → 得到 <span class="math">f</span> →
+                <span class="math"><i>f</i>(0) = 123</span>。
+              </p>
+              <p class="callout callout--secret rise">
+                <strong>只拿 2 張：無限多條線</strong><br />
+                兩個點只定出一條直線（1 次），原題是 2 次 →
+                還有 <span class="math">p</span> 種可能的 <span class="math">a<sub>0</sub></span>，猜不出來。
+              </p>
+              <p class="small muted rise">
+                注意最大的 <span class="math math--sm">f(x) = 5,668</span>：還沒取模就已是 Secret 的
+                46 倍 —— 這就是第 3 章要接手的問題。
+              </p>
+
+        <!-- 這一頁也用 `.coef` 表格；樣式只作用於自己所屬的 shadow root，
+             所以同樣的規則要在這一頁再寫一次（動畫與樣式都跟著投影片走）。 -->
+        <!-- 這一頁自己的樣式：`.coef` 表格。
+             寫在 section 內才不會在合併（index.html importNode）時掉；
+             另外，anim.js 會把樣式連進 shadow root，而以元素名稱開頭的選擇器
+             （例如 th、td、thead th）在 shadow root 內會讓整份規則表失效，
+             所以一律從「.class」開始寫。 -->
+        <style>
+          .coef {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            font-size: 15px;
+            color: var(--ink-700);
+          }
+
+          .coef__cap {
+            padding: 0 0 8px;
+            text-align: left;
+            caption-side: top;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--ink-300);
+          }
+
+          .coef__th,
+          .coef__td {
+            padding: 10px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+          }
+
+          .coef__th {
+            background: var(--paper-dim);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--ink-300);
+          }
+
+          /* 表格內所有儲存格都用等寬字對齊數字；第一欄（係數名稱）改數學字體 */
+          .coef__td,
+          .coef__cell {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+          }
+
+          .coef__td--name {
+            font-family: var(--font-serif);
+            font-size: 17px;
+          }
+
+          .coef__td--sec {
+            background: var(--accent-soft);
+          }
+
+          .coef__td--last {
+            border-bottom: 0;
+          }
+
+          .coef__no {
+            font-weight: 700;
+            color: var(--accent);
+          }
+        </style>
+            </div>
+          </div>
+        </div>
+
+
+
+
+      </section>
+
+      <!-- 5 ─ 本章小結 ===================================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="本章小結">
+        <header class="slide__head">
+          <p class="eyebrow rise">2-4 · 本章小結</p>
+          <h2 class="h2 rise">定義清楚之後，問題也跟著清楚</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="cards">
+            <article class="card rise">
+              <p class="card__index">01</p>
+              <h3 class="card__title">係數的角色固定</h3>
+              <p class="card__text">
+                <span class="math math--sm">a<sub>0</sub></span> 放機密、
+                <span class="math math--sm">a<sub>1</sub> … a<sub>r−2</sub></span> 亂數、
+                <span class="math math--sm">a<sub>r−1</sub> ≠ 0</span> 保住次數。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02</p>
+              <h3 class="card__title">次數就是門檻</h3>
+              <p class="card__text">
+                r 個未知係數需要 r 個點；少給一個，解就不唯一。
+              </p>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03</p>
+              <h3 class="card__title">運算要在有限體裡</h3>
+              <p class="card__text">
+                式子裡寫了 <span class="math math--sm">(mod p)</span>：係數與加減乘除都要留在
+                <span class="math math--sm">K</span> 內。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>下一章</strong>：如果不用 Galois Field，只用普通整數會壞在哪裡？
+            —— 兩個具體的失敗場景。
+          </p>
+
+        </div>
+
+
+      </section>
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 05</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 播放器（單獨開啟本章時自動初始化）→ 接著載入頁內 step 播放器 -->
+    <script src="deck.js"></script>
+    <script src="anim.js"></script>
+  </body>
+</html>
+
+
+
