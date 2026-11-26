@@ -370,7 +370,13 @@
     if (raw) delete global.SlideAnim;
     var steps = raw ? Number(raw.steps) : 1;
     if (!isFinite(steps) || steps < 1) steps = 1;
-    return { source: raw, steps: Math.floor(steps), dead: !raw };
+    // ready：沒有 step（steps < 2）的靜態頁要不要執行 init。
+    // 省略或 1＝不執行（原本行為：靜態頁的 init 不會被呼叫）；
+    // 0＝建立控制器時就執行：頁面若能上桌就不能不處理自己的內容
+    // （例如封面目錄列一合併進來就要變成可點擊的連結）。
+    var ready = raw && raw.ready !== undefined ? Number(raw.ready) : 1;
+    if (!isFinite(ready) || ready < 0) ready = 1;
+    return { source: raw, steps: Math.floor(steps), dead: !raw, ready: ready === 0 };
   }
 
   function setStep(host, step) {
@@ -418,7 +424,9 @@
 
     function runInit() {
       var config = scope.config;
-      if (!config || config.dead || config.steps < 2) return;
+      if (!config || config.dead) return;
+      // 沒有 step 的靜態頁原本不跑 init；只有 ready: 0 的頁面例外
+      if (config.steps < 2 && !config.ready) return;
       try {
         var ret = typeof config.source.init === "function" ? config.source.init(root, host) : null;
         if (ret && typeof ret.dispose === "function") scope.stack.push(ret.dispose);
@@ -524,7 +532,7 @@
     scope.config = readConfig(host);
     api.config = scope.config; // 給 SlideSteps.isStatic()／除錯用
     setStep(host, 0);
-    runInit();
+    runInit(); // 建立控制器時執行 init（ready: 0 的頁面見 readConfig）
     syncCounts();
     bindPlay(root, api);
     bindSwipe(root, api);
