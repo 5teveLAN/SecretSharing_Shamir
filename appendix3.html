@@ -99,7 +99,7 @@
             </div>
 
             <div class="mk__result">
-              <span class="mk__stat"><b>~1000</b>行 code</span>
+              <span class="mk__stat"><b>~1000</b>多行 code</span>
               <span class="mk__stat"><b>0</b>個外部套件</span>
               <span class="mk__stat"><b>3</b>個人各自開發</span>
               <span class="mk__stat mk__stat--accent"><b>＋</b>程式直接嵌進簡報</span>
@@ -349,12 +349,279 @@
         </script>
       </section>
 
+      <!-- 3 ─ AI Coding 的優點與缺點（頁內 step，2 步）=========================
+           分鏡：
+             0  先亮「優點」卡（快、好看、可以有動畫，~1000 多行 code）
+             1  再亮「缺點」卡（10–20 分鐘、10w token、動畫更久、要打掉一半 code）
+                ＋ 解法：版本控制
+           卡片左右各一：左優點、右缺點；沒輪到的那張先淡掉，只切 opacity，
+           不動版面，所以換步時卡片不會跳。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="AI Coding 的優點與缺點">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 3-2 · 檢討</p>
+          <h2 class="h2 rise">AI Coding 好用，但改起來很慢</h2>
+        </header>
+
+        <div class="slide__body">
+          <div class="pc">
+            <article class="card pc__card pc__card--pro rise">
+              <p class="card__index">優點 · PROS</p>
+              <h3 class="card__title">先把東西生出來，再慢慢變好</h3>
+              <ul class="pc__list">
+                <li><b>快</b>：一章不用從零開始刻版面</li>
+                <li><b>好看</b>：配色、字體、留白都有基本水準</li>
+                <li><b>可以有動畫</b>：<span class="math">data-step</span> 一頁一頁講</li>
+              </ul>
+              <p class="pc__foot">
+                成品約 <b>1000 多行</b> code，沒有裝任何套件。
+              </p>
+            </article>
+
+            <article class="card pc__card pc__card--con rise">
+              <p class="card__index">缺點 · CONS</p>
+              <h3 class="card__title">每次修改曠日廢時</h3>
+              <ul class="pc__list">
+                <li><b>10–20 分鐘</b>才看到一次結果</li>
+                <li><b>10w token</b>（DeepSeek API 約 3 元／次）</li>
+                <li><b>動畫更久</b>：要對 step、對時間軸</li>
+                <li><b>結果有時不正確</b>：常常要打掉一半的 code</li>
+              </ul>
+              <p class="pc__foot pc__foot--warn">
+                <b>不只慢</b>：改三次，有兩次得先退回上一個版本。
+              </p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet pc__fix">
+            <strong>解法：版本控制</strong> —— 每次改動先 commit，改壞就
+            <span class="math">git checkout</span> 回到上一個能跑的版本；敢打掉重來，才不會卡在同一個錯誤裡。
+          </p>
+        </div>
+
+        <noscript>
+          <p class="slide__body small muted">
+            靜態內容：優點是快、好看、可以有動畫，成品約 1000 多行 code；
+            缺點是每次修改要 10–20 分鐘、約 10w token，動畫更久且結果有時不正確，
+            解法是用版本控制（commit）保留每個能跑的版本。
+          </p>
+        </noscript>
+
+        <style>
+          /* 版面上補上「解法」那一條，兩張卡才不會貼到底 */
+          :host(.slide) .slide__body {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+          }
+
+          .pc {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+          }
+
+          .pc__card {
+            border-top: 4px solid var(--line-2);
+            transition: opacity 0.4s ease;
+          }
+
+          .pc__card--pro {
+            border-top-color: var(--ok);
+          }
+
+          .pc__card--con {
+            border-top-color: var(--accent);
+            /* 第 0 步時整張不出現（只留左邊的優點），第 1 步才淡入。
+               只切 opacity：.rise 的進場也會設 transform，避免互蓋。 */
+            opacity: 0;
+            pointer-events: none;
+          }
+
+          /* ── 兩個 step：0 只亮左邊（優點），1 才亮右邊（缺點）───────── */
+          :host([data-step="1"]) .pc__card--con {
+            opacity: 1;
+            pointer-events: auto;
+          }
+
+          .pc__fix {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            font-size: 16px;
+            line-height: 1.7;
+          }
+
+          :host([data-step="1"]) .pc__fix {
+            opacity: 1;
+            transform: none;
+          }
+
+          /* ── 清單 ───────────────────────────────────────────────────── */
+          .pc__list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 15.5px;
+            line-height: 1.7;
+            color: var(--ink-500);
+          }
+
+          .pc__list li {
+            padding-left: 16px;
+            position: relative;
+          }
+
+          .pc__list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.66em;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--line-2);
+          }
+
+          .pc__card--pro .pc__list li::before {
+            background: var(--ok);
+          }
+
+          .pc__card--con .pc__list li::before {
+            background: var(--accent);
+          }
+
+          .pc__list b {
+            color: var(--ink-900);
+          }
+
+          .pc__foot {
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px dashed var(--line-2);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--ink-500);
+          }
+
+          .pc__foot b {
+            margin-right: 4px;
+            font-size: 17px;
+            color: var(--ok);
+          }
+
+          .pc__foot--warn b {
+            color: var(--accent);
+          }
+
+          /* ── 窄螢幕：兩張卡改上下排，動畫一律全亮 ───────────────────── */
+          @media (max-width: 980px) {
+            .pc {
+              grid-template-columns: 1fr;
+            }
+
+            .pc__card--con,
+            .pc__fix {
+              opacity: 1;
+              transform: none;
+              pointer-events: auto;
+            }
+          }
+
+          /* 減少動態：直接切到定位，不做補間 */
+          @media (prefers-reduced-motion: reduce) {
+            .pc__card,
+            .pc__fix {
+              transition-duration: 0.01ms !important;
+            }
+          }
+        </style>
+
+        <!-- 兩個 step：0 優點、1 缺點（純 CSS 切換，不需要 init） -->
+        <script>
+          window.SlideAnim = { steps: 2 };
+        </script>
+      </section>
+
+      <!-- 4 ─ 未來想試：open-slide（無 step）=================================
+           重點：open-slide 也能 AI Coding，而且可以直接在畫面上編輯文字，
+           解決上面「改一個字要重跑十幾分鐘」的問題。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="未來想試 open-slide">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 3-3 · 下一步</p>
+          <h2 class="h2 rise">下次想試：open-slide</h2>
+        </header>
+
+        <div class="slide__body grid-2">
+          <ul class="steps" style="gap: 12px;">
+            <li class="step rise">
+              <span class="step__num">1</span>
+              <span class="step__body">
+                <span class="step__title">一樣能用 AI Coding</span>
+                簡報以 HTML 呈現，所以「請 AI 幫我加一頁」這件事照樣成立，
+                現在的做法可以直接搬過去。
+              </span>
+            </li>
+            <li class="step rise">
+              <span class="step__num">2</span>
+              <span class="step__body">
+                <span class="step__title">可以直接編輯文字</span>
+                錯字、換句話說在畫面上改就好，不用為了<strong>一個字</strong>重跑一次 AI
+                （現在要等 10–20 分鐘）。
+              </span>
+            </li>
+            <li class="step rise">
+              <span class="step__num">3</span>
+              <span class="step__body">
+                <span class="step__title">分工不變</span>
+                一樣一人一章、共用一套視覺；動畫仍寫在單頁裡，
+                需要時才加，不影響其他人。
+              </span>
+            </li>
+          </ul>
+
+          <div class="stack">
+            <div class="terminal rise">
+              <p class="terminal__bar">現在 vs 想試</p>
+<pre><span class="c"># 現在：改一個錯字</span>
+編輯 HTML → 重新合併 → 瀏覽器確認
+         <span class="mk__warn">10–20 分鐘 / 10w token</span>
+
+<span class="c"># 想試：open-slide</span>
+直接在畫面上改字 → 存檔
+         <span class="ok">幾十秒</span>
+
+<span class="c"># 兩邊都保留的好習慣</span>
+git commit <span class="c"># 改壞就退回上一個版本</span></pre>
+            </div>
+
+            <p class="callout callout--ok rise">
+              <strong>AI 寫骨架，人手改細節</strong><br />
+              生成的成本在「重跑」，不在「打字」；
+              能直接編輯，就不用每次修改都把整份簡報重做一遍。
+            </p>
+          </div>
+        </div>
+
+        <style>
+          /* 終端機裡標「慢」的那一行：暖色，和綠色的 .ok 對比 */
+          :host(.slide) .terminal .mk__warn {
+            color: #f0b183;
+          }
+        </style>
+      </section>
+
     </main>
 
     <nav class="hud" aria-label="投影片控制">
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
-        <span class="hud__count" aria-live="polite">01 / 02</span>
+        <span class="hud__count" aria-live="polite">01 / 04</span>
         <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
         <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
