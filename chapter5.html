@@ -13,10 +13,10 @@
       <section class="slide slide--cover is-active" aria-roledescription="slide" aria-label="封面">
         <div class="cover">
           <p class="eyebrow rise">機密分享 · 期末報告</p>
-          <h1 class="h1 rise">得到 Share 後，如何解出多項式</h1>
+          <h1 class="h1 rise">得到 Share 後，如何還原機密</h1>
           <p class="lede rise">
-            利用拉格朗日插值法（Lagrange Interpolation）秘密還原：<br />
-            只需常數項 <span class="math">f(0)</span>，在 <span class="math">GF(2<sup>8</sup>)</span> 模運算下套公式精準還原。
+            比較三種還原解密方法：拉格朗日插值法、行列式（克拉瑪公式）與高斯消去法，<br />
+            在 <span class="math">GF(2<sup>8</sup>)</span> 有限體下精準取回常數項 <span class="math">f(0)</span>。
           </p>
           <div class="cover__meta rise">
             <span class="tag tag--dark">CH. 05</span>
@@ -28,49 +28,98 @@
         <div class="cover__ghost" aria-hidden="true">05</div>
       </section>
 
-      <!-- 2 ─ 解密核心目標：只要常數項 f(0) ================================= -->
-      <section class="slide" aria-roledescription="slide" aria-label="解密核心目標">
+      <!-- 2 ─ 解密核心目標：三種還原方法總覽 ================================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="三種還原方法總覽">
         <header class="slide__head">
           <p class="eyebrow rise">5-1 · 還原思維</p>
-          <h2 class="h2 rise">我們不需要解出完整多項式，只要 f(0)</h2>
+          <h2 class="h2 rise">得到 Share 後，有三種方法還原機密 f(0)</h2>
+        </header>
+
+        <div class="slide__body grid-3">
+          <div class="card card--spot rise">
+            <div class="chip chip--brand">方法一 · 推薦</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">拉格朗日插值法</h3>
+            <p class="card__text">
+              不解聯立，直接構造開關基底 <span class="math">&ell;<sub>i</sub>(0)</span>，直攻常數項 <span class="math">S = f(0)</span>。<br />
+              <strong>複雜度</strong>：<span class="math">O(k<sup>2</sup>)</span>
+            </p>
+          </div>
+
+          <div class="card rise">
+            <div class="chip chip--dark">方法二 · 線性代數</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">行列式解密（克拉瑪公式）</h3>
+            <p class="card__text">
+              將聯立方程寫成矩陣，利用克拉瑪公式直接對常數項 <span class="math">a<sub>0</sub></span> 求行列式比值 <span class="math">det(V<sub>0</sub>) / det(V)</span>。<br />
+              <strong>複雜度</strong>：<span class="math">O(k! )</span> 或 <span class="math">O(k<sup>3</sup>)</span>
+            </p>
+          </div>
+
+          <div class="card rise">
+            <div class="chip chip--dark">方法三 · 線性代數</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">高斯消去法</h3>
+            <p class="card__text">
+              將 <span class="math">k</span> 個點代入多項式，列成增廣矩陣消去並回代，求得所有係數 <span class="math">a<sub>0</sub>…a<sub>k-1</sub></span>。<br />
+              <strong>複雜度</strong>：<span class="math">O(k<sup>3</sup>)</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2.5 ─ 拉格朗日原理：開關函數 ======================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="拉格朗日原理">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-2 · 方法一：拉格朗日原理</p>
+          <h2 class="h2 rise">核心原理：為每個點設計專屬「開關」&ell;<sub>i</sub>(x)</h2>
         </header>
 
         <div class="slide__body grid-2">
           <div class="stack">
-            <div class="card rise">
-              <div class="chip chip--dark">傳統思維 · 解聯立方程</div>
-              <h3 class="card__title" style="margin-top: var(--sp-sm);">高斯消去法求所有係數</h3>
-              <p class="card__text">
-                列出 <span class="math">k</span> 條線性方程組解 <span class="math">a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>k-1</sub></span>。<br />
-                <strong>時間複雜度</strong>：<span class="math">O(k<sup>3</sup>)</span>，矩陣求逆運算成本高、邏輯繁瑣。
-              </p>
+            <div class="formula rise">
+              <span class="formula__label">加權合成</span>
+              <span class="math">
+                f(x) = &sum;<sub>i=1</sub><sup>k</sup> y<sub>i</sub> &middot; &ell;<sub>i</sub>(x)
+              </span>
             </div>
-
-            <div class="card card--spot rise">
-              <div class="chip chip--brand">拉格朗日插值法（推薦）</div>
-              <h3 class="card__title" style="margin-top: var(--sp-sm);">直攻截距項 f(0)</h3>
+            <div class="card rise">
+              <h3 class="card__title">開關性質 (Kronecker Delta)</h3>
               <p class="card__text">
-                原秘密就存放在常數項 <span class="math">S = f(0) = a<sub>0</sub></span>。<br />
-                <strong>時間複雜度</strong>：<span class="math">O(k<sup>2</sup>)</span>，只需單純加法與連乘，套公式即得。
+                &bull; 在自己家：<span class="math">&ell;<sub>i</sub>(x<sub>i</sub>) = <strong>1</strong></span><br />
+                &bull; 在別人家：<span class="math">&ell;<sub>i</sub>(x<sub>j</sub>) = <strong>0</strong></span>（<span class="math">j &ne; i</span>）<br />
+                代入任意 <span class="math">x<sub>m</sub></span> 時，只有 <span class="math">y<sub>m</sub> &middot; 1</span> 活著，其餘全為 <span class="math">0</span>！
               </p>
             </div>
           </div>
 
           <div class="stack">
-            <div class="formula rise">
-              <span class="formula__label">秘密還原等式</span>
-              <span class="math">
-                S = f(0) = &sum;<sub>i=0</sub><sup>k-1</sup> y<sub>i</sub> &middot; &ell;<sub>i</sub>(0)
-              </span>
+            <div class="card rise" style="padding: var(--sp-sm);">
+              <svg viewBox="0 0 420 220" width="100%" height="auto" aria-label="拉格朗日開關函數圖解">
+                <!-- Axes -->
+                <line x1="30" y1="170" x2="400" y2="170" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" />
+                <line x1="45" y1="20" x2="45" y2="195" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5" />
+                <!-- y = 1 dashed line -->
+                <line x1="45" y1="65" x2="390" y2="65" stroke="currentColor" stroke-opacity="0.25" stroke-dasharray="4 4" stroke-width="1" />
+                <text x="26" y="69" font-size="12" fill="currentColor" opacity="0.7">1</text>
+                <text x="26" y="174" font-size="12" fill="currentColor" opacity="0.7">0</text>
+
+                <!-- Basis curve l_1(x): passes (100, 65), (220, 170), (340, 170) -->
+                <path d="M 65 25 Q 100 65, 160 128 T 220 170 Q 280 202, 340 170 T 385 115" fill="none" stroke="var(--brand, #3b82f6)" stroke-width="3" />
+
+                <!-- x1, x2, x3 markers -->
+                <circle cx="100" cy="65" r="6" fill="#10b981" stroke="#fff" stroke-width="1.5" />
+                <text x="90" y="50" font-size="12" font-weight="bold" fill="#10b981">ℓ₁(x₁)=1</text>
+                <text x="94" y="188" font-size="12" fill="currentColor" opacity="0.8">x₁</text>
+
+                <circle cx="220" cy="170" r="6" fill="#ef4444" stroke="#fff" stroke-width="1.5" />
+                <text x="200" y="155" font-size="12" font-weight="bold" fill="#ef4444">ℓ₁(x₂)=0</text>
+                <text x="214" y="188" font-size="12" fill="currentColor" opacity="0.8">x₂</text>
+
+                <circle cx="340" cy="170" r="6" fill="#ef4444" stroke="#fff" stroke-width="1.5" />
+                <text x="320" y="155" font-size="12" font-weight="bold" fill="#ef4444">ℓ₁(x₃)=0</text>
+                <text x="334" y="188" font-size="12" fill="currentColor" opacity="0.8">x₃</text>
+              </svg>
             </div>
-
-            <p class="body-text rise">
-              每個 Share 點 <span class="math">(x<sub>i</sub>, y<sub>i</sub>)</span> 乘上專屬基底權重 <span class="math">&ell;<sub>i</sub>(0)</span> 後相加。<br />
-              <strong>權重特性</strong>：<span class="math">&ell;<sub>i</sub>(x)</span> 在 <span class="math">x = x<sub>i</sub></span> 時為 1，在其餘給定點 <span class="math">x<sub>j</sub> (j &ne; i)</span> 皆為 0。
-            </p>
-
             <p class="callout rise">
-              <strong>關鍵洞察</strong>：拉格朗日基底 <span class="math">&ell;<sub>i</sub>(0)</span> 僅由參與還原的點座標 <span class="math">x</span> 決定，與機密值 <span class="math">y</span> 完全無關！
+              <strong>兩步構造</strong>：分子 <span class="math">&prod;(x &minus; x<sub>j</sub>)</span> 讓別人家歸 <strong>0</strong>；分母 <span class="math">&prod;(x<sub>i</sub> &minus; x<sub>j</sub>)</span> 讓自己家變 <strong>1</strong>。最後 <span class="math">&sum; y<sub>i</sub>&ell;<sub>i</sub>(0)</span> 即得秘密！
             </p>
           </div>
         </div>
@@ -79,8 +128,8 @@
       <!-- 3 ─ GF(2^8) 下的公式化簡 ========================================== -->
       <section class="slide" aria-roledescription="slide" aria-label="公式化簡">
         <header class="slide__head">
-          <p class="eyebrow rise">5-2 · 有限體代數適配</p>
-          <h2 class="h2 rise">有限體 GF(2<sup>8</sup>) 下的公式大化簡</h2>
+          <p class="eyebrow rise">5-2 · 方法一：拉格朗日插值法</p>
+          <h2 class="h2 rise">拉格朗日插值法：GF(2<sup>8</sup>) 下的公式大化簡</h2>
         </header>
 
         <div class="slide__body grid-2">
@@ -226,36 +275,36 @@
         </div>
       </section>
 
-      <!-- 6 ─ 本章總結與承接下一章 ============================================ -->
-      <section class="slide" aria-roledescription="slide" aria-label="本章總結">
+      <!-- 6 ─ 第二種方法：行列式解密（克拉瑪公式） ============================= -->
+      <section class="slide" aria-roledescription="slide" aria-label="行列式解密">
         <header class="slide__head">
-          <p class="eyebrow rise">5-5 · 總結</p>
-          <h2 class="h2 rise">掌握多項式還原，邁向像素級影像合成</h2>
+          <p class="eyebrow rise">5-5 · 方法二：行列式解密</p>
+          <h2 class="h2 rise">行列式解密（克拉瑪公式）：直求常數項 a<sub>0</sub></h2>
         </header>
 
-        <div class="slide__body grid-3">
-          <div class="card rise">
-            <div class="chip chip--dark">精準直攻</div>
-            <h3 class="card__title" style="margin-top: var(--sp-sm);">直求 f(0)</h3>
-            <p class="card__text">
-              拉格朗日基底多項式讓還原運算降至 <span class="math">O(k<sup>2</sup>)</span>，不解方程、不走彎路。
+        <div class="slide__body grid-2">
+          <div class="stack">
+            <div class="formula rise">
+              <span class="formula__label">克拉瑪公式 (Cramer's Rule)</span>
+              <span class="math">
+                S = a<sub>0</sub> = <span class="math-frac"><span class="math-num">det(V<sub>0</sub>)</span><span class="math-den">det(V)</span></span> &nbsp;(在 GF(2<sup>8</sup>) 下運算)
+              </span>
+            </div>
+            <p class="body-text rise">
+              把 <span class="math">k</span> 個點寫成係數矩陣 <span class="math">V</span>（第 <span class="math">i</span> 列為 <span class="math">[1, x<sub>i</sub>, x<sub>i</sub><sup>2</sup>, …, x<sub>i</sub><sup>k-1</sup>]</span>）。<br />
+              將 <span class="math">V</span> 的第一行換成輸出向量 <span class="math"><b>y</b></span> 得到 <span class="math">V<sub>0</sub></span>，兩者行列式相除即為秘密 <span class="math">a<sub>0</sub></span>。
             </p>
           </div>
 
-          <div class="card rise">
-            <div class="chip chip--brand">代數簡化</div>
-            <h3 class="card__title" style="margin-top: var(--sp-sm);">無負數 XOR</h3>
-            <p class="card__text">
-              在 <span class="math">GF(2<sup>8</sup>)</span> 裡加等於減，負號全消，分子留 <span class="math">x<sub>j</sub></span>、分母變 <span class="math">x<sub>i</sub> &oplus; x<sub>j</sub></span>。
-            </p>
-          </div>
-
-          <div class="card card--spot rise">
-            <div class="chip chip--dark">承接第 6 章</div>
-            <h3 class="card__title" style="margin-top: var(--sp-sm);">擴展至影像 RGB</h3>
-            <p class="card__text">
-              單點數字還原完畢。下一章將此演算法套用到彩色圖片上，對數百萬個像素獨立還原！
-            </p>
+          <div class="stack">
+            <div class="card card--spot rise">
+              <div class="chip chip--brand">線性代數視角</div>
+              <h3 class="card__title" style="margin-top: var(--sp-sm);">為什麼不用求其他係數？</h3>
+              <p class="card__text">
+                1. <strong>目標明確</strong>：只替換對應 <span class="math">a<sub>0</sub></span> 的第一行，不必算 <span class="math">a<sub>1</sub>…a<sub>k-1</sub></span>。<br />
+                2. <strong>小門檻超好手算</strong>：當 <span class="math">k = 2</span> 或 <span class="math">3</span> 時，2&times;2 / 3&times;3 行列式展開非常直覺；但 <span class="math">k</span> 變大時計算量會暴增。
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -263,7 +312,7 @@
       <!-- 7 ─ 還原解密：高斯消去法 =========================================== -->
       <section class="slide" aria-roledescription="slide" aria-label="還原解密：高斯消去法">
         <header class="slide__head">
-          <p class="eyebrow rise">5-6 · 門檻還原</p>
+          <p class="eyebrow rise">5-6 · 方法三：高斯消去法</p>
           <h2 class="h2 rise">高斯消去法：解聯立多項式求回機密</h2>
         </header>
 
@@ -484,13 +533,50 @@
           </div>
         </div>
       </section>
+
+      <!-- 10 ─ 總結：三種方法優缺點比較 ===================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="三種方法優缺點比較">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-9 · 總結與比較</p>
+          <h2 class="h2 rise">三種還原方法優缺點總整理</h2>
+        </header>
+
+        <div class="slide__body grid-3">
+          <div class="card card--spot rise">
+            <div class="chip chip--brand">拉格朗日插值法</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">O(k<sup>2</sup>) · 套公式取模</h3>
+            <p class="card__text">
+              <strong>優點</strong>：不解聯立、程式極簡、無須存矩陣，實務與影像還原首選。<br />
+              <strong>缺點</strong>：若不預存權重，大量像素時會有重複計算 <span class="math">&ell;<sub>i</sub>(0)</span> 的問題。
+            </p>
+          </div>
+
+          <div class="card rise">
+            <div class="chip chip--dark">行列式（克拉瑪公式）</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">O(k!) / O(k<sup>3</sup>) · 直求 a<sub>0</sub></h3>
+            <p class="card__text">
+              <strong>優點</strong>：只算第一行替換後的行列式比值，不用解出其他係數，<span class="math">k</span> 很小時好手算。<br />
+              <strong>缺點</strong>：<span class="math">k</span> 變大時行列式展開計算量暴增，不適合大門檻程式實作。
+            </p>
+          </div>
+
+          <div class="card rise">
+            <div class="chip chip--dark">高斯消去法</div>
+            <h3 class="card__title" style="margin-top: var(--sp-sm);">O(k<sup>3</sup>) · 解全係數</h3>
+            <p class="card__text">
+              <strong>優點</strong>：線性代數標準解法，能一次求得完整多項式的所有係數 <span class="math">a<sub>0</sub>…a<sub>k-1</sub></span>。<br />
+              <strong>缺點</strong>：時間複雜度高、回代步驟繁瑣，只求秘密 <span class="math">f(0)</span> 時成本過高。
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- 播放器控制列 -->
     <nav class="hud" aria-label="投影片控制">
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
-        <span class="hud__count" aria-live="polite">01 / 09</span>
+        <span class="hud__count" aria-live="polite">01 / 11</span>
         <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
         <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
