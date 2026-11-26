@@ -6,6 +6,55 @@
     <meta name="color-scheme" content="light" />
     <title>第 4 章 · Galois Field 性質與運算</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+      .flow-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding: 12px 8px;
+      }
+      .flow-branches {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .flow-branch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .flow-merge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .flow-node {
+        padding: 6px 12px;
+        border-radius: var(--rad, 8px);
+        background: var(--code-bg, #f4f6f8);
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        font-family: var(--font-mono, monospace);
+        font-size: 0.92em;
+        white-space: nowrap;
+      }
+      .flow-node--accent {
+        background: rgba(37, 99, 235, 0.08);
+        border-color: rgba(37, 99, 235, 0.35);
+        font-weight: 600;
+      }
+      .flow-arrow {
+        color: #64748b;
+        font-weight: 600;
+        user-select: none;
+      }
+      .highlight-num {
+        color: #2563eb;
+        font-weight: 700;
+      }
+    </style>
   </head>
   <body>
     <main class="deck" id="deck" aria-roledescription="簡報" aria-label="第 4 章 Galois Field 性質與運算">
@@ -190,10 +239,87 @@ for (let i = 0; i < 255; i++) {
         </div>
       </section>
 
-      <!-- 6 ─ 小結與承接下一章 ================================================ -->
+      <!-- 6 ─ 查表核心流程與具體數字範例 ====================================== -->
+      <section class="slide" aria-roledescription="slide" aria-label="查表核心流程與範例">
+        <header class="slide__head">
+          <p class="eyebrow rise">4-5 · 查表核心流程與範例</p>
+          <h2 class="h2 rise">查表三步驟與具體數字示範</h2>
+        </header>
+
+        <div class="slide__body stack">
+          <div class="card rise">
+            <h3 class="card__title">查表三步驟視覺流程圖</h3>
+            <div class="flow-container">
+              <div class="flow-branches">
+                <div class="flow-branch">
+                  <span class="flow-node">a</span>
+                  <span class="flow-arrow">→</span>
+                  <span class="flow-node flow-node--accent">查 LOG 表</span>
+                  <span class="flow-arrow">→</span>
+                  <span class="flow-node">log(a)</span>
+                </div>
+                <div class="flow-branch">
+                  <span class="flow-node">b</span>
+                  <span class="flow-arrow">→</span>
+                  <span class="flow-node flow-node--accent">查 LOG 表</span>
+                  <span class="flow-arrow">→</span>
+                  <span class="flow-node">log(b)</span>
+                </div>
+              </div>
+              <svg class="flow-merge-svg" width="36" height="58" viewBox="0 0 36 58" fill="none" aria-hidden="true">
+                <path d="M0 11 H14 V29 M0 47 H14 V29 M14 29 H33" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M28 24 L34 29 L28 34" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <div class="flow-merge">
+                <span class="flow-node flow-node--accent">相加</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-node">sum</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-node flow-node--accent">查 EXP 表</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-node flow-node--accent">乘積</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+            <article class="card rise" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <p class="card__index">乘法範例</p>
+                <h3 class="card__title"><span class="math"><span class="highlight-num">7</span> × <span class="highlight-num">11</span></span></h3>
+                <ul class="card__text" style="margin: 0; padding-left: 1.2em; line-height: 1.65;">
+                  <li>查 LOG 表：<code>LOG[<span class="highlight-num">7</span>] = <span class="highlight-num">198</span></code>、<code>LOG[<span class="highlight-num">11</span>] = <span class="highlight-num">95</span></code></li>
+                  <li>指數相加：<span class="math"><span class="highlight-num">198</span> + <span class="highlight-num">95</span> = <span class="highlight-num">293</span></span></li>
+                  <li>查 EXP 表：<code>EXP[<span class="highlight-num">293</span>] = <span class="highlight-num">49</span></code></li>
+                </ul>
+              </div>
+              <p class="callout callout--quiet" style="margin-top: 14px; margin-bottom: 0;">
+                <strong>結論：<span class="math"><span class="highlight-num">7</span> × <span class="highlight-num">11</span> = <span class="highlight-num">49</span></span></strong>
+              </p>
+            </article>
+
+            <article class="card rise" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <p class="card__index">除法範例（驗算還原）</p>
+                <h3 class="card__title"><span class="math"><span class="highlight-num">49</span> ÷ <span class="highlight-num">7</span></span></h3>
+                <ul class="card__text" style="margin: 0; padding-left: 1.2em; line-height: 1.65;">
+                  <li>查 LOG 表：<code>LOG[<span class="highlight-num">49</span>] = <span class="highlight-num">38</span></code>、<code>LOG[<span class="highlight-num">7</span>] = <span class="highlight-num">198</span></code></li>
+                  <li>指數相減（+255 防負數）：<span class="math"><span class="highlight-num">38</span> − <span class="highlight-num">198</span> + <span class="highlight-num">255</span> = <span class="highlight-num">95</span></span></li>
+                  <li>查 EXP 表：<code>EXP[<span class="highlight-num">95</span>] = <span class="highlight-num">11</span></code></li>
+                </ul>
+              </div>
+              <p class="callout callout--quiet" style="margin-top: 14px; margin-bottom: 0;">
+                <strong>結論：<span class="math"><span class="highlight-num">49</span> ÷ <span class="highlight-num">7</span> = <span class="highlight-num">11</span></span>（精準整數還原）</strong>
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 ─ 小結與承接下一章 ================================================ -->
       <section class="slide" aria-roledescription="slide" aria-label="本章總結">
         <header class="slide__head">
-          <p class="eyebrow rise">4-5 · 總結</p>
+          <p class="eyebrow rise">4-6 · 總結</p>
           <h2 class="h2 rise">代數工具齊備，進入解密環節</h2>
         </header>
 
@@ -234,7 +360,7 @@ for (let i = 0; i < 255; i++) {
     <nav class="hud" aria-label="投影片控制">
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
-        <span class="hud__count" aria-live="polite">01 / 06</span>
+        <span class="hud__count" aria-live="polite">01 / 07</span>
         <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
         <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
