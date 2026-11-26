@@ -28,60 +28,27 @@
         <div class="cover__ghost" aria-hidden="true">A1</div>
       </section>
 
-      <!-- 2 ─ 實機 Demo ==================================================== -->
-      <section class="slide" aria-roledescription="slide" aria-label="實機 Demo">
-        <header class="slide__head">
-          <p class="eyebrow rise">附錄 1-1 · 實機 Demo</p>
-          <h2 class="h2 rise">直接玩：拆分 → 還原</h2>
-          <p class="lede rise">
-            這是 <span class="math">code/index.html</span> 本體，不是截圖。
-            左邊拆分、右邊還原；湊滿 <span class="math">k</span> 張就能拿回原圖。
-            技術選擇、架構與分工的說明請見「附錄 2 · 程式實作介紹」。
-          </p>
-        </header>
-
-        <div class="slide__body stack">
-          <div class="embed-shell rise">
-            <iframe
-              class="embed-frame"
-              data-embed
-              src="code/index.html?embed"
-              title="Shamir 機密影像分享：拆分與還原的實際操作畫面"
-              loading="eager"
-            ></iframe>
-          </div>
-        </div>
+      <!-- 2 ─ 實機 Demo（滿版、頁面上不留任何文字） ========================= -->
+      <section class="slide slide--demo" aria-roledescription="slide" aria-label="實機 Demo">
+        <iframe
+          class="embed-frame"
+          data-embed
+          src="code/index.html?embed"
+          title="Shamir 機密影像分享：拆分與還原的實際操作畫面"
+          loading="eager"
+        ></iframe>
 
         <style>
-          /* 只用這一頁的 class，不動 style.css；:host 版本給 anim.js 的 shadow root 用 */
-          .embed-shell {
-            height: 452px;
-            overflow: hidden;
-            border-radius: var(--radius);
-            background: var(--paper);
-            box-shadow: inset 0 0 0 1px var(--line), 0 18px 40px rgba(18, 26, 43, 0.12);
-          }
-
+          /* 只留 Demo 本體：absolute + inset 0 直接蓋滿整張投影片（含 .slide 的內距），
+             不必改 style.css。文件層與 anim.js 的 shadow root 都適用同一條規則。 */
           .embed-frame {
+            position: absolute;
+            inset: 0;
             display: block;
             width: 100%;
             height: 100%;
             border: 0;
-          }
-
-          :host(.slide) .embed-shell {
-            height: 452px;
-            overflow: hidden;
-            border-radius: var(--radius);
-            background: var(--paper);
-            box-shadow: inset 0 0 0 1px var(--line), 0 18px 40px rgba(18, 26, 43, 0.12);
-          }
-
-          :host(.slide) .embed-frame {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border: 0;
+            background: #ffffff;
           }
         </style>
       </section>

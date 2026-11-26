@@ -68,6 +68,20 @@
         font-family: Consolas, monospace;
         color: #b45309;
       }
+      /* 以 iframe 嵌進簡報時（?embed）：去掉頁面留白，讓 UI 直接滿版 */
+      html.is-embed body {
+        min-height: 100vh;
+        padding: 0;
+        background: #ffffff;
+      }
+      html.is-embed .sss-app {
+        box-sizing: border-box;
+        max-width: none;
+        min-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
     </style>
   </head>
   <body>
@@ -99,6 +113,7 @@
       // 簡報以 iframe 嵌入時（embed.js 會帶 ?embed），只留系統本體；
       // 上面那塊「自我檢測」是開發用的，投影片上不需要。
       if (new URLSearchParams(location.search).has('embed')) {
+        document.documentElement.classList.add('is-embed');
         var runner = document.querySelector('.test-runner');
         if (runner) runner.style.display = 'none';
       }
