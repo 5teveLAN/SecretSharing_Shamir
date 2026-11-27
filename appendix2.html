@@ -683,6 +683,7 @@ export function
       <!-- 7 ─ 與 AI、GitHub 協作（2 步）=======================================
            筆記 a2-5：水平兩張圖卡，第 1 步先出現左邊（AI），第 2 步再出現右邊（GitHub）。
            一進這一頁就只有一個 step：左邊 AI 卡先亮，按一下前進才亮右邊 GitHub 卡。
+           右卡底部是示意 graph（純 HTML/CSS）：三個人各自 commit，全部匯入 main。
            顯示切換放在外層 .a2c__cell（它是 <div>，不會被 anim.js 給 .rise 的
            opacity:1 蓋掉）；內層 .card.rise 照常進場，兩者相乘才輪到誰亮。
              第 0 步（一翻到這一頁）：左邊 AI 卡亮、右邊淡
@@ -717,15 +718,25 @@ export function
                 <ul class="a2c__list">
                   <li>開工先 pull、收工就 push，不做長期分支</li>
                   <li>因為各自只寫自己的檔案，不會有衝突問題</li>
-                  <li>組起來跑一次測試，就知道三塊接得起來</li>
                 </ul>
-                <div class="a2c__code">
-                  <p class="a2c__codebar">terminal</p>
-                  <pre>git pull
-git add code/shamir.js
-git commit -m "shamir: Horner 求值"
-git push</pre>
-                </div>
+
+                <!-- 示意 graph：主線 main 垂直往下，三個人各自 commit 由上而下掛在主線上 -->
+                <figure class="a2c__graph">
+                  <figcaption class="a2c__graph-head">
+                    <span class="a2c__graph-main">main</span>
+                    <span>git graph · 由上往下是時間</span>
+                  </figcaption>
+
+                  <ol class="a2c__commits">
+                    <li><span class="a2c__who">安</span><i class="a2c__dot"></i><span class="a2c__msg">feat: shamir.js Horner 求值</span></li>
+                    <li><span class="a2c__who">妡</span><i class="a2c__dot"></i><span class="a2c__msg">feat: Lagrange.js 插值</span></li>
+                    <li><span class="a2c__who">我</span><i class="a2c__dot"></i><span class="a2c__msg">feat: app.js 介面接線</span></li>
+                  </ol>
+
+                  <p class="a2c__graph-note">
+                    開工先 <b>pull</b>、收工就 <b>push</b>：三筆都直接進 main
+                  </p>
+                </figure>
               </article>
             </div>
           </div>
@@ -815,17 +826,24 @@ git push</pre>
             color: #6ecb8f;
           }
 
-          /* 淺色 code 區塊：與整份簡報一致，不搶深色膠囊的焦點 */
-          .a2c__code {
+          /* ── 示意 graph：三條線都直接接回 main（不開長期分支）─────────────
+             每列是一條泳道：人名 │ 自己的 commit ●━━━● main
+             線條用 ::before / ::after 畫，不需要圖片也不需要 JS */
+          .a2c__graph {
+            position: relative;
             margin-top: auto;
-            overflow: hidden;
+            padding: 10px 14px 11px;
             border-radius: var(--radius-sm);
             background: var(--paper-dim);
             box-shadow: inset 0 0 0 1px var(--line);
           }
 
-          .a2c__codebar {
-            padding: 6px 14px;
+          .a2c__graph-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            /* 左邊留出跟 commit 主線一樣的位置，main 標籤剛好壓在主線上方 */
+            padding: 0 0 7px 60px;
             border-bottom: 1px solid var(--line);
             font-family: var(--font-mono);
             font-size: 11px;
@@ -833,13 +851,89 @@ git push</pre>
             color: var(--ink-300);
           }
 
-          .a2c__code pre {
-            margin: 0;
-            padding: 10px 14px 12px;
-            font-family: var(--font-mono);
-            font-size: 12.5px;
-            line-height: 1.75;
+          /* main 標籤：反推回主線正上方 */
+          .a2c__graph-main {
+            margin-left: -60px;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
             color: var(--ink-700);
+          }
+
+          /* 一筆 commit＝一列：安 ●── commit 訊息，圓點串在同一條垂直 main 上。
+             主線用 .a2c__commits 的 ::before 貫穿，圓點疊在它上面。 */
+          .a2c__commits {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 10px 0 0;
+            padding: 0 0 0 60px;
+            list-style: none;
+          }
+
+          /* 垂直主線：對齊圓點中心（60px 左欄、圓點 9px 寬 → 中心在 60px） */
+          .a2c__commits::before {
+            content: "";
+            position: absolute;
+            top: -14px;
+            bottom: -2px;
+            left: 59px;
+            width: 2px;
+            background: var(--ink-900);
+            opacity: 0.75;
+          }
+
+          .a2c__commits li {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-left: 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+          }
+
+          /* 人名：固定欄寬靠右對齊，緊貼圓點左側 */
+          .a2c__who {
+            position: absolute;
+            left: -60px;
+            width: 46px;
+            text-align: right;
+            white-space: nowrap;
+            color: var(--ink-700);
+          }
+
+          /* commit 圓點：疊在垂直主線上（主線中心在 li 左緣 -1px） */
+          .a2c__dot {
+            position: absolute;
+            left: -5px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-soft);
+            z-index: 1;
+          }
+
+          .a2c__msg {
+            color: var(--ink-500);
+          }
+
+          /* figure 預設有 margin-inline，這裡歸零才不會擠到卡片內距 */
+          .a2c__graph {
+            margin-inline: 0;
+          }
+
+          .a2c__graph-note {
+            margin: 9px 0 0;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--ink-500);
+          }
+
+          .a2c__graph-note b {
+            color: var(--ok);
           }
 
           /* 減少動態：直接切換，不做補間 */
