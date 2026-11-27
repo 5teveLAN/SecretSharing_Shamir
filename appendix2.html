@@ -682,11 +682,11 @@ export function
 
       <!-- 7 ─ 與 AI、GitHub 協作（2 步）=======================================
            筆記 a2-5：水平兩張圖卡，第 1 步先出現左邊（AI），第 2 步再出現右邊（GitHub）。
+           一進這一頁就只有一個 step：左邊 AI 卡先亮，按一下前進才亮右邊 GitHub 卡。
            顯示切換放在外層 .a2c__cell（它是 <div>，不會被 anim.js 給 .rise 的
            opacity:1 蓋掉）；內層 .card.rise 照常進場，兩者相乘才輪到誰亮。
-             第 0 步：兩張都淡
-             第 1 步（data-step="1"）：左邊 AI 卡亮
-             第 2 步（data-step="2"）：右邊 GitHub 卡也亮 -->
+             第 0 步（一翻到這一頁）：左邊 AI 卡亮、右邊淡
+             第 1 步（data-step="1"）：右邊 GitHub 卡也亮 -->
       <section class="slide" aria-roledescription="slide" aria-label="與 AI、GitHub 協作">
         <header class="slide__head">
           <p class="eyebrow rise">附錄 2-5 · 開發流程</p>
@@ -739,14 +739,18 @@ git push</pre>
             align-items: stretch;
           }
 
-          /* 外層只負責「輪到了沒」：淡掉時降到 0.25，輪到就回到 1 */
+          /* 外層只負責「輪到了沒」：還沒輪到的降到 0.25，輪到就回到 1。
+             第 0 步左邊就已經亮，所以左邊是預設 1、右邊預設 0.25 */
           .a2c__cell {
-            opacity: 0.25;
+            opacity: 1;
             transition: opacity 0.5s ease;
           }
 
-          :host([data-step="1"]) .a2c__cell:nth-child(1),
-          :host([data-step="2"]) .a2c__cell {
+          .a2c__cell:nth-child(2) {
+            opacity: 0.25;
+          }
+
+          :host([data-step="1"]) .a2c__cell:nth-child(2) {
             opacity: 1;
           }
 
@@ -766,8 +770,8 @@ git push</pre>
             --a2c-color: var(--ok);
           }
 
-          :host([data-step="1"]) .a2c__cell:nth-child(1) .a2c__tool,
-          :host([data-step="2"]) .a2c__cell:nth-child(2) .a2c__tool {
+          .a2c__cell:nth-child(1) .a2c__tool,
+          :host([data-step="1"]) .a2c__cell:nth-child(2) .a2c__tool {
             border-top-color: var(--a2c-color);
           }
 
