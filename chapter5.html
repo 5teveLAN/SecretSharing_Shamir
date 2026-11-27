@@ -275,44 +275,559 @@
         </div>
       </section>
 
-      <!-- 6 ─ 第二種方法：行列式解密（克拉瑪公式） ============================= -->
-      <section class="slide" aria-roledescription="slide" aria-label="行列式解密">
+      <!-- 6 ─ 第二種方法：利用行列式解密 ======================================
+           筆記 pg5-5：先寫出線性方程組，再用矩陣表示，最後取係數矩陣的行列式 Δ。
+           這一頁只是鋪陳（靜態、沒有 step）；Δ₀、Δ₁、Δ₂ 與克拉瑪公式在下一頁。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="利用行列式解密">
         <header class="slide__head">
-          <p class="eyebrow rise">5-5 · 方法二：行列式解密</p>
-          <h2 class="h2 rise">行列式解密（克拉瑪公式）：直求常數項 a<sub>0</sub></h2>
+          <p class="eyebrow rise">5-5 · 方法二：利用行列式解密</p>
+          <h2 class="h2 rise">先寫出線性方程組，再取係數矩陣的行列式 <span class="math"><i>Δ</i></span></h2>
         </header>
 
         <div class="slide__body grid-2">
           <div class="stack">
+            <p class="body-text rise">
+              以門檻 <span class="math">k = 3</span> 為例，拿到三個 Share
+              <span class="math">(x<sub>1</sub>, y<sub>1</sub>)、(x<sub>2</sub>, y<sub>2</sub>)、(x<sub>3</sub>, y<sub>3</sub>)</span>，
+              代入 <span class="math">f(x) = a<sub>0</sub> + a<sub>1</sub>x + a<sub>2</sub>x<sup>2</sup></span>：
+            </p>
+
             <div class="formula rise">
-              <span class="formula__label">克拉瑪公式 (Cramer's Rule)</span>
+              <span class="formula__label">線性方程組</span>
               <span class="math">
-                S = a<sub>0</sub> = <span class="math-frac"><span class="math-num">det(V<sub>0</sub>)</span><span class="math-den">det(V)</span></span> &nbsp;(在 GF(2<sup>8</sup>) 下運算)
+                y<sub>1</sub> = a<sub>0</sub> &plus; a<sub>1</sub>x<sub>1</sub> &plus; a<sub>2</sub>x<sub>1</sub><sup>2</sup><br />
+                y<sub>2</sub> = a<sub>0</sub> &plus; a<sub>1</sub>x<sub>2</sub> &plus; a<sub>2</sub>x<sub>2</sub><sup>2</sup><br />
+                y<sub>3</sub> = a<sub>0</sub> &plus; a<sub>1</sub>x<sub>3</sub> &plus; a<sub>2</sub>x<sub>3</sub><sup>2</sup>
               </span>
             </div>
-            <p class="body-text rise">
-              把 <span class="math">k</span> 個點寫成係數矩陣 <span class="math">V</span>（第 <span class="math">i</span> 列為 <span class="math">[1, x<sub>i</sub>, x<sub>i</sub><sup>2</sup>, …, x<sub>i</sub><sup>k-1</sup>]</span>）。<br />
-              將 <span class="math">V</span> 的第一行換成輸出向量 <span class="math"><b>y</b></span> 得到 <span class="math">V<sub>0</sub></span>，兩者行列式相除即為秘密 <span class="math">a<sub>0</sub></span>。
-            </p>
+
+            <div class="formula rise">
+              <span class="formula__label">矩陣表示</span>
+              <span class="math">
+                <span class="dl6-mat">
+                  <span class="dl6-col">
+                    1 &nbsp; <i class="dl6-var">x</i><sub>1</sub> &nbsp; <i class="dl6-var">x</i><sub>1</sub><sup>2</sup><br />
+                    1 &nbsp; <i class="dl6-var">x</i><sub>2</sub> &nbsp; <i class="dl6-var">x</i><sub>2</sub><sup>2</sup><br />
+                    1 &nbsp; <i class="dl6-var">x</i><sub>3</sub> &nbsp; <i class="dl6-var">x</i><sub>3</sub><sup>2</sup>
+                  </span>
+                  <span class="dl6-big">&times;</span>
+                  <span class="dl6-col">
+                    <i class="dl6-var">a</i><sub>0</sub><br />
+                    <i class="dl6-var">a</i><sub>1</sub><br />
+                    <i class="dl6-var">a</i><sub>2</sub>
+                  </span>
+                  <span class="dl6-big">=</span>
+                  <span class="dl6-col">
+                    <i class="dl6-var">y</i><sub>1</sub><br />
+                    <i class="dl6-var">y</i><sub>2</sub><br />
+                    <i class="dl6-var">y</i><sub>3</sub>
+                  </span>
+                </span>
+              </span>
+            </div>
           </div>
 
           <div class="stack">
-            <div class="card card--spot rise">
-              <div class="chip chip--brand">線性代數視角</div>
-              <h3 class="card__title" style="margin-top: var(--sp-sm);">為什麼不用求其他係數？</h3>
-              <p class="card__text">
-                1. <strong>目標明確</strong>：只替換對應 <span class="math">a<sub>0</sub></span> 的第一行，不必算 <span class="math">a<sub>1</sub>…a<sub>k-1</sub></span>。<br />
-                2. <strong>小門檻超好手算</strong>：當 <span class="math">k = 2</span> 或 <span class="math">3</span> 時，2&times;2 / 3&times;3 行列式展開非常直覺；但 <span class="math">k</span> 變大時計算量會暴增。
-              </p>
+            <div class="formula formula--hero rise">
+              <span class="formula__label">取係數矩陣的行列式</span>
+              <span class="math dl-det dl-det--hero">
+                <span class="dl-det__label"><i>Δ</i> =</span>
+                <span class="dl-det__bar">|</span>
+                <span class="dl-det__grid">
+                  1 &nbsp; x<sub>1</sub> &nbsp; x<sub>1</sub><sup>2</sup><br />
+                  1 &nbsp; x<sub>2</sub> &nbsp; x<sub>2</sub><sup>2</sup><br />
+                  1 &nbsp; x<sub>3</sub> &nbsp; x<sub>3</sub><sup>2</sup>
+                </span>
+                <span class="dl-det__bar">|</span>
+              </span>
+            </div>
+
+            <p class="body-text rise">
+              <span class="math"><i>Δ</i></span> 是係數矩陣的行列式（凡德蒙行列式）。
+              接著把「某一欄」換成右邊的 <span class="math">y</span> 向量，得到
+              <span class="math"><i>Δ</i><sub>0</sub>、<i>Δ</i><sub>1</sub>、<i>Δ</i><sub>2</sub></span>，
+              就能用克拉瑪公式 <span class="math">a<sub>0</sub> = <i>Δ</i><sub>0</sub> / <i>Δ</i></span> 直接取回秘密。
+            </p>
+
+            <p class="callout rise">
+              <strong>關鍵</strong>：只要秘密 <span class="math">a<sub>0</sub></span>，所以實際只算
+              <span class="math"><i>Δ</i></span> 與 <span class="math"><i>Δ</i><sub>0</sub></span>；
+              <span class="math"><i>Δ</i><sub>1</sub>、<i>Δ</i><sub>2</sub></span> 是同一個手法換欄，用來對照。
+            </p>
+          </div>
+        </div>
+
+        <!-- 這一頁自己的樣式：行列式排版（.dl-det*）；顏色一律用 :root 的變數 -->
+        <style>
+          .dl-det {
+            display: inline-flex;
+            align-items: stretch;
+            gap: 6px;
+            font-size: 20px;
+            line-height: 1.5;
+          }
+
+          .dl-det--hero {
+            font-size: 24px;
+          }
+
+          .dl-det__label {
+            align-self: center;
+          }
+
+          .dl-det__bar {
+            font-size: 1.9em;
+            line-height: 1;
+            font-weight: 300;
+            color: var(--ink-500);
+          }
+
+          .dl-det__grid {
+            text-align: left;
+            white-space: nowrap;
+          }
+
+          /* 矩陣表示：三欄並排，用等寬字型讓 x₁、x₂、x₃ 上下對齊 */
+          .dl6-mat {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+          }
+
+          .dl6-col {
+            font-family: var(--font-mono);
+            font-size: 17px;
+            line-height: 1.7;
+            text-align: center;
+            white-space: nowrap;
+          }
+
+          /* 未知數與 y 維持數學斜體（.math 的襯線斜體），只有數字用等寬字型對齊 */
+          .dl6-col sub,
+          .dl6-col sup {
+            font-size: 0.68em;
+          }
+
+          .dl6-var {
+            font-family: var(--font-serif);
+            font-style: italic;
+          }
+
+          .dl6-big {
+            font-size: 1.2em;
+            color: var(--ink-500);
+          }
+        </style>
+      </section>
+
+      <!-- 7 ─ 取 Δ₀、Δ₁、Δ₂（頁內 step 分鏡，4 步）============================
+           筆記「新增的第二頁」：下面分三塊，每個 step 亮一塊，同時高亮上面的方程式組。
+             0  亮 Δ₀（y 取代 a₀ 欄）：方程組亮 a₀ 那一欄
+             1  亮 Δ₁（y 取代 a₁ 欄）：方程組亮 a₁x 那一欄
+             2  亮 Δ₂（y 取代 a₂ 欄）：方程組亮 a₂x² 那一欄
+             3  結論：克拉瑪公式 a₀ = Δ₀ / Δ
+           高亮容器一律不帶 .rise（anim.js 會把 .rise 的 opacity 補回 1）。
+           顯示狀態寫 :host([data-step="N"])；樣式與腳本都留在 section 內，合併時才不會掉。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="取 Δ0、Δ1、Δ2">
+        <header class="slide__head">
+          <p class="eyebrow rise">5-6 · 方法二：行列式解密</p>
+          <h2 class="h2 rise">一欄一欄替換：<i>Δ</i><sub>0</sub>、<i>Δ</i><sub>1</sub>、<i>Δ</i><sub>2</sub></h2>
+        </header>
+
+        <div class="slide__body">
+          <div class="dl">
+            <!-- ① 方程式組：每行拆成 a₀ / a₁ / a₂ 三個欄位，輪到哪欄就亮哪欄 -->
+            <div class="dl__eqwrap">
+              <div class="dl__eqhead">被替換的欄位</div>
+              <div class="dl__eq math">
+                <div class="dl__row">
+                  <span class="dl__cell dl__cell--y">y<sub>1</sub> =</span>
+                  <span class="dl__cell dl__col dl__col--a0">a<sub>0</sub></span>
+                  <span class="dl__cell">+</span>
+                  <span class="dl__cell dl__col dl__col--a1">a<sub>1</sub>x<sub>1</sub></span>
+                  <span class="dl__cell">+</span>
+                  <span class="dl__cell dl__col dl__col--a2">a<sub>2</sub>x<sub>1</sub><sup>2</sup></span>
+                </div>
+                <div class="dl__row">
+                  <span class="dl__cell dl__cell--y">y<sub>2</sub> =</span>
+                  <span class="dl__cell dl__col dl__col--a0">a<sub>0</sub></span>
+                  <span class="dl__cell">+</span>
+                  <span class="dl__cell dl__col dl__col--a1">a<sub>1</sub>x<sub>2</sub></span>
+                  <span class="dl__cell">+</span>
+                  <span class="dl__cell dl__col dl__col--a2">a<sub>2</sub>x<sub>2</sub><sup>2</sup></span>
+                </div>
+                <div class="dl__row">
+                  <span class="dl__cell dl__cell--y">y<sub>3</sub> =</span>
+                  <span class="dl__cell dl__col dl__col--a0">a<sub>0</sub></span>
+                  <span class="dl__cell">+</span>
+                  <span class="dl__cell dl__col dl__col--a1">a<sub>1</sub>x<sub>3</sub></span>
+                  <span class="dl__cell">+</span>
+                  <span class="dl__cell dl__col dl__col--a2">a<sub>2</sub>x<sub>3</sub><sup>2</sup></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ② 三個行列式：y 分別落在 a₀ / a₁ / a₂ 那一欄 -->
+            <div class="dl__dets">
+              <div class="dl__card" data-on="0">
+                <p class="dl__name">y 取代 <span class="dl__hl dl__hl--a0">a<sub>0</sub> 欄</span></p>
+                <span class="math dl-det">
+                  <span class="dl-det__label"><i>Δ</i><sub>0</sub> =</span>
+                  <span class="dl-det__bar">|</span>
+                  <span class="dl-det__grid">
+                    <span class="dl-det__cell">y<sub>1</sub></span> &nbsp; x<sub>1</sub> &nbsp; x<sub>1</sub><sup>2</sup><br />
+                    <span class="dl-det__cell">y<sub>2</sub></span> &nbsp; x<sub>2</sub> &nbsp; x<sub>2</sub><sup>2</sup><br />
+                    <span class="dl-det__cell">y<sub>3</sub></span> &nbsp; x<sub>3</sub> &nbsp; x<sub>3</sub><sup>2</sup>
+                  </span>
+                  <span class="dl-det__bar">|</span>
+                </span>
+              </div>
+
+              <div class="dl__card" data-on="1">
+                <p class="dl__name">y 取代 <span class="dl__hl dl__hl--a1">a<sub>1</sub> 欄</span></p>
+                <span class="math dl-det">
+                  <span class="dl-det__label"><i>Δ</i><sub>1</sub> =</span>
+                  <span class="dl-det__bar">|</span>
+                  <span class="dl-det__grid">
+                    1 &nbsp; <span class="dl-det__cell">y<sub>1</sub></span> &nbsp; x<sub>1</sub><sup>2</sup><br />
+                    1 &nbsp; <span class="dl-det__cell">y<sub>2</sub></span> &nbsp; x<sub>2</sub><sup>2</sup><br />
+                    1 &nbsp; <span class="dl-det__cell">y<sub>3</sub></span> &nbsp; x<sub>3</sub><sup>2</sup>
+                  </span>
+                  <span class="dl-det__bar">|</span>
+                </span>
+              </div>
+
+              <div class="dl__card" data-on="2">
+                <p class="dl__name">y 取代 <span class="dl__hl dl__hl--a2">a<sub>2</sub> 欄</span></p>
+                <span class="math dl-det">
+                  <span class="dl-det__label"><i>Δ</i><sub>2</sub> =</span>
+                  <span class="dl-det__bar">|</span>
+                  <span class="dl-det__grid">
+                    1 &nbsp; x<sub>1</sub> &nbsp; <span class="dl-det__cell">y<sub>1</sub></span><br />
+                    1 &nbsp; x<sub>2</sub> &nbsp; <span class="dl-det__cell">y<sub>2</sub></span><br />
+                    1 &nbsp; x<sub>3</sub> &nbsp; <span class="dl-det__cell">y<sub>3</sub></span>
+                  </span>
+                  <span class="dl-det__bar">|</span>
+                </span>
+              </div>
+            </div>
+
+
+            <!-- ③ 結論：克拉瑪公式 -->
+            <p class="callout callout--ok dl__result">
+              <strong>克拉瑪公式</strong>：
+              <span class="math">a<sub>0</sub> = <i>Δ</i><sub>0</sub> / <i>Δ</i></span>、
+              <span class="math">a<sub>1</sub> = <i>Δ</i><sub>1</sub> / <i>Δ</i></span>、
+              <span class="math">a<sub>2</sub> = <i>Δ</i><sub>2</sub> / <i>Δ</i></span>。
+              只要秘密 <span class="math">a<sub>0</sub></span>，算到 <span class="math"><i>Δ</i><sub>0</sub></span> 就停手。
+            </p>
+
+            <div class="dl__bar">
+              <span class="dl__count" data-step-count></span>
+              <button class="dl__play" type="button" data-step-nav="play">▸ 自動播放</button>
             </div>
           </div>
         </div>
+
+        <noscript>
+          <p class="slide__body small muted">
+            逐格播放需要 JavaScript。靜態內容：<i>Δ</i>₀ 把第一欄換成 y、<i>Δ</i>₁ 把第二欄換成 y、<i>Δ</i>₂ 把第三欄換成 y，
+            最後以 a₀ = <i>Δ</i>₀ / <i>Δ</i> 取回秘密。
+          </p>
+        </noscript>
+
+
+        <!-- 這一頁自己的樣式：只寫 .dl__* 與 .dl-det* 新名稱；顏色一律用 :root 的變數 -->
+        <style>
+          .dl {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+            min-height: 100%;
+          }
+
+          /* ── ① 方程式組 ───────────────────────────────────────────── */
+          .dl__eqwrap {
+            position: relative;
+            padding: 20px 24px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--paper-dim);
+            box-shadow: inset 0 0 0 1px var(--line);
+          }
+
+          .dl__eqhead {
+            position: absolute;
+            top: -10px;
+            left: 18px;
+            padding: 1px 10px;
+            border-radius: 999px;
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line-2);
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            letter-spacing: 0.06em;
+            color: var(--ink-300);
+          }
+
+          .dl__eq {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 22px;
+          }
+
+          /* 三行共用的欄寬：y 運算子 | a₀ | + | a₁x | + | a₂x²，
+             每欄寬度一致，換 step 才不會左右跳動 */
+          .dl__row {
+            display: grid;
+            grid-template-columns: 3.6em 3.2em 1em 4.4em 1em 4.6em;
+            align-items: baseline;
+            justify-content: start;
+            column-gap: 2px;
+          }
+
+          .dl__cell {
+            transition: color 0.4s ease, background-color 0.4s ease;
+          }
+
+          /* 三個欄位：輪到誰就誰亮（底色＋底線） */
+          .dl__col {
+            padding: 1px 6px;
+            border-radius: 6px;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+            transition: color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
+          }
+
+          /* ── ② 三個行列式 ─────────────────────────────────────────── */
+          .dl__dets {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            align-items: stretch;
+          }
+
+          .dl__card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+            border-top: 3px solid var(--line-2);
+            opacity: 0.3;
+            transition: opacity 0.45s ease, border-color 0.45s ease;
+          }
+
+          .dl__name {
+            margin: 0;
+            font-size: 14px;
+            color: var(--ink-500);
+          }
+
+          .dl__hl {
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: 700;
+          }
+
+          .dl__hl--a0 {
+            background: var(--brand-soft);
+            color: var(--brand-600);
+          }
+
+          .dl__hl--a1 {
+            background: var(--ok-soft);
+            color: var(--ok);
+          }
+
+          .dl__hl--a2 {
+            background: var(--accent-soft);
+            color: #8a4a06;
+          }
+
+          /* 行列式排版：左右兩條直線＋置中的格線（與第 6 頁同一組名稱） */
+          .dl-det {
+            display: inline-flex;
+            align-items: stretch;
+            gap: 6px;
+            font-size: 20px;
+            line-height: 1.6;
+          }
+
+          .dl-det__label {
+            align-self: center;
+            white-space: nowrap;
+          }
+
+          .dl-det__bar {
+            font-size: 1.9em;
+            line-height: 1;
+            font-weight: 300;
+            color: var(--ink-500);
+          }
+
+          .dl-det__grid {
+            text-align: left;
+            white-space: nowrap;
+          }
+
+          /* 被 y 取代的那一欄 */
+          .dl-det__cell {
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: 700;
+            background: var(--accent-soft);
+            color: #8a4a06;
+          }
+
+          /* ── ③ 結論與控制列 ───────────────────────────────────────── */
+          .dl__result {
+            margin: 0;
+            padding: 14px 20px 14px 24px;
+            font-size: 18px;
+            line-height: 1.6;
+          }
+
+          .dl__bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--ink-300);
+          }
+
+          .dl__play {
+            padding: 4px 12px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--brand-soft);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--brand-600);
+            cursor: pointer;
+          }
+
+          .dl__play[aria-pressed="true"] {
+            background: var(--brand);
+            color: var(--paper);
+          }
+
+
+          /* ── 高亮狀態（3 步＋結論）────────────────────────────────────
+             哪一個行列式亮，方程組就亮「它被替換的那一欄」：
+               step 0：Δ₀ 亮 → 方程組亮 a₀ 欄
+               step 1：Δ₁ 亮 → 方程組亮 a₁ 欄
+               step 2：Δ₂ 亮 → 方程組亮 a₂ 欄
+               step 3：結論列亮，三個欄位回到一般狀態
+             沒輪到的欄位用 opacity 淡掉（只留 a 符號、x 與次方變淡），
+             不要用別的顏色標示，否則看起來像在指另一欄。 */
+          .dl__col sub,
+          .dl__col sup {
+            transition: opacity 0.4s ease;
+          }
+
+          :host([data-step="0"]) .dl__col--a1,
+          :host([data-step="0"]) .dl__col--a2,
+          :host([data-step="1"]) .dl__col--a0,
+          :host([data-step="1"]) .dl__col--a2,
+          :host([data-step="2"]) .dl__col--a0,
+          :host([data-step="2"]) .dl__col--a1 {
+            color: var(--ink-300);
+          }
+
+          :host([data-step="0"]) .dl__col--a1 sub,
+          :host([data-step="0"]) .dl__col--a1 sup,
+          :host([data-step="0"]) .dl__col--a2 sub,
+          :host([data-step="0"]) .dl__col--a2 sup,
+          :host([data-step="1"]) .dl__col--a0,
+          :host([data-step="1"]) .dl__col--a2 sub,
+          :host([data-step="1"]) .dl__col--a2 sup,
+          :host([data-step="2"]) .dl__col--a0,
+          :host([data-step="2"]) .dl__col--a1 sub,
+          :host([data-step="2"]) .dl__col--a1 sup {
+            opacity: 0.45;
+          }
+
+          /* 輪到的那一欄：底色＋底線，顏色與對應的行列式卡片一致 */
+          :host([data-step="0"]) .dl__col--a0 {
+            background: var(--brand-soft);
+            color: var(--brand-600);
+            border-bottom-color: var(--brand);
+          }
+
+          :host([data-step="1"]) .dl__col--a1 {
+            background: var(--ok-soft);
+            color: var(--ok);
+            border-bottom-color: var(--ok);
+          }
+
+          :host([data-step="2"]) .dl__col--a2 {
+            background: var(--accent-soft);
+            color: #8a4a06;
+            border-bottom-color: var(--accent);
+          }
+
+          /* 行列式牌：只有輪到的那一張亮，並換上對應顏色 */
+          :host([data-step="0"]) .dl__card[data-on="0"],
+          :host([data-step="1"]) .dl__card[data-on="1"],
+          :host([data-step="2"]) .dl__card[data-on="2"] {
+            opacity: 1;
+          }
+
+          :host([data-step="0"]) .dl__card[data-on="0"] {
+            border-top-color: var(--brand);
+          }
+
+          :host([data-step="1"]) .dl__card[data-on="1"] {
+            border-top-color: var(--ok);
+          }
+
+          :host([data-step="2"]) .dl__card[data-on="2"] {
+            border-top-color: var(--accent);
+          }
+
+          /* 結論：最後一步才亮 */
+          .dl__result {
+            opacity: 0.45;
+            transition: opacity 0.45s ease;
+          }
+
+          :host([data-step="3"]) .dl__result {
+            opacity: 1;
+          }
+
+          /* 減少動態：直接切換，不做補間 */
+          @media (prefers-reduced-motion: reduce) {
+            .dl__cell,
+            .dl__col,
+            .dl__card,
+            .dl__result {
+              transition-duration: 0.01ms !important;
+              transition-delay: 0ms !important;
+            }
+          }
+        </style>
+
+        <!-- 這一頁只有 CSS 顯示狀態：步驟數告訴播放器即可（不需要 init） -->
+        <script>
+          window.SlideAnim = { steps: 4 };
+        </script>
       </section>
 
-      <!-- 7 ─ 還原解密：高斯消去法 =========================================== -->
+
+          }
+
+      <!-- 8 ─ 還原解密：高斯消去法 =========================================== -->
       <section class="slide" aria-roledescription="slide" aria-label="還原解密：高斯消去法">
         <header class="slide__head">
-          <p class="eyebrow rise">5-6 · 方法三：高斯消去法</p>
+          <p class="eyebrow rise">5-7 · 方法三：高斯消去法</p>
           <h2 class="h2 rise">高斯消去法：解聯立多項式求回機密</h2>
         </header>
 
@@ -419,10 +934,10 @@
         </div>
       </section>
 
-      <!-- 8 ─ 高斯消去法：建立矩陣與前向消去 ================================ -->
+      <!-- 9 ─ 高斯消去法：建立矩陣與前向消去 ================================ -->
       <section class="slide" aria-roledescription="slide" aria-label="高斯消去法：建立矩陣與前向消去">
         <header class="slide__head">
-          <p class="eyebrow rise">5-7 · 數值演算（一）</p>
+          <p class="eyebrow rise">5-8 · 數值演算（一）</p>
           <h2 class="h2 rise">先把 Share 寫成增廣矩陣，再消去一列</h2>
         </header>
 
@@ -478,10 +993,10 @@
         </div>
       </section>
 
-      <!-- 9 ─ 高斯消去法：反向代入與驗算 ================================ -->
+      <!-- 10 ─ 高斯消去法：反向代入與驗算 ================================ -->
       <section class="slide" aria-roledescription="slide" aria-label="高斯消去法：反向代入與驗算">
         <header class="slide__head">
-          <p class="eyebrow rise">5-8 · 數值演算（二）</p>
+          <p class="eyebrow rise">5-9 · 數值演算（二）</p>
           <h2 class="h2 rise">由最後一列往回解，再代回 Share 驗算</h2>
         </header>
 
@@ -534,10 +1049,10 @@
         </div>
       </section>
 
-      <!-- 10 ─ 總結：三種方法優缺點比較 ===================================== -->
+      <!-- 11 ─ 總結：三種方法優缺點比較 ===================================== -->
       <section class="slide" aria-roledescription="slide" aria-label="三種方法優缺點比較">
         <header class="slide__head">
-          <p class="eyebrow rise">5-9 · 總結與比較</p>
+          <p class="eyebrow rise">5-10 · 總結與比較</p>
           <h2 class="h2 rise">三種還原方法優缺點總整理</h2>
         </header>
 
@@ -576,7 +1091,7 @@
     <nav class="hud" aria-label="投影片控制">
       <div class="hud__bar">
         <span class="hud__progress" aria-hidden="true"><i></i></span>
-        <span class="hud__count" aria-live="polite">01 / 11</span>
+        <span class="hud__count" aria-live="polite">01 / 12</span>
         <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
         <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
         <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
