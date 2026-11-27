@@ -52,7 +52,7 @@
       </section>
 
       <!-- 2 ─ 目錄 =========================================================
-           六章 ＋ 三份附錄，每一項都標「負責講的人」。
+           六章 ＋ 四份附錄，每一項都標「負責講的人」。
            章名與 index.html 的 CHAPTERS 一致；改章名時兩邊要一起改。
            .toc__row--link：合併播放時點一下就是 index.html 的 ?chapter=N 深連結，
            直接跳到該章第一頁（切章不會重新載入）。單獨開 cover.html 時沒有其他章，
@@ -60,9 +60,9 @@
       <section class="slide" data-intro aria-roledescription="slide" aria-label="目錄">
         <header class="slide__head">
           <p class="eyebrow rise">目錄 · CONTENTS</p>
-          <h2 class="h2 rise">六章，加上三份附錄</h2>
+          <h2 class="h2 rise">六章，加上四份附錄</h2>
           <p class="lede rise">
-            前六章是理論與實作的主線；附錄放程式 Demo、程式架構，以及這份簡報怎麼做的。
+            前六章是理論與實作的主線；附錄放程式 Demo、程式架構、簡報製作，以及合作過程。
           </p>
         </header>
 
@@ -131,6 +131,14 @@
                   </span>
                   <span class="toc__who">蕭</span>
                 </li>
+                <li class="toc__row toc__row--link rise" data-href="?chapter=10">
+                  <span class="toc__num">A4</span>
+                  <span class="toc__name">
+                    合作甘苦談
+                    <span class="toc__sub">三週的節奏 · 研究／實作／報告</span>
+                  </span>
+                  <span class="toc__who toc__who--team">三人</span>
+                </li>
               </ul>
 
               <p class="callout callout--quiet toc__note rise">
@@ -144,7 +152,7 @@
         <noscript>
           <p class="slide__body small muted">
             靜態內容：第 1–3 章由蕭負責、第 4–5 章由安負責、第 6 章由妡負責；
-            附錄 1 程式 Demo、附錄 2 程式架構、附錄 3 簡報製作，由三人共同講。
+            附錄 1 程式 Demo、附錄 2 程式架構、附錄 3 簡報製作、附錄 4 合作甘苦談，由三人共同講。
           </p>
         </noscript>
 
@@ -204,7 +212,7 @@
             color: #cdd9ff;
           }
 
-          /* ── 目錄：左欄六章、右欄三份附錄 ───────────────────────────── */
+          /* ── 目錄：左欄六章、右欄四份附錄 ───────────────────────────── */
           .toc {
             display: grid;
             grid-template-columns: 1.06fr 0.94fr;

@@ -35,222 +35,339 @@
           <h2 class="h2 rise">為什麼是原生 HTML / CSS / JS</h2>
         </header>
 
-        <div class="slide__body grid-2 grid-2--even">
-          <div class="stack rise">
-            <ul class="chips">
-              <li class="chip chip--brand">HTML</li>
-              <li class="chip chip--brand">CSS</li>
-              <li class="chip chip--brand">JavaScript</li>
-            </ul>
-
-            <p class="body-text">
-              整個系統就是一個網頁：<span class="hl"><span class="math">Canvas</span> 讀像素</span>、
-              <span class="hl">純函式算數學</span>、<span class="hl">DOM 做介面</span>。
-              瀏覽器直接就是執行環境，不需要建置、不需要後端，也沒有任何資料離開你的電腦。
-            </p>
-
-            <p class="callout">
-              <strong>零依賴</strong><br />
-              沒有打包工具、沒有 npm 套件，所有運算都跑在瀏覽器裡。
-              GF(2<sup>8</sup>) 查表只用兩個 256 格的 <span class="math">Uint8Array</span>。
-            </p>
-          </div>
-
-          <div class="cards cards--2 rise">
-            <article class="card">
-              <p class="card__index">01 · 動機</p>
-              <h3 class="card__title">組員都不熟 JS</h3>
+        <div class="slide__body stack a2x">
+          <div class="a2x-cards">
+            <article class="card rise">
+              <p class="card__index">01 · 表現力</p>
+              <h3 class="card__title">Web 技術做得出好看的東西</h3>
               <p class="card__text">
-                比起框架，先看懂一支不到 100 行、只做數學的模組更容易；錯了也能一行一行 debug。
+                HTML / CSS 排版、配色、動畫都只是文字檔；JS 也能寫很多輕便的小程式 ——
+                讀像素、建查表、算多項式，一支不到 100 行就能跑完。
               </p>
             </article>
 
-            <article class="card">
+            <article class="card rise">
               <p class="card__index">02 · 跨平台</p>
-              <h3 class="card__title">有瀏覽器就能跑</h3>
+              <h3 class="card__title">免安裝，手機也能跑</h3>
               <p class="card__text">
-                桌機、手機、投影機都能開；要分享給別人，丟一個網址就好。
+                有瀏覽器就能開：桌機、手機、投影機都一樣。沒有安裝、沒有建置，
+                要分享就是丟一個網址。
               </p>
             </article>
 
-            <article class="card">
-              <p class="card__index">03 · 沒有後端</p>
-              <h3 class="card__title">機密不離開本機</h3>
-              <p class="card__text">
-                圖片只在記憶體與 Canvas 裡處理、不上傳伺服器 —— 符合機密分享「自己保管 share」的精神。
-              </p>
-            </article>
-
-            <article class="card">
-              <p class="card__index">04 · 分工</p>
-              <h3 class="card__title">檔案邊界＝人的邊界</h3>
-              <p class="card__text">
-                三支檔案各自獨立，可以「先寫規格、再各自實作」，最後直接組起來。
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3 ─ 資料流 ======================================================== -->
-      <section class="slide" aria-roledescription="slide" aria-label="系統資料流">
-        <header class="slide__head">
-          <p class="eyebrow rise">附錄 2-2 · 系統架構</p>
-          <h2 class="h2 rise">一張原圖，怎麼變成 n 張雜訊？</h2>
-        </header>
-
-        <div class="slide__body stack">
-          <svg
-            class="diagram"
-            viewBox="0 0 1080 290"
-            role="img"
-            aria-label="資料流：原圖 ImageData 交給 ui.js 逐像素處理，呼叫 shamir.js 建立多項式並產生 n 個 share，GF 運算由 gf28.js 負責；還原時走反方向，用任 k 張 share 做拉格朗日插值取回 a0"
-            style="width: 100%; height: auto;"
-          >
-            <defs>
-              <marker id="a2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
-                <path d="M0 0 L10 5 L0 10 z" fill="#7b869c" />
-              </marker>
-              <marker id="a2-arrow-brand" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
-                <path d="M0 0 L10 5 L0 10 z" fill="#2f57d6" />
-              </marker>
-              <marker id="a2-arrow-secret" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
-                <path d="M0 0 L10 5 L0 10 z" fill="#d97706" />
-              </marker>
-            </defs>
-
-            <rect x="8" y="76" width="170" height="124" rx="14" fill="#ffffff" stroke="#e3e8f1" />
-            <text x="93" y="108" text-anchor="middle" style="font: 700 18px var(--font-sans); fill: var(--ink-900);">原圖</text>
-            <text x="93" y="134" text-anchor="middle" style="font: 13px var(--font-mono); fill: var(--ink-300);">ImageData</text>
-            <text x="93" y="158" text-anchor="middle" style="font: 13px var(--font-mono); fill: var(--brand-600);">R G B A × 像素數</text>
-            <text x="93" y="182" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">每個通道 0–255</text>
-
-            <rect x="226" y="52" width="190" height="172" rx="14" fill="#ecf0ff" stroke="#c6d2fb" />
-            <text x="321" y="80" text-anchor="middle" style="font: 700 17px var(--font-sans); fill: var(--brand-600);">ui.js</text>
-            <text x="321" y="104" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">逐像素、逐通道的迴圈</text>
-            <text x="321" y="132" text-anchor="middle" style="font: 12.5px var(--font-mono); fill: var(--ink-700);">generateSharesAll()</text>
-            <text x="321" y="158" text-anchor="middle" style="font: 12.5px var(--font-mono); fill: var(--ink-700);">reconstructAll()</text>
-            <text x="321" y="188" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">Canvas 上色 / 下載 PNG</text>
-            <text x="321" y="208" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">上傳、錯誤提示</text>
-
-            <rect x="464" y="52" width="190" height="172" rx="14" fill="#ffffff" stroke="#2f57d6" stroke-width="2" />
-            <text x="559" y="80" text-anchor="middle" style="font: 700 17px var(--font-sans); fill: var(--brand-600);">shamir.js</text>
-            <text x="559" y="108" text-anchor="middle" style="font: 12.5px var(--font-mono); fill: var(--ink-700);">generateShares()</text>
-            <text x="559" y="132" text-anchor="middle" style="font: 12.5px var(--font-mono); fill: var(--ink-700);">reconstructPixel()</text>
-            <text x="559" y="162" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">隨機係數、Horner 求值</text>
-            <text x="559" y="184" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">只認數字，不碰圖片</text>
-            <text x="559" y="206" text-anchor="middle" style="font: 12px var(--font-mono); fill: var(--ink-300);">+ Lagrange.js</text>
-
-            <rect x="702" y="76" width="170" height="124" rx="14" fill="#e3f6f2" stroke="#9fd9d0" />
-            <text x="787" y="108" text-anchor="middle" style="font: 700 17px var(--font-sans); fill: #0b6f63;">gf28.js</text>
-            <text x="787" y="134" text-anchor="middle" style="font: 12.5px var(--font-mono); fill: var(--ink-700);">add / sub / mul / div</text>
-            <text x="787" y="158" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">XOR ＋ log / exp 查表</text>
-            <text x="787" y="182" text-anchor="middle" style="font: 12px var(--font-mono); fill: var(--ink-300);">0x11d</text>
-
-            <rect x="920" y="76" width="150" height="124" rx="14" fill="#fff3e0" stroke="#f1c98f" />
-            <text x="995" y="108" text-anchor="middle" style="font: 700 17px var(--font-sans); fill: #8a4a06;">n 張 share</text>
-            <text x="995" y="134" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">每張都像雜訊</text>
-            <text x="995" y="158" text-anchor="middle" style="font: 12px var(--font-sans); fill: var(--ink-500);">湊 k 張才還原</text>
-            <text x="995" y="182" text-anchor="middle" style="font: 12px var(--font-mono); fill: var(--ink-300);">x = 1 … n</text>
-
-            <path d="M180 138 L224 138" stroke="#7b869c" stroke-width="2" marker-end="url(#a2-arrow)" />
-            <path d="M418 138 L462 138" stroke="#7b869c" stroke-width="2" marker-end="url(#a2-arrow)" />
-            <path d="M656 138 L700 138" stroke="#7b869c" stroke-width="2" marker-end="url(#a2-arrow)" />
-            <path d="M874 138 L918 138" stroke="#2f57d6" stroke-width="2" marker-end="url(#a2-arrow-brand)" />
-
-            <text x="441" y="126" text-anchor="middle" style="font: 12px var(--font-mono); fill: var(--ink-500);">f(x)</text>
-            <text x="678" y="126" text-anchor="middle" style="font: 12px var(--font-mono); fill: var(--ink-500);">GF 運算</text>
-
-            <path d="M920 246 L874 246" stroke="#d97706" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a2-arrow-secret)" />
-            <path d="M700 246 L656 246" stroke="#d97706" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a2-arrow-secret)" />
-            <path d="M462 246 L418 246" stroke="#d97706" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a2-arrow-secret)" />
-            <path d="M224 246 L182 246" stroke="#d97706" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a2-arrow-secret)" />
-            <text x="545" y="252" text-anchor="middle" style="font: 13.5px var(--font-sans); fill: #8a4a06;">還原：任選 k 張 → 拉格朗日插值 → f(0) = a₀</text>
-          </svg>
-        </div>
-      </section>
-
-      <section class="slide" aria-roledescription="slide" aria-label="模組邊界">
-        <header class="slide__head">
-          <p class="eyebrow rise">附錄 2-2 · 分層</p>
-          <h2 class="h2 rise">每層只知道它下面那層</h2>
-        </header>
-
-        <div class="slide__body stack">
-          <div class="diagram cards" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
             <article class="card rise">
-              <p class="card__index">1 · 影像層</p>
-              <h3 class="card__title"><span class="math math--sm">ui.js</span></h3>
+              <p class="card__index">03 · 同語言</p>
+              <h3 class="card__title">和簡報使用相同的語言</h3>
               <p class="card__text">
-                知道哪張圖是第幾號 share、怎麼畫到 Canvas。逐像素、逐通道呼叫下一層，
-                不寫任何數學。
-              </p>
-            </article>
-            <article class="card rise">
-              <p class="card__index">2 · 演算法層</p>
-              <h3 class="card__title"><span class="math math--sm">shamir.js</span></h3>
-              <p class="card__text">
-                吃 0–255、吐 0–255：抽係數、Horner 求值、呼叫拉格朗日取 <span class="math">a<sub>0</sub></span>。
-                不知道什麼叫圖片。
-              </p>
-            </article>
-            <article class="card rise">
-              <p class="card__index">3 · 數學層</p>
-              <h3 class="card__title"><span class="math math--sm">gf28.js</span></h3>
-              <p class="card__text">
-                只有四則運算與兩張查表陣列。換成假的實作，上層照樣能跑。
-              </p>
-            </article>
-            <article class="card rise">
-              <p class="card__index">4 · 瀏覽器層</p>
-              <h3 class="card__title"><span class="math math--sm">Canvas API</span></h3>
-              <p class="card__text">
-                讀像素、畫像素、匯出 PNG；全部在瀏覽器裡完成，沒有後端。
+                這份簡報本身就是 HTML / CSS / JS，
+                所以程式可以<strong>直接內嵌在簡報上跑</strong> —— 附錄 1 的 Demo 就是這樣。
               </p>
             </article>
           </div>
 
-          <p class="callout rise">
-            <strong>為什麼迴圈放在 <span class="math">ui.js</span>？</strong><br />
-            因為「哪張圖是第幾號 share」是介面的概念。這樣 <span class="math">shamir.js</span>
-            只認得數字，可以完全不碰 Canvas，也才能在 Node 裡用單元測試直接驗證。
+          <p class="a2x-foot rise">
+            <span class="chip chip--brand">HTML</span>
+            <span class="chip chip--brand">CSS</span>
+            <span class="chip chip--brand">JavaScript</span>
+            <span>零依賴：沒有打包工具、沒有 npm 套件</span>
           </p>
         </div>
+
+        <style>
+          /* 只有版面，沒有 step：不需 window.SlideAnim */
+          .a2x-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+            align-items: stretch;
+          }
+
+          .a2x-cards .card {
+            gap: 14px;
+            padding: 30px 28px 32px;
+            min-height: 290px;
+          }
+
+          .a2x-cards .card__title {
+            font-size: 24px;
+          }
+
+          .a2x-cards .card__text {
+            font-size: 16.5px;
+          }
+
+          .a2x-foot {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-top: 26px;
+            font-size: 14px;
+            color: var(--ink-300);
+          }
+
+          .a2x-foot > span:last-child {
+            margin-left: 4px;
+          }
+        </style>
       </section>
 
-      <!-- 5 ─ 介面規格 ====================================================== -->
-      <section class="slide" aria-roledescription="slide" aria-label="核心函式規格">
+      <!-- 3 ─ 三個區塊（Divide and conquer）===================================
+           分鏡：三張區塊卡水平排列，卡與卡之間是「介面」＝傳過去的資料。
+             C ↔ B：像素 [R,G,B] + (k,n)  →  n 個 share 像素
+             B ↔ A：運算種類 + a, b       →  0–255 的結果
+           C 是 ui.js（妡）、B 是 shamir.js（蕭，還原用 Lagrange.js）、A 是 gf28.js（安）；
+           與 excalidraw「模組資料流」同一組區塊，只留三個區塊（不分層）。
+           這一頁沒有 step：不需 window.SlideAnim。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="程式分工：三個模組">
         <header class="slide__head">
-          <p class="eyebrow rise">附錄 2-3 · 介面規格</p>
-          <h2 class="h2 rise">先把幾個函式講好，其他都自由發揮</h2>
+          <p class="eyebrow rise">附錄 2-2 · 程式分工 · Divide and conquer</p>
+          <h2 class="h2 rise">一個大問題，拆成三個區塊</h2>
+          <p class="lede rise">
+            拆分要邏輯清晰、易懂、低耦合：每塊只管自己的事，只透過「一塊資料」跟隔壁講話。
+          </p>
+        </header>
+
+        <div class="slide__body">
+          <div class="a2m">
+            <article class="card a2m__box a2m__box--c rise">
+              <p class="card__index">C · 影像與介面層 · 妡</p>
+              <h3 class="card__title"><span class="math math--sm">ui.js</span> UI ＋ 影像處理</h3>
+              <ul class="a2m__list">
+                <li>上傳圖片、設定 <span class="math">(k, n)</span></li>
+                <li>Canvas 讀像素、寫像素</li>
+                <li>逐像素、逐通道呼叫 B</li>
+                <li>下載分享圖、顯示原圖</li>
+              </ul>
+              <p class="a2m__fn">generateSharesAll / reconstructAll</p>
+              <p class="a2m__note">只呼叫 B，不自己做 GF 運算</p>
+            </article>
+
+            <div class="a2m__link rise">
+              <p class="a2m__msg">像素<br /><span class="math">[R,G,B]</span> ＋ <span class="math">(k,n)</span></p>
+              <svg viewBox="0 0 64 24" aria-hidden="true"><path d="M28 5 L42 12 L28 19" /><path d="M36 5 L50 12 L36 19" /></svg>
+              <p class="a2m__msg a2m__msg--back">n 個 share 像素</p>
+              <svg viewBox="0 0 64 24" aria-hidden="true" class="a2m__svg--back"><path d="M36 5 L22 12 L36 19" /><path d="M28 5 L14 12 L28 19" /></svg>
+            </div>
+
+            <article class="card a2m__box a2m__box--b rise">
+              <p class="card__index">B · 核心演算法層 · 蕭</p>
+              <h3 class="card__title"><span class="math math--sm">shamir.js</span> Shamir 核心</h3>
+              <dl class="a2m__sub">
+                <div><dt>makePolynomial</dt><dd>建 k−1 次多項式，亂數係數 a<sub>1</sub>…a<sub>k-1</sub></dd></div>
+                <div><dt>evalPolynomial</dt><dd>Horner 求 f(1)…f(n)</dd></div>
+                <div><dt>插值求 <span class="math">a<sub>0</sub></span><span class="a2m__file">Lagrange.js</span></dt><dd><span class="math">lagrangeInterpolateAtZero(points, k)</span></dd></div>
+              </dl>
+              <p class="a2m__fn">generateShares / reconstructPixel</p>
+              <p class="a2m__note">只碰 0–255，不碰 Canvas</p>
+            </article>
+
+            <div class="a2m__link rise">
+              <p class="a2m__msg">運算種類<br />＋ <span class="math">a, b</span></p>
+              <svg viewBox="0 0 64 24" aria-hidden="true"><path d="M28 5 L42 12 L28 19" /><path d="M36 5 L50 12 L36 19" /></svg>
+              <p class="a2m__msg a2m__msg--back">0–255 的結果</p>
+              <svg viewBox="0 0 64 24" aria-hidden="true" class="a2m__svg--back"><path d="M36 5 L22 12 L36 19" /><path d="M28 5 L14 12 L28 19" /></svg>
+            </div>
+
+            <article class="card a2m__box a2m__box--a rise">
+              <p class="card__index">A · 數學層 · 安</p>
+              <h3 class="card__title"><span class="math math--sm">gf28.js</span> GF(2<sup>8</sup>) 數學庫</h3>
+              <ul class="a2m__list">
+                <li><span class="math">exp</span> / <span class="math">log</span> 兩張查表</li>
+                <li><span class="math">add</span> · <span class="math">sub</span>（XOR）</li>
+                <li><span class="math">mul</span> · <span class="math">div</span>（查表）</li>
+                <li>本原多項式 <span class="math">0x11d</span></li>
+              </ul>
+              <p class="a2m__fn">GF28.add / sub / mul / div</p>
+              <p class="a2m__note">每個運算都吐 0–255</p>
+            </article>
+          </div>
+
+          <p class="callout callout--quiet rise">
+            <strong>為什麼要拆？</strong>每塊都能單獨開發、單獨測試：A 拿幾組已知答案驗算，
+            B 驗「拆完再還原要等於原值」，C 用假的 <span class="math">generateShares</span> 先把畫面做完。
+          </p>
+        </div>
+        <style>
+          /* 三區塊水平排列，中間兩條是「介面」：上去、回來 */
+          .a2m {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr) 92px minmax(0, 1fr);
+            gap: 8px;
+            align-items: stretch;
+          }
+
+          .a2m__box {
+            justify-content: center;
+            gap: 12px;
+            padding: 18px 18px 16px;
+            border-top: 4px solid var(--line-2);
+          }
+
+          .a2m__box--c {
+            border-top-color: var(--brand);
+            background: var(--brand-soft);
+          }
+
+          .a2m__box--b {
+            border-top-color: var(--brand-600);
+          }
+
+          .a2m__box--a {
+            border-top-color: var(--ok);
+            background: var(--ok-soft);
+          }
+
+          .a2m__box .card__title {
+            font-size: 18px;
+          }
+
+          .a2m__list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin: 0;
+            padding-left: 1.1em;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--ink-500);
+          }
+
+          .a2m__list .math {
+            font-size: 1em;
+          }
+
+          /* B 的子函式：小格直排，看得出「B 裡面還有這些」 */
+          .a2m__sub {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin: 0;
+          }
+
+          .a2m__sub > div {
+            padding: 6px 10px;
+            border-radius: var(--radius-xs);
+            background: var(--paper-dim);
+            box-shadow: inset 0 0 0 1px var(--line);
+          }
+
+          .a2m__sub dt {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            justify-content: flex-start;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: var(--brand-600);
+          }
+
+          .a2m__sub dd {
+            margin: 1px 0 0;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: var(--ink-500);
+          }
+
+          .a2m__sub dd .math {
+            font-size: 1em;
+          }
+
+          .a2m__file {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            font-weight: 400;
+            color: var(--ink-300);
+          }
+
+          .a2m__fn {
+            margin-top: 4px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: var(--ink-700);
+          }
+
+          .a2m__note {
+            font-size: 13px;
+            color: var(--ink-300);
+          }
+
+          /* 卡與卡之間：上面一個方向、下面反方向 */
+          .a2m__link {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+            text-align: center;
+          }
+
+          .a2m__msg {
+            margin: 0;
+            font-size: 12.5px;
+            line-height: 1.45;
+            color: var(--ink-500);
+          }
+
+          .a2m__msg .math {
+            font-size: 1em;
+          }
+
+          .a2m__msg--back {
+            margin-top: 16px;
+            color: var(--ink-300);
+          }
+
+          .a2m__link svg {
+            width: 56px;
+            margin: 2px auto;
+            fill: none;
+            stroke: var(--ink-300);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          .a2m__link .a2m__svg--back {
+            stroke: var(--line-2);
+          }
+        </style>
+      </section>
+
+      <!-- 4 ─ Interface 先出來 ===============================================
+           筆記 a2-2 後半：分完區塊後 Interface 要先出來，最重要。
+           左：三張小卡列出各自匯出什麼（與 code/*.js、guild.md 一致）
+           右：為什麼介面要先定 —— 獨立開發、換掉假貨、改介面要三個人講好
+           這一頁沒有 step：不需 window.SlideAnim。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="先把介面講好">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 2-2 · 程式分工 · Interface 先出來</p>
+          <h2 class="h2 rise">分完區塊，第一件事是把 Interface 講好</h2>
         </header>
 
         <div class="slide__body grid-2">
-          <div class="stack rise">
-            <div class="formula">
-              <span class="formula__label">gf28.js</span>
-              <span class="math math--sm">add / sub / mul / div(a, b) → number</span>
+          <div class="stack">
+            <div class="formula a2i rise">
+              <span class="formula__label">A · gf28.js</span>
+              <span class="math math--sm">GF28.add / sub / mul / div(a, b) → number</span>
             </div>
-            <div class="formula">
-              <span class="formula__label">shamir.js</span>
+            <div class="formula a2i rise">
+              <span class="formula__label">B · shamir.js</span>
               <span class="math math--sm">generateShares(value, k, n) → number[]</span>
             </div>
-            <div class="formula">
-              <span class="formula__label">shamir.js</span>
+            <div class="formula a2i rise">
+              <span class="formula__label">B · shamir.js</span>
               <span class="math math--sm">reconstructPixel(points, k) → number</span>
             </div>
-            <div class="formula">
-              <span class="formula__label">ui.js</span>
+            <div class="formula a2i rise">
+              <span class="formula__label">C · ui.js</span>
               <span class="math math--sm">generateSharesAll(imageData, k, n) → ImageData[]</span>
             </div>
-            <div class="formula">
-              <span class="formula__label">ui.js</span>
-              <span class="math math--sm">reconstructAll(imageDataList, k) → ImageData</span>
-            </div>
 
-            <p class="callout callout--quiet">
-              規格只寫 <strong>函式名 / 輸入 / 輸出</strong>；底層用物件、class 還是純函式，不影響別人。
-              回答不出參數與回傳值的，就不是規格，是願望。
+            <p class="callout callout--quiet rise">
+              規格只寫<strong>函式名 / 參數 / 回傳值</strong>：底層用物件、class 還是純函式，不影響別人。
+              回答不出參數與回傳值的，就不是介面，是願望。
             </p>
           </div>
 
@@ -258,182 +375,580 @@
             <li class="step rise">
               <span class="step__num">1</span>
               <span class="step__body">
-                <span class="step__title">值域寫死</span>
-                像素值一律 <span class="math">0–255</span> 的整數；<span class="math">1 ≤ k ≤ n ≤ 255</span>；
-                share 的座標 <span class="math">x</span> 從 <span class="math">1</span> 開始（<span class="math">0</span> 是秘密本身）。
+                <span class="step__title">先有洞，再填內容</span>
+                三支檔案的函式簽名先寫好，誰都可以照著簽名開工；
+                裡面 <span class="math">throw new Error("todo")</span> 也無所謂。
               </span>
             </li>
             <li class="step rise">
               <span class="step__num">2</span>
               <span class="step__body">
-                <span class="step__title">邊界有定義</span>
-                <span class="math">div(a, 0)</span>、<span class="math">k &gt; n</span>、share 張數不足都直接拋錯，
-                而不是默默回一張錯的圖。
+                <span class="step__title">可以換掉假貨</span>
+                安 還沒寫好前，蕭 用假的 <span class="math">GF28</span> 先跑；
+                蕭 還沒寫好前，妡 用假的 <span class="math">generateShares</span> 先做畫面。
               </span>
             </li>
             <li class="step rise">
               <span class="step__num">3</span>
               <span class="step__body">
-                <span class="step__title">不改別人的資料</span>
-                <span class="math">generateShares</span> 不動輸入；
-                <span class="math">generateSharesAll</span> 一律回傳新的 ImageData，原圖保持原樣。
-              </span>
-            </li>
-            <li class="step rise">
-              <span class="step__num">4</span>
-              <span class="step__body">
-                <span class="step__title">可以互換假貨</span>
-                安 還沒寫好前，蕭 用假的 <span class="math">GF28</span> 先跑；
-                蕭 還沒寫好前，妡 用假的 <span class="math">generateShares</span> 先做畫面。
+                <span class="step__title">改介面要三個人一起</span>
+                接縫只有 4+2 個函式：改一個簽名，上下游都要跟著改；
+                改實作則誰都不用等誰。
               </span>
             </li>
           </ul>
         </div>
       </section>
 
-      <!-- 6 ─ 三個檔案、三個人 ============================================== -->
-      <section class="slide" aria-roledescription="slide" aria-label="分工與模組">
+      <!-- 5 ─ 介紹 interface：以 reconstructPixel 為例 ========================
+           筆記 a2-3：函式名稱、傳入參數、回傳值。範例用真實簽名
+           reconstructPixel(points, k)（筆記寫的 reconstructShares 就是它，改名以程式為準）。
+           這一頁沒有 step：不需 window.SlideAnim。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="一個介面長什麼樣">
         <header class="slide__head">
-          <p class="eyebrow rise">附錄 2-4 · 分工</p>
-          <h2 class="h2 rise">一個檔案，一個人，互不阻塞</h2>
+          <p class="eyebrow rise">附錄 2-3 · 介面規格 · 範例</p>
+          <h2 class="h2 rise">一個介面，只回答三件事</h2>
           <p class="lede rise">
-            每人只維護一支檔案，靠那幾個函式當接縫；誰先完成都不會卡住其他人。
+            名字叫什麼、要給它什麼、它會還你什麼 —— 用還原函式當例子。
           </p>
         </header>
 
         <div class="slide__body grid-2">
           <div class="stack">
-            <article class="card rise">
-              <p class="card__index">安 · 數學層</p>
-              <h3 class="card__title"><span class="math math--sm">code/gf28.js</span></h3>
-              <p class="card__text">
-                模組載入時建 <span class="math">exp</span> / <span class="math">log</span> 兩張表，
-                提供 <span class="math">add / sub / mul / div</span>。加法是 XOR、乘除查表，
-                本原多項式 <span class="math">0x11d</span>（<span class="math">x<sup>8</sup>+x<sup>4</sup>+x<sup>3</sup>+x<sup>2</sup>+1</span>）。
-              </p>
-            </article>
+            <div class="formula formula--lg rise">
+              <span class="formula__label">code/shamir.js</span>
+              <span class="math math--sm">reconstructPixel(points, k) → number</span>
+            </div>
 
-            <article class="card rise">
-              <p class="card__index">蕭 · 演算法層</p>
-              <h3 class="card__title"><span class="math math--sm">code/shamir.js</span></h3>
-              <p class="card__text">
-                用 <span class="math">crypto.getRandomValues</span> 抽亂數係數，
-                Horner 法求 <span class="math">f(1)…f(n)</span>；
-                還原交給 <span class="math">code/Lagrange.js</span> 取 <span class="math">f(0) = a<sub>0</sub></span>。
-              </p>
-            </article>
-
-            <article class="card rise">
-              <p class="card__index">妡 · 影像與介面層</p>
-              <h3 class="card__title"><span class="math math--sm">code/ui.js</span></h3>
-              <p class="card__text">
-                逐像素、逐通道呼叫上面兩層；負責 Canvas 顯示、上傳與拖曳、
-                分享圖下載、還原預覽，以及所有錯誤提示。
-              </p>
-            </article>
+            <ul class="iface rise">
+              <li>
+                <b>名稱</b>
+                <span class="math">reconstructPixel</span>：要還原的是「一個像素的一個通道」，
+                所以叫 Pixel，不叫 Image。
+              </li>
+              <li>
+                <b>參數 1</b>
+                <span class="math">points: {x:number, y:number}[]</span> ——
+                <span class="math">x</span> 是 share 編號 <span class="math">1…n</span>、
+                <span class="math">y</span> 是該張的像素值；<strong>至少 k 個</strong>。
+              </li>
+              <li>
+                <b>參數 2</b>
+                <span class="math">k: number</span> —— 門檻值（規格裡的 r）。
+              </li>
+              <li>
+                <b>回傳</b>
+                <span class="math">number</span> —— <span class="math">0–255</span> 的 secret 值，
+                不是陣列、不是圖片。
+              </li>
+            </ul>
           </div>
 
           <div class="stack">
-            <figure class="figure">
-              <svg viewBox="0 0 380 372" role="img" aria-label="三個模組的依賴方向：ui.js 依賴 shamir.js，shamir.js 依賴 gf28.js，方向只有由上往下" style="width: 100%; max-width: 360px; height: auto;">
-                <defs>
-                  <marker id="a2-dep" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
-                    <path d="M0 0 L10 5 L0 10 z" fill="#7b869c" />
-                  </marker>
-                </defs>
-                <rect x="24" y="12" width="332" height="80" rx="14" fill="#ecf0ff" stroke="#c6d2fb" />
-                <text x="190" y="44" text-anchor="middle" style="font: 700 19px var(--font-sans); fill: var(--brand-600);">ui.js</text>
-                <text x="190" y="70" text-anchor="middle" style="font: 13px var(--font-mono); fill: var(--ink-500);">generateSharesAll / reconstructAll</text>
+            <div class="terminal rise">
+              <p class="terminal__bar">呼叫端（C 層）</p>
+<pre><span class="c">// 每張 share 取同一個像素的 R 通道</span>
+const points = shares.<span class="ok">map</span>((img, i) =&gt; ({
+  x: i + 1,                 <span class="c">// 1…n</span>
+  y: pixelAt(img, i + 1).r, <span class="c">// 0–255</span>
+}));
 
-                <path d="M190 94 L190 138" stroke="#7b869c" stroke-width="2" marker-end="url(#a2-dep)" />
-
-                <rect x="24" y="142" width="332" height="80" rx="14" fill="#ffffff" stroke="#2f57d6" stroke-width="2" />
-                <text x="190" y="174" text-anchor="middle" style="font: 700 19px var(--font-sans); fill: var(--brand-600);">shamir.js</text>
-                <text x="190" y="200" text-anchor="middle" style="font: 13px var(--font-mono); fill: var(--ink-500);">generateShares / reconstructPixel</text>
-
-                <path d="M190 224 L190 268" stroke="#7b869c" stroke-width="2" marker-end="url(#a2-dep)" />
-
-                <rect x="24" y="272" width="332" height="80" rx="14" fill="#e3f6f2" stroke="#9fd9d0" />
-                <text x="190" y="304" text-anchor="middle" style="font: 700 19px var(--font-sans); fill: #0b6f63;">gf28.js</text>
-                <text x="190" y="330" text-anchor="middle" style="font: 13px var(--font-mono); fill: var(--ink-500);">GF28.add / sub / mul / div</text>
-              </svg>
-              <figcaption>依賴只有一個方向：改下層不改上層，改介面要三個人一起。</figcaption>
-            </figure>
+reconstructPixel(points, k);   <span class="ok">// → 0–255</span></pre>
+            </div>
 
             <p class="callout callout--quiet rise">
-              <strong>接縫處的約定</strong>：<span class="math">shamir.js</span> 從
-              <span class="math">./gf28.js</span> 匯入 <span class="math">GF28</span>；
-              <span class="math">ui.js</span> 從 <span class="math">./shamir.js</span> 匯入兩個函式。
-              匯出名稱對齊，換人接手也不必改程式。
+              <strong>介面沒寫到的，就是還沒決定</strong>：張數不足
+              （<span class="math">points.length &lt; k</span>）、
+              <span class="math">x</span> 重複、值超出 <span class="math">0–255</span>，
+              都要先講好是 throw 還是回 <span class="math">NaN</span> —— 我們選 throw。
             </p>
           </div>
         </div>
+
+        <style>
+          .a2i {
+            gap: 12px;
+            padding: 16px 20px;
+          }
+
+          .a2i .formula__label {
+            min-width: 88px;
+            font-size: 12px;
+          }
+
+          .a2i .math {
+            font-size: 15.5px;
+            white-space: nowrap;
+          }
+
+          .a2i .formula__label {
+            white-space: nowrap;
+          }
+
+          .formula--lg {
+            padding: 20px 24px;
+          }
+
+          .formula--lg .math {
+            font-size: 20px;
+          }
+
+          .iface {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--ink-500);
+          }
+
+          .iface li {
+            padding-left: 14px;
+            border-left: 3px solid var(--line-2);
+          }
+
+          .iface b {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            color: var(--brand);
+          }
+
+          .iface .math {
+            font-size: 1em;
+          }
+        </style>
       </section>
 
-      <!-- 7 ─ 與 AI、GitHub 協作 =========================================== -->
-      <section class="slide" aria-roledescription="slide" aria-label="開發流程">
+      <!-- 6 ─ 三個視窗：介面實作 ==============================================
+           筆記 a2-4：AI 給 js code 後，各自開發。
+           三個「視窗」水平排列，每個視窗 = 一個檔案 = 一個人。
+           簽名以 guild.md 與 code/*.js 為準（只列公開的，省略內部小工具）。
+           這一頁沒有 step：不需 window.SlideAnim。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="三個檔案，三個人">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 2-4 · 分工</p>
+          <h2 class="h2 rise">介面定好，AI 給初版 code，各自開發</h2>
+          <p class="lede rise">
+            每人只碰自己那支檔案；唯一要三個人一起改的，只有函式簽名。
+          </p>
+        </header>
+
+        <div class="slide__body">
+          <div class="a2w">
+            <article class="a2w__win rise">
+              <p class="a2w__bar"><span class="a2w__name">code/gf28.js</span><span class="a2w__who">安</span></p>
+              <pre><span class="c">// GF(2^8) · 0x11d</span>
+export const GF28 = {
+  add(a, b) {}, <span class="c">// a ^ b</span>
+  sub(a, b) {}, <span class="c">// = add</span>
+  mul(a, b) {}, <span class="c">// 查表</span>
+  div(a, b) {}, <span class="c">// 0 則錯</span>
+};</pre>
+              <p class="a2w__note">只有四則運算與兩張 256 格查表。</p>
+            </article>
+
+            <article class="a2w__win rise">
+              <p class="a2w__bar"><span class="a2w__name">code/shamir.js</span><span class="a2w__who">蕭</span></p>
+              <pre><span class="c">// 只碰 0–255</span>
+export function
+  <span class="ok">generateShares</span>(value, k, n) {}
+<span class="c">// 內部用 Lagrange.js</span>
+export function
+  <span class="ok">reconstructPixel</span>(points, k) {}</pre>
+              <p class="a2w__note">多項式、Horner、拉格朗日插值都在這裡。</p>
+            </article>
+
+            <article class="a2w__win rise">
+              <p class="a2w__bar"><span class="a2w__name">code/ui.js</span><span class="a2w__who">妡</span></p>
+              <pre><span class="c">// 上層：Canvas、上傳</span>
+export function
+  <span class="ok">generateSharesAll</span>(
+    imageData, k, n) {}
+<span class="c">// 至少 k 張</span>
+export function
+  <span class="ok">reconstructAll</span>(
+    imageDataList, k) {}</pre>
+              <p class="a2w__note">逐像素逐通道呼叫 B，畫面錯誤都由這裡顯示。</p>
+            </article>
+          </div>
+
+          <p class="a2w__rule">
+            <span class="math">shamir.js</span> 從 <span class="math">./gf28.js</span> 匯入 <span class="math">GF28</span>；
+            <span class="math">ui.js</span> 從 <span class="math">./shamir.js</span> 匯入兩個函式 —— 依賴只有由上往下一個方向。
+          </p>
+        </div>
+
+        <style>
+          /* 三個視窗：深色標題列 ＋ 白底程式碼，寬度三等分 */
+          .a2w {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+            align-items: stretch;
+          }
+
+          .a2w__win {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            background: var(--paper);
+            box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+          }
+
+          .a2w__bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            background: var(--ink-900);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #8a94a8;
+          }
+
+          /* 沿用 .terminal__bar 的三顆圓點 */
+          .a2w__bar::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            flex: none;
+            margin-right: 26px;
+            border-radius: 50%;
+            background: #f0876f;
+            box-shadow: 14px 0 0 #f2c46d, 28px 0 0 #6ecb8f;
+          }
+
+          .a2w__name {
+            color: #dbe3f4;
+          }
+
+          .a2w__who {
+            margin-left: auto;
+            font-family: var(--font-sans);
+            font-size: 11.5px;
+            letter-spacing: 0.08em;
+            color: var(--ink-300);
+          }
+
+          .a2w__win pre {
+            min-height: 230px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            flex: 1;
+            margin: 0;
+            padding: 14px 16px;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.85;
+            color: var(--ink-700);
+            background: var(--paper);
+          }
+
+          .a2w__win .c {
+            color: var(--ink-300);
+          }
+
+          .a2w__win .ok {
+            color: var(--brand-600);
+          }
+
+          .a2w__note {
+            padding: 10px 16px 12px;
+            border-top: 1px dashed var(--line);
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: var(--ink-500);
+          }
+
+          .a2w__rule {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--ink-500);
+          }
+
+          .a2w__rule .math {
+            font-size: 1em;
+          }
+        </style>
+      </section>
+
+      <!-- 7 ─ 與 AI、GitHub 協作（2 步）=======================================
+           筆記 a2-5：水平兩張圖卡，第 1 步先出現左邊（AI），第 2 步再出現右邊（GitHub）。
+           一進這一頁就只有一個 step：左邊 AI 卡先亮，按一下前進才亮右邊 GitHub 卡。
+           右卡底部是示意 graph（純 HTML/CSS）：三個人各自 commit，全部匯入 main。
+           顯示切換放在外層 .a2c__cell（它是 <div>，不會被 anim.js 給 .rise 的
+           opacity:1 蓋掉）；內層 .card.rise 照常進場，兩者相乘才輪到誰亮。
+             第 0 步（一翻到這一頁）：左邊 AI 卡亮、右邊淡
+             第 1 步（data-step="1"）：右邊 GitHub 卡也亮 -->
+      <section class="slide" aria-roledescription="slide" aria-label="與 AI、GitHub 協作">
         <header class="slide__head">
           <p class="eyebrow rise">附錄 2-5 · 開發流程</p>
           <h2 class="h2 rise">我們怎麼用 AI 和 GitHub 協作</h2>
         </header>
 
-        <div class="slide__body grid-2">
-          <ul class="steps">
-            <li class="step rise">
-              <span class="step__num">1</span>
-              <span class="step__body">
-                <span class="step__title">AI 先出「骨架」</span>
-                因為都不熟 JS，請 AI 先寫三支檔案的<strong>介面草稿</strong>（只有函式簽名與註解），
-                先確定接得起來，再各自填內容。
-              </span>
-            </li>
-            <li class="step rise">
-              <span class="step__num">2</span>
-              <span class="step__body">
-                <span class="step__title">用 AI 補細節、自己驗證</span>
-                查表、Horner、Canvas 這類細節請 AI 給初版；
-                數值對不對一定自己再算一次（例如 <span class="math">0x57 × 0x83 = 0x31</span>）。
-              </span>
-            </li>
-            <li class="step rise">
-              <span class="step__num">3</span>
-              <span class="step__body">
-                <span class="step__title">規格變成可執行的測試</span>
-                同一份介面規格寫成 <strong>BDD</strong>（給人看的 Gherkin）與<strong>單元測試</strong>；
-                跑一次 <span class="math">npm test</span> 就知道有沒有壞。
-              </span>
-            </li>
-            <li class="step rise">
-              <span class="step__num">4</span>
-              <span class="step__body">
-                <span class="step__title">分支 + Pull Request</span>
-                一人一條分支、一個功能一個 commit；合併前先跑測試，衝突就在合併時解決。
-              </span>
-            </li>
-          </ul>
-
-          <div class="stack">
-            <div class="terminal rise">
-              <p class="terminal__bar">terminal</p>
-<pre><span class="c"># 一人一條分支</span>
-git switch -c feat/gf28
-<span class="c"># 改完先跑測試</span>
-npm test        <span class="ok"># 21 pass</span>
-npm run bdd     <span class="ok"># 23 scenarios</span>
-<span class="c"># 小步驟 commit，訊息寫清楚改了什麼</span>
-git add code/gf28.js
-git commit -m "gf28: log/exp 查表"
-<span class="c"># 推到遠端，開 PR 合併</span>
-git push -u origin feat/gf28</pre>
+        <div class="slide__body">
+          <div class="a2c">
+            <div class="a2c__cell">
+              <article class="card a2c__tool rise">
+                <p class="card__index">STEP 1 · 寫程式</p>
+                <h3 class="card__title">AI Agent —— 用對話寫 code</h3>
+                <p class="a2c__app">VS Code ＋ Antigravity</p>
+                <ul class="a2c__list">
+                  <li>用對話描述要的函式，AI 直接改在檔案裡</li>
+                  <li>自己那支檔案的內容自己負責，看不懂就問它</li>
+                  <li>測試自己的模組：<b>單元測試</b>（純 code）與 <b>Gherkin</b></li>
+                </ul>
+                <p class="a2c__cmd"><span>npm test</span><span>npm run bdd</span></p>
+              </article>
             </div>
 
-            <p class="callout callout--ok rise">
-              <strong>AI 協作的關鍵不是「叫它寫」，而是「先講好介面」</strong><br />
-              有了規格與測試，AI 產出的程式碼可以被驗證；
-              沒有規格，三個人（和三個 AI）寫出來的東西誰也接不起來。
-            </p>
+            <div class="a2c__cell">
+              <article class="card a2c__tool rise">
+                <p class="card__index">STEP 2 · 合起來</p>
+                <h3 class="card__title">GitHub —— push &amp; pull</h3>
+                <p class="a2c__app">同一個 repo，全部放 main</p>
+                <ul class="a2c__list">
+                  <li>開工先 pull、收工就 push，不做長期分支</li>
+                  <li>因為各自只寫自己的檔案，不會有衝突問題</li>
+                </ul>
+
+                <!-- 示意 graph：主線 main 垂直往下，三個人各自 commit 由上而下掛在主線上 -->
+                <figure class="a2c__graph">
+                  <figcaption class="a2c__graph-head">
+                    <span class="a2c__graph-main">main</span>
+                    <span>git graph · 由上往下是時間</span>
+                  </figcaption>
+
+                  <ol class="a2c__commits">
+                    <li><span class="a2c__who">安</span><i class="a2c__dot"></i><span class="a2c__msg">feat: shamir.js Horner 求值</span></li>
+                    <li><span class="a2c__who">妡</span><i class="a2c__dot"></i><span class="a2c__msg">feat: Lagrange.js 插值</span></li>
+                    <li><span class="a2c__who">我</span><i class="a2c__dot"></i><span class="a2c__msg">feat: app.js 介面接線</span></li>
+                  </ol>
+
+                  <p class="a2c__graph-note">
+                    開工先 <b>pull</b>、收工就 <b>push</b>：三筆都直接進 main
+                  </p>
+                </figure>
+              </article>
+            </div>
           </div>
         </div>
+
+        <style>
+          .a2c {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: stretch;
+          }
+
+          /* 外層只負責「輪到了沒」：還沒輪到的降到 0.25，輪到就回到 1。
+             第 0 步左邊就已經亮，所以左邊是預設 1、右邊預設 0.25 */
+          .a2c__cell {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+          }
+
+          .a2c__cell:nth-child(2) {
+            opacity: 0.25;
+          }
+
+          :host([data-step="1"]) .a2c__cell:nth-child(2) {
+            opacity: 1;
+          }
+
+          .a2c__tool {
+            gap: 12px;
+            height: calc(100% - 1px);
+            padding: 24px 26px 24px;
+            border-top: 4px solid var(--line-2);
+            transition: border-color 0.5s ease;
+          }
+
+          .a2c__cell:nth-child(1) {
+            --a2c-color: var(--brand);
+          }
+
+          .a2c__cell:nth-child(2) {
+            --a2c-color: var(--ok);
+          }
+
+          .a2c__cell:nth-child(1) .a2c__tool,
+          :host([data-step="1"]) .a2c__cell:nth-child(2) .a2c__tool {
+            border-top-color: var(--a2c-color);
+          }
+
+          .a2c__tool .card__title {
+            font-size: 21px;
+          }
+
+          .a2c__app {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--brand-600);
+          }
+
+          .a2c__list {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin: 0;
+            padding-left: 1.1em;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--ink-500);
+          }
+
+          .a2c__list b {
+            color: var(--ink-900);
+          }
+
+          .a2c__cmd {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+          }
+
+          .a2c__cmd span {
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: var(--ink-900);
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: #6ecb8f;
+          }
+
+          /* ── 示意 graph：三條線都直接接回 main（不開長期分支）─────────────
+             每列是一條泳道：人名 │ 自己的 commit ●━━━● main
+             線條用 ::before / ::after 畫，不需要圖片也不需要 JS */
+          .a2c__graph {
+            position: relative;
+            margin-top: auto;
+            padding: 10px 14px 11px;
+            border-radius: var(--radius-sm);
+            background: var(--paper-dim);
+            box-shadow: inset 0 0 0 1px var(--line);
+          }
+
+          .a2c__graph-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            /* 左邊留出跟 commit 主線一樣的位置，main 標籤剛好壓在主線上方 */
+            padding: 0 0 7px 60px;
+            border-bottom: 1px solid var(--line);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: var(--ink-300);
+          }
+
+          /* main 標籤：反推回主線正上方 */
+          .a2c__graph-main {
+            margin-left: -60px;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--ink-700);
+          }
+
+          /* 一筆 commit＝一列：安 ●── commit 訊息，圓點串在同一條垂直 main 上。
+             主線用 .a2c__commits 的 ::before 貫穿，圓點疊在它上面。 */
+          .a2c__commits {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 10px 0 0;
+            padding: 0 0 0 60px;
+            list-style: none;
+          }
+
+          /* 垂直主線：對齊圓點中心（60px 左欄、圓點 9px 寬 → 中心在 60px） */
+          .a2c__commits::before {
+            content: "";
+            position: absolute;
+            top: -14px;
+            bottom: -2px;
+            left: 59px;
+            width: 2px;
+            background: var(--ink-900);
+            opacity: 0.75;
+          }
+
+          .a2c__commits li {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-left: 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+          }
+
+          /* 人名：固定欄寬靠右對齊，緊貼圓點左側 */
+          .a2c__who {
+            position: absolute;
+            left: -60px;
+            width: 46px;
+            text-align: right;
+            white-space: nowrap;
+            color: var(--ink-700);
+          }
+
+          /* commit 圓點：疊在垂直主線上（主線中心在 li 左緣 -1px） */
+          .a2c__dot {
+            position: absolute;
+            left: -5px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-soft);
+            z-index: 1;
+          }
+
+          .a2c__msg {
+            color: var(--ink-500);
+          }
+
+          /* figure 預設有 margin-inline，這裡歸零才不會擠到卡片內距 */
+          .a2c__graph {
+            margin-inline: 0;
+          }
+
+          .a2c__graph-note {
+            margin: 9px 0 0;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--ink-500);
+          }
+
+          .a2c__graph-note b {
+            color: var(--ok);
+          }
+
+          /* 減少動態：直接切換，不做補間 */
+          @media (prefers-reduced-motion: reduce) {
+            .a2c__cell,
+            .a2c__tool {
+              transition-duration: 0.01ms;
+            }
+          }
+        </style>
+
+        <script>
+          // 只有 CSS 顯示狀態，步驟數告訴播放器即可
+          window.SlideAnim = { steps: 2 };
+        </script>
       </section>
 
     </main>
