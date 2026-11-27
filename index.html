@@ -140,7 +140,7 @@
        *   4. 最後呼叫 deck.js 的 SlideDeck.init()：頁碼是整份簡報的 1–N，
        *      換章節、翻頁都只是換投影片，不會再重新載入任何檔案。
        *
-       * 之後要加其他章：在 CHAPTERS 多加一筆即可（目前有 1、2、3、4、5、6）。
+       * 之後要加其他章：在 CHAPTERS 多加一筆即可（目前有 0–10）。
        * 附錄檔名用 appendixN.html（附錄 1 是 appendix1.html），label 寫「附錄 N」、
        * short 寫「AN」，章節鈕才不會顯示成 CH.7 之類的章號。
        * ?chapter=N 決定從哪一章的第一頁開始；#頁碼 則是合併後的全域頁碼。
@@ -162,6 +162,7 @@
           7: { file: "appendix1.html", label: "附錄 1", short: "A1", name: "程式實作 Demo" },
           8: { file: "appendix2.html", label: "附錄 2", short: "A2", name: "程式實作介紹" },
           9: { file: "appendix3.html", label: "附錄 3", short: "A3", name: "簡報製作介紹" },
+          10: { file: "appendix4.html", label: "附錄 4", short: "A4", name: "合作甘苦談" },
         };
 
         var boot = document.getElementById("boot");

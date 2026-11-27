@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>附錄 4 · 合作甘苦談</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck" aria-roledescription="簡報" aria-label="附錄 4 合作甘苦談">
+      <!-- 1 ─ 三週的節奏（三個水平圖卡）=====================================
+           沒有 step：三個星期一次攤開，最後用一句話收在「卡住了」。 -->
+      <section class="slide is-active" aria-roledescription="slide" aria-label="三週的節奏">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 4-1 · 合作甘苦談</p>
+          <h2 class="h2 rise">三週，卡在「不知道要幹嘛」</h2>
+          <p class="lede rise">
+            三個人、三個星期：先各自研究，再一起討論，最後才動手實作。
+          </p>
+        </header>
+
+        <div class="slide__body gw">
+          <div class="cards gw__cards">
+            <article class="card rise gw__week">
+              <p class="card__index">WEEK 1</p>
+              <h3 class="card__title">各自研究</h3>
+              <p class="card__text">分頭找資料、讀理論，先把名詞與數學弄懂。</p>
+              <span class="gw__no" aria-hidden="true">01</span>
+            </article>
+
+            <article class="card rise gw__week">
+              <p class="card__index">WEEK 2</p>
+              <h3 class="card__title">討論</h3>
+              <p class="card__text">把各自讀懂（或沒讀懂）的東西攤開來對。</p>
+              <span class="gw__no" aria-hidden="true">02</span>
+            </article>
+
+            <article class="card rise gw__week">
+              <p class="card__index">WEEK 3</p>
+              <h3 class="card__title">實作</h3>
+              <p class="card__text">開始寫程式，試著把想法真的做出來。</p>
+              <span class="gw__no" aria-hidden="true">03</span>
+            </article>
+          </div>
+
+          <p class="callout callout--secret gw__punch rise">
+            <strong>三週後：研究不出個東西來、進度落後。</strong><br />
+            坐在電腦前的時間不少，卻常常不知道要幹嘛。
+          </p>
+        </div>
+
+        <noscript>
+          <p class="slide__body small muted">
+            靜態內容：第 1 週各自研究、第 2 週討論、第 3 週實作；
+            三週後發現研究不出東西、進度落後，也不知道要幹嘛。
+          </p>
+        </noscript>
+
+        <!-- 這一頁自己的樣式：只新增 .gw__* 名稱；顏色一律用 :root 的變數 -->
+        <style>
+          .gw {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            height: 100%;
+            min-height: 0;
+          }
+
+          .gw__cards {
+            gap: 18px;
+          }
+
+          .gw__cards .card {
+            position: relative;
+            overflow: hidden;
+            gap: 8px;
+            min-height: 260px;
+            padding: 22px 24px 24px;
+            border-top: 4px solid var(--line-2);
+          }
+
+          .gw__cards .card:nth-child(2) {
+            border-top-color: var(--accent);
+          }
+
+          .gw__cards .card:nth-child(3) {
+            border-top-color: var(--brand);
+          }
+
+          .gw__cards .card__title {
+            font-size: 26px;
+          }
+
+          .gw__cards .card__text {
+            font-size: 15.5px;
+            max-width: 26em;
+          }
+
+          /* 卡片右下角的巨大週次：只是背景裝飾，不搶文字 */
+          .gw__no {
+            position: absolute;
+            right: 16px;
+            bottom: 2px;
+            font-family: var(--font-mono);
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            color: var(--paper-dim);
+            pointer-events: none;
+          }
+
+          /* 收尾那句：暖色，和平順的週次卡形成對比 */
+          .gw__punch {
+            font-size: 17.5px;
+            line-height: 1.7;
+          }
+
+          /* 窄螢幕：三張卡改上下排，避免文字被壓扁 */
+          @media (max-width: 980px) {
+            .gw__cards {
+              grid-template-columns: 1fr;
+            }
+
+            .gw__cards .card {
+              min-height: 0;
+            }
+          }
+        </style>
+      </section>
+
+      <!-- 2 ─ 後來怎麼做（三個水平圖卡）=====================================
+           研究 → 實作 → 報告，各一張卡；卡片內的粗體就是當時的重點。 -->
+      <section class="slide" aria-roledescription="slide" aria-label="研究、實作、報告">
+        <header class="slide__head">
+          <p class="eyebrow rise">附錄 4-2 · 後來怎麼做</p>
+          <h2 class="h2 rise">把「不知道要幹嘛」拆成三件事</h2>
+          <p class="lede rise">
+            先把要學的東西列清楚，再把工作切成研究、實作、報告三塊。
+          </p>
+        </header>
+
+        <div class="slide__body gwp">
+          <div class="cards gp__cards">
+            <article class="card rise">
+              <p class="card__index">01 · 研究<span class="gp__when">11/19 THU</span></p>
+              <h3 class="card__title">先講給彼此聽</h3>
+              <p class="gp__sub">開會討論 · 互相教學</p>
+              <ul class="gp__list">
+                <li><strong>Shamir 多項式</strong></li>
+                <li><span class="math">GF(2<sup>n</sup>)</span> 的運算</li>
+                <li>還原多項式的三個方法<span class="gp__aside">（來不及就先做一個）</span></li>
+                <li><strong>如何實作視覺機密分享</strong></li>
+              </ul>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">02 · 實作<span class="gp__when">11/20 FRI</span></p>
+              <h3 class="card__title">介面先定，再分頭寫</h3>
+              <p class="gp__sub">
+                和作業大同小異：差別只在機密怎麼產生 —— 從編碼矩陣換成 Shamir 多項式。
+              </p>
+              <ul class="gp__list">
+                <li>用 HTML + CSS + JS</li>
+                <li>
+                  拆成 <span class="math">gf28</span>、<span class="math">shamir</span>、<span class="math">ui</span> 三塊；
+                  還原 Secret 的解法再拆成三個檔案
+                </li>
+                <li><strong>訂定介面規格</strong><span class="gp__aside">（回家作業 → 上課討論）</span></li>
+                <li>草稿見〈介面規格〉</li>
+                <li>分工：ui 妡 · shamir 蕭 · gf28 安</li>
+                <li>與 AI 協作、用 GitHub 協作</li>
+              </ul>
+            </article>
+
+            <article class="card rise">
+              <p class="card__index">03 · 報告</p>
+              <h3 class="card__title">簡報也用同一套做</h3>
+              <p class="gp__sub">
+                用 AI + HTML + CSS：好看、能動，甚至能把實作出的程式直接放進簡報。
+              </p>
+              <ul class="gp__list">
+                <li>拆解：<span class="math">chap1.html</span>、<span class="math">chap2.html</span></li>
+                <li>風格統一：共用 <span class="math">style.css</span>，分開做也不會走鐘</li>
+                <li>合併：<span class="math">index.html</span> 自己抓其他的 HTML 進來</li>
+                <li>章節草稿（參考筆記）</li>
+                <li>分配誰做哪部分</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+
+        <noscript>
+          <p class="slide__body small muted">
+            靜態內容：研究（Shamir 多項式、GF(2^n) 運算、還原多項式的三個方法、視覺機密分享實作）、
+            實作（HTML + CSS + JS，拆成 gf28／shamir／ui，先訂介面規格，三人分工並用 AI 與 GitHub 協作）、
+            報告（拆章節、共用 style.css、由 index.html 合併、參考筆記與分工）。
+          </p>
+        </noscript>
+
+        <!-- 這一頁自己的樣式：卡片比第一頁高、字比第一頁小，六條清單也放得下 -->
+        <style>
+          .gwp {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            min-height: 0;
+          }
+
+          .gp__cards {
+            gap: 18px;
+          }
+
+          .gp__cards .card {
+            gap: 6px;
+            padding: 18px 20px 20px;
+            border-top: 4px solid var(--line-2);
+          }
+
+          .gp__cards .card:nth-child(1) {
+            border-top-color: var(--brand);
+          }
+
+          .gp__cards .card:nth-child(2) {
+            border-top-color: var(--accent);
+          }
+
+          .gp__cards .card:nth-child(3) {
+            border-top-color: var(--ok);
+          }
+
+          /* 索引列：左邊「01 · 研究」，右邊是小字日期 */
+          .gp__cards .card__index {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+          }
+
+          .gp__when {
+            margin-left: auto;
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            color: var(--ink-300);
+          }
+
+          .gp__cards .card__title {
+            font-size: 22px;
+          }
+
+          /* 卡片開頭那句摘要：比正文再輕一點 */
+          .gp__sub {
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: var(--ink-500);
+          }
+
+          .gp__list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 4px 0 0;
+            padding: 0;
+            list-style: none;
+            font-size: 13.5px;
+            line-height: 1.55;
+            color: var(--ink-500);
+          }
+
+          .gp__list li {
+            position: relative;
+            padding-left: 14px;
+          }
+
+          .gp__list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.6em;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--line-2);
+          }
+
+          .gp__cards .card:nth-child(1) .gp__list li::before {
+            background: var(--brand);
+          }
+
+          .gp__cards .card:nth-child(2) .gp__list li::before {
+            background: var(--accent);
+          }
+
+          .gp__cards .card:nth-child(3) .gp__list li::before {
+            background: var(--ok);
+          }
+
+          .gp__list strong {
+            color: var(--ink-900);
+          }
+
+          /* 行內程式名詞跟著清單字級，不要被 .math 的 26px 撐開 */
+          .gp__list .math {
+            font-size: 1em;
+            line-height: inherit;
+          }
+
+          /* 「（來不及就先做一個）」這種補充語氣 */
+          .gp__aside {
+            font-size: 12.5px;
+            color: var(--ink-300);
+          }
+
+          /* 窄螢幕：三張卡改上下排 */
+          @media (max-width: 980px) {
+            .gp__cards {
+              grid-template-columns: 1fr;
+            }
+          }
+        </style>
+      </section>
+    </main>
+
+    <nav class="hud" aria-label="投影片控制">
+      <div class="hud__bar">
+        <span class="hud__progress" aria-hidden="true"><i></i></span>
+        <span class="hud__count" aria-live="polite">01 / 02</span>
+        <button class="hud__btn" type="button" data-nav="prev" aria-label="上一頁" title="上一頁（← ↑）">←</button>
+        <button class="hud__btn" type="button" data-nav="next" aria-label="下一頁" title="下一頁（→ ↓）">→</button>
+        <button class="hud__btn" type="button" data-nav="fullscreen" aria-label="全螢幕" title="全螢幕（F）">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M2 10v4h4" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- 播放器 → 頁內 step 播放器（這兩頁都是靜態頁，不需要 window.SlideAnim） -->
+    <script src="deck.js"></script>
+    <script src="anim.js"></script>
+  </body>
+</html>
+
