@@ -1049,6 +1049,11 @@ strong {
   color: #b7c3dd;
 }
 
+.slide--cover .math,
+.slide--cover .lede .math {
+  color: inherit !important;
+}
+
 .cover {
   position: relative;
   z-index: 1;
