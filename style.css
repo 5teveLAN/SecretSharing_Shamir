@@ -1395,3 +1395,54 @@ strong {
   }
 }
 
+/* 4-5 查表三步驟視覺流程圖 */
+.flow-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  padding: 6px 4px;
+  overflow-x: auto;
+}
+.flow-branches {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.flow-branch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.flow-merge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.flow-node {
+  padding: 6px 12px;
+  border-radius: var(--rad, 8px);
+  background: var(--code-bg, #f4f6f8);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.92em;
+  white-space: nowrap;
+}
+.flow-node--accent {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.35);
+  font-weight: 600;
+}
+.flow-arrow {
+  color: #64748b;
+  font-weight: 600;
+  user-select: none;
+}
+.highlight-num {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+

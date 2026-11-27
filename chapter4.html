@@ -11,9 +11,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 14px;
-        flex-wrap: wrap;
-        padding: 12px 8px;
+        gap: 10px;
+        flex-wrap: nowrap;
+        padding: 6px 4px;
+        overflow-x: auto;
       }
       .flow-branches {
         display: flex;
@@ -246,9 +247,9 @@ for (let i = 0; i < 255; i++) {
           <h2 class="h2 rise">查表三步驟與具體數字示範</h2>
         </header>
 
-        <div class="slide__body stack">
-          <div class="card rise">
-            <h3 class="card__title">查表三步驟視覺流程圖</h3>
+        <div class="slide__body stack stack--tight">
+          <div class="card rise" style="padding: 16px 20px;">
+            <h3 class="card__title" style="margin-bottom: 8px;">查表三步驟視覺流程圖</h3>
             <div class="flow-container">
               <div class="flow-branches">
                 <div class="flow-branch">
@@ -282,7 +283,7 @@ for (let i = 0; i < 255; i++) {
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+          <div class="grid-2 grid-2--even" style="gap: 20px; align-items: stretch;">
             <article class="card rise" style="display: flex; flex-direction: column; justify-content: space-between;">
               <div>
                 <p class="card__index">乘法範例</p>
