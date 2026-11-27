@@ -4,6 +4,29 @@
 // 這裡只透過 gf.add / gf.mul / gf.div 操作 0–255 的位元組，不碰 Canvas。
 import { GF28 as gf } from "./gf28.js";
 import { lagrangeInterpolateAtZero } from "./Lagrange.js";
+import { gaussianSolveAtZero } from "./Gaussian.js";
+import { determinantSolveAtZero } from "./Determinant.js";
+
+/**
+ * 還原秘密時可選的解法。
+ * 三種方法在數學上等價，差在「怎麼解出多項式的常數項 a0」：
+ *   lagrange     拉格朗日插值（直接代 x = 0）
+ *   determinant  行列式 + 克拉瑪公式（a0 = Δ0 / Δ）
+ *   gaussian     高斯消去（消成上三角後取 a0 = R[0][k] / R[0][0]）
+ */
+export const RECONSTRUCT_METHODS = Object.freeze({
+  LAGRANGE: "lagrange",
+  DETERMINANT: "determinant",
+  GAUSSIAN: "gaussian",
+});
+
+/** UI 下拉／勾選用的預設解法。 */
+export const DEFAULT_RECONSTRUCT_METHOD = RECONSTRUCT_METHODS.LAGRANGE;
+
+/** 是否為支援的解法名稱。 */
+export function isReconstructMethod(method) {
+  return Object.values(RECONSTRUCT_METHODS).includes(method);
+}
 
 /**
  * 真 GF(2^8) 是否已接上。
@@ -90,10 +113,25 @@ export function generateShares(value, k, n, randomFn = randomByte) {
 }
 
 /**
+ * 從 k 個點還原單一像素通道的秘密值（多項式的常數項 a0）。
+ *
  * @param {{x:number, y:number}[]} points x ∈ [1,n]，至少 k 個
- * @param {number} k
+ * @param {number} k 門檻（多項式次數 + 1）
+ * @param {string} [method] 用哪種方法解：'lagrange' | 'determinant' | 'gaussian'
+ *   省略時預設 'lagrange'（行為與舊版相同）。
  * @returns {number} 0–255
+ * @throws {RangeError} 點數不足、門檻不合法、x 重複，或 method 不認識
  */
-export function reconstructPixel(points, k) {
-  return lagrangeInterpolateAtZero(points, k);
+export function reconstructPixel(points, k, method = DEFAULT_RECONSTRUCT_METHOD) {
+  if (method === RECONSTRUCT_METHODS.LAGRANGE) {
+    return lagrangeInterpolateAtZero(points, k);
+  } else if (method === RECONSTRUCT_METHODS.DETERMINANT) {
+    return determinantSolveAtZero(points, k);
+  } else if (method === RECONSTRUCT_METHODS.GAUSSIAN) {
+    return gaussianSolveAtZero(points, k);
+  }
+
+  throw new RangeError(
+    `不認識的還原方法 "${method}"，可用：${Object.values(RECONSTRUCT_METHODS).join(" / ")}`
+  );
 }

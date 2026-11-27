@@ -1,5 +1,11 @@
 // ---------- ui.js（妡） ----------
-import { generateShares, reconstructPixel } from './shamir.js';
+import {
+  generateShares,
+  reconstructPixel,
+  RECONSTRUCT_METHODS,
+  DEFAULT_RECONSTRUCT_METHOD,
+  isReconstructMethod
+} from './shamir.js';
 
 /**
  * =========================================================================
@@ -36,6 +42,11 @@ function gfDiv(a, b) {
   if (b === 0) throw new RangeError('GF(2^8) 除以零錯誤');
   if (a === 0) return 0;
   return GF28_EXP[(GF28_LOG[a] - GF28_LOG[b] + 255) % 255];
+}
+
+function gfInv(a) {
+  if (a === 0) throw new RangeError('GF(2^8) 中 0 沒有乘法反元素');
+  return GF28_EXP[255 - GF28_LOG[a]];
 }
 
 /** 內建 Mock/Fallback: 拆分單一像素通道值 (0~255) */
@@ -82,6 +93,100 @@ function mockReconstructPixel(points, k) {
   return secret;
 }
 
+/**
+ * 內建 Mock/Fallback: 高斯消去法（只在 shamir.js 拋錯時兜底用）。
+ * 前向消去 + 回代，最後取常數項 a[0] 當秘密。
+ */
+function mockGaussianPixel(points, k) {
+  if (!points || points.length < k) {
+    throw new Error(`還原點數不足：需要至少 ${k} 個點，目前僅有 ${points ? points.length : 0} 個`);
+  }
+  const m = [];
+  for (let i = 0; i < k; i++) {
+    const row = new Array(k + 1);
+    let p = 1;
+    for (let j = 0; j < k; j++) {
+      row[j] = p;
+      p = gfMul(p, points[i].x);
+    }
+    row[k] = points[i].y;
+    m.push(row);
+  }
+  for (let col = 0; col < k; col++) {
+    let pivot = col;
+    while (pivot < k && m[pivot][col] === 0) pivot++;
+    if (pivot === k) throw new Error('矩陣奇異，請檢查是否有重複的 x 座標');
+    if (pivot !== col) {
+      const tmp = m[col];
+      m[col] = m[pivot];
+      m[pivot] = tmp;
+    }
+    const invPivot = gfInv(m[col][col]);
+    for (let r = col + 1; r < k; r++) {
+      if (m[r][col] === 0) continue;
+      const scale = gfMul(m[r][col], invPivot);
+      for (let c = col; c <= k; c++) m[r][c] ^= gfMul(scale, m[col][c]);
+    }
+  }
+  // 回代（GF 裡減法 = XOR）
+  const a = new Array(k);
+  for (let row = k - 1; row >= 0; row--) {
+    let sum = m[row][k];
+    for (let c = row + 1; c < k; c++) sum ^= gfMul(m[row][c], a[c]);
+    a[row] = gfDiv(sum, m[row][row]);
+  }
+  return a[0];
+}
+
+/** 內建 Mock/Fallback: 行列式 + 克拉瑪公式（只在 shamir.js 拋錯時兜底用） */
+function mockDeterminantPixel(points, k) {
+  if (!points || points.length < k) {
+    throw new Error(`還原點數不足：需要至少 ${k} 個點，目前僅有 ${points ? points.length : 0} 個`);
+  }
+  const buildV = () => {
+    const v = [];
+    for (let i = 0; i < k; i++) {
+      const row = new Array(k);
+      let p = 1;
+      for (let j = 0; j < k; j++) {
+        row[j] = p;
+        p = gfMul(p, points[i].x);
+      }
+      v.push(row);
+    }
+    return v;
+  };
+  const det = (matrix) => {
+    const n = matrix.length;
+    const a = matrix.map((row) => row.slice());
+    let d = 1;
+    for (let col = 0; col < n; col++) {
+      let pivot = col;
+      while (pivot < n && a[pivot][col] === 0) pivot++;
+      if (pivot === n) return 0;
+      if (pivot !== col) {
+        const tmp = a[col];
+        a[col] = a[pivot];
+        a[pivot] = tmp;
+      }
+      d = gfMul(d, a[col][col]);
+      const invPivot = gfInv(a[col][col]);
+      for (let r = col + 1; r < n; r++) {
+        if (a[r][col] === 0) continue;
+        const scale = gfMul(a[r][col], invPivot);
+        for (let c = col; c < n; c++) a[r][c] ^= gfMul(scale, a[col][c]);
+      }
+    }
+    return d;
+  };
+  const v = buildV();
+  const v0 = buildV();
+  for (let i = 0; i < k; i++) v0[i][0] = points[i].y;
+  const delta = det(v);
+  if (delta === 0) throw new Error('det(V) = 0，矩陣奇異，請檢查是否有重複的 x 座標');
+  return gfDiv(det(v0), delta);
+}
+
 /** 統一調用隊友函式，若未實作則優雅降級至 Mock */
 let hasLoggedShamirMode = false;
 function callGenerateShares(val, k, n) {
@@ -102,18 +207,25 @@ function callGenerateShares(val, k, n) {
   return mockGenerateShares(val, k, n);
 }
 
-function callReconstructPixel(points, k) {
+function callReconstructPixel(points, k, method = DEFAULT_RECONSTRUCT_METHOD) {
+  // 用哪種解法就逃到哪個 mock，避免隊友模組壞掉時整個流程掛掉
+  const mockByMethod = method === RECONSTRUCT_METHODS.GAUSSIAN
+    ? mockGaussianPixel
+    : method === RECONSTRUCT_METHODS.DETERMINANT
+      ? mockDeterminantPixel
+      : mockReconstructPixel;
+
   if (typeof reconstructPixel === 'function') {
     try {
-      const res = reconstructPixel(points, k);
+      const res = reconstructPixel(points, k, method);
       if (typeof res === 'number' && !isNaN(res)) {
         return Math.max(0, Math.min(255, Math.round(res)));
       }
     } catch (err) {
-      console.warn('[ui.js] 隊友 reconstructPixel 執行拋出異常，切換至內建演算法:', err);
+      console.warn(`[ui.js] 隊友 reconstructPixel（${method}）執行拋出異常，切換至內建演算法:`, err);
     }
   }
-  return mockReconstructPixel(points, k);
+  return mockByMethod(points, k);
 }
 
 function createImageDataSafe(width, height) {
@@ -218,12 +330,20 @@ export function generateSharesAll(imageData, k, n) {
  * 吃進分享圖清單（至少 k 張）與門檻 k，還原出原始影像
  * @param {ImageData[]} imageDataList 分享圖清單（至少 k 張）
  * @param {number} k 門檻值
+ * @param {string} [method] 還原時用哪種解法：'lagrange' | 'determinant' | 'gaussian'
+ *   省略時預設 'lagrange'（行為與舊版相同）。
  * @returns {ImageData} 還原後的單一 ImageData 物件（尺寸對齊第一張分享圖）
  */
-export function reconstructAll(imageDataList, k) {
+export function reconstructAll(imageDataList, k, method = DEFAULT_RECONSTRUCT_METHOD) {
   // 1. 防呆檢查
   if (!Array.isArray(imageDataList) || imageDataList.length === 0) {
     throw new TypeError('reconstructAll 錯誤：imageDataList 必須為非空的 ImageData 陣列');
+  }
+
+  if (!isReconstructMethod(method)) {
+    throw new RangeError(
+      `reconstructAll 錯誤：不認識的還原方法 "${method}"，可用：${Object.values(RECONSTRUCT_METHODS).join(' / ')}`
+    );
   }
 
   k = Math.floor(Number(k));
@@ -294,9 +414,9 @@ export function reconstructAll(imageDataList, k) {
       bPoints[s].y = sData[offset + 2];
     }
 
-    resData[offset] = callReconstructPixel(rPoints, k);
-    resData[offset + 1] = callReconstructPixel(gPoints, k);
-    resData[offset + 2] = callReconstructPixel(bPoints, k);
+    resData[offset] = callReconstructPixel(rPoints, k, method);
+    resData[offset + 1] = callReconstructPixel(gPoints, k, method);
+    resData[offset + 2] = callReconstructPixel(bPoints, k, method);
     resData[offset + 3] = baseImg.data[offset + 3]; // A 通道直接複製
   }
 
@@ -678,6 +798,51 @@ const CSS_STYLES = `
   flex-wrap: wrap;
   margin-top: 10px;
 }
+.sss-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.sss-method {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.sss-method:hover {
+  border-color: #93c5fd;
+  background: #f8fbff;
+}
+.sss-method.is-active {
+  border-color: #10b981;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+.sss-method input {
+  margin-top: 3px;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+.sss-method__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sss-method__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.sss-method__desc {
+  font-size: 12px;
+  color: #64748b;
+}
 @keyframes sssFadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -815,6 +980,36 @@ export function mountSecretSharingUI(targetContainer) {
             </p>
           </div>
 
+          <div class="sss-form-group">
+            <label>3. 選擇還原解法（三選一）</label>
+            <div class="sss-methods" id="sss-method-group">
+              <label class="sss-method" data-method="lagrange">
+                <input type="radio" name="sss-reconstruct-method" value="lagrange" />
+                <span class="sss-method__text">
+                  <span class="sss-method__name">拉格朗日插值（Lagrange）</span>
+                  <span class="sss-method__desc">直接算 lᵢ(0) 後加權求和，代一次 x = 0 就得到 a₀</span>
+                </span>
+              </label>
+              <label class="sss-method" data-method="determinant">
+                <input type="radio" name="sss-reconstruct-method" value="determinant" />
+                <span class="sss-method__text">
+                  <span class="sss-method__name">行列式 + 克拉瑪公式（Determinant）</span>
+                  <span class="sss-method__desc">a₀ = Δ₀ / Δ，Δ 為凡德蒙行列式，Δ₀ 把 a₀ 欄換成 y</span>
+                </span>
+              </label>
+              <label class="sss-method" data-method="gaussian">
+                <input type="radio" name="sss-reconstruct-method" value="gaussian" />
+                <span class="sss-method__text">
+                  <span class="sss-method__name">高斯消去法（Gaussian Elimination）</span>
+                  <span class="sss-method__desc">增廣矩陣消成上三角，直接取 a₀ = R[0][k] / R[0][0]</span>
+                </span>
+              </label>
+            </div>
+            <p style="font-size:12px; color:#64748b; margin:6px 0 0 0;">
+              三種解法在數學上完全等價，還原結果應逐像素相同。
+            </p>
+          </div>
+
           <div style="margin-top:auto; padding-top: 14px;">
             <button type="button" class="sss-btn sss-btn--success" id="sss-btn-reconstruct" style="width:100%;">
               🔓 開始還原原始圖片 (reconstructAll)
@@ -829,6 +1024,7 @@ export function mountSecretSharingUI(targetContainer) {
               <div class="sss-meta-info">
                 <div><span class="sss-badge sss-badge--success">還原成功！</span></div>
                 <div><strong>圖片尺寸：</strong><span id="sss-rec-dim">-</span></div>
+                <div><strong>使用解法：</strong><span id="sss-rec-method">-</span></div>
                 <div style="margin-top:8px;">
                   <button type="button" class="sss-btn sss-btn--primary sss-btn--sm" id="sss-btn-download-rec">
                     📥 下載還原影像 (PNG)
@@ -870,12 +1066,40 @@ export function mountSecretSharingUI(targetContainer) {
   const decListEl = targetContainer.querySelector('#sss-dec-list');
   const btnClearDec = targetContainer.querySelector('#sss-btn-clear-dec');
   const decInputK = targetContainer.querySelector('#sss-dec-k');
+  const methodGroup = targetContainer.querySelector('#sss-method-group');
+  const methodInputs = Array.from(methodGroup.querySelectorAll('input[name="sss-reconstruct-method"]'));
   const btnReconstruct = targetContainer.querySelector('#sss-btn-reconstruct');
   const recResultArea = targetContainer.querySelector('#sss-rec-result-area');
   const recCanvas = targetContainer.querySelector('#sss-rec-canvas');
   const recDimEl = targetContainer.querySelector('#sss-rec-dim');
+  const recMethodEl = targetContainer.querySelector('#sss-rec-method');
   const btnDownloadRec = targetContainer.querySelector('#sss-btn-download-rec');
   let currentReconstructedImageData = null;
+
+  // 還原解法：預設拉格朗日，勾選哪個就同步高亮哪個
+  const METHOD_LABELS = {
+    [RECONSTRUCT_METHODS.LAGRANGE]: '拉格朗日插值（Lagrange）',
+    [RECONSTRUCT_METHODS.DETERMINANT]: '行列式 + 克拉瑪公式（Determinant）',
+    [RECONSTRUCT_METHODS.GAUSSIAN]: '高斯消去法（Gaussian）'
+  };
+  let selectedMethod = DEFAULT_RECONSTRUCT_METHOD;
+
+  function setSelectedMethod(method) {
+    if (!isReconstructMethod(method)) return;
+    selectedMethod = method;
+    methodInputs.forEach((input) => {
+      const active = input.value === method;
+      input.checked = active;
+      const card = input.closest('.sss-method');
+      if (card) card.classList.toggle('is-active', active);
+    });
+  }
+  methodInputs.forEach((input) => {
+    input.addEventListener('change', () => {
+      if (input.checked) setSelectedMethod(input.value);
+    });
+  });
+  setSelectedMethod(DEFAULT_RECONSTRUCT_METHOD);
 
   function showAlert(msg, type = 'info', autoHideMs = 6000) {
     alertBox.className = `sss-alert sss-alert--${type}`;
@@ -1192,13 +1416,13 @@ export function mountSecretSharingUI(targetContainer) {
       return;
     }
 
-    showAlert('正在解密與還原像素中，請稍候...', 'info', 0);
+    showAlert(`正在用「${METHOD_LABELS[selectedMethod]}」還原像素中，請稍候...`, 'info', 0);
     btnReconstruct.disabled = true;
 
     setTimeout(() => {
       try {
         const imagesToReconstruct = decShareItems.map(item => item.imageData);
-        const reconstructed = reconstructAll(imagesToReconstruct, k);
+        const reconstructed = reconstructAll(imagesToReconstruct, k, selectedMethod);
         currentReconstructedImageData = reconstructed;
 
         recCanvas.width = reconstructed.width;
@@ -1207,8 +1431,9 @@ export function mountSecretSharingUI(targetContainer) {
         ctx.putImageData(reconstructed, 0, 0);
 
         recDimEl.textContent = `${reconstructed.width} × ${reconstructed.height}`;
+        recMethodEl.textContent = METHOD_LABELS[selectedMethod];
         recResultArea.style.display = 'block';
-        showAlert(`🎉 圖片還原成功！尺寸：${reconstructed.width} × ${reconstructed.height}`, 'success');
+        showAlert(`🎉 圖片還原成功！尺寸：${reconstructed.width} × ${reconstructed.height}（解法：${METHOD_LABELS[selectedMethod]}）`, 'success');
       } catch (err) {
         showAlert(`還原失敗：${err.message}`, 'error');
       } finally {
@@ -1256,6 +1481,8 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     generateSharesAll,
     reconstructAll,
     mountSecretSharingUI,
-    createTestPattern
+    createTestPattern,
+    RECONSTRUCT_METHODS,
+    DEFAULT_RECONSTRUCT_METHOD
   };
 }

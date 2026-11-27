@@ -59,7 +59,8 @@ GF28.init()           // → void     建 log/exp 表；模組載入時自動呼
 generateShares(value, k, n)   // → number[]，長度 n，索引 0..n-1 對應第 1..n 張 share
 
 // 用「座標 + 值」還原，座標就是 share 的編號
-reconstructPixel(points, k)   // points: [{x, y}, ...] 至少 k 個 → number
+reconstructPixel(points, k, method)  // points: [{x, y}, ...] 至少 k 個 → number
+//   method 可省略，預設 'lagrange'；可選 'lagrange' | 'determinant' | 'gaussian'
 ```
 
 - `value` 和回傳的每個元素都是 **0–255**。
@@ -152,9 +153,10 @@ export function generateShares(value, k, n) {}
 /**
  * @param {{x:number, y:number}[]} points x ∈ [1,n]，至少 k 個
  * @param {number} k
+ * @param {'lagrange'|'determinant'|'gaussian'} [method] 預設 'lagrange'
  * @returns {number} 0–255
  */
-export function reconstructPixel(points, k) {}
+export function reconstructPixel(points, k, method = "lagrange") {}
 
 // ---------- ui.js（妡） ----------
 /** @returns {ImageData[]} 長度 n，不動原圖 */
