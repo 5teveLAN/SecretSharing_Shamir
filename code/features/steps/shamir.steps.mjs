@@ -8,6 +8,8 @@ import { strict as assert } from "node:assert";
 import {
   generateShares,
   evalPolynomial,
+  reconstructPixel,
+  RECONSTRUCT_METHODS,
   GF_IS_REAL,
 } from "../../shamir.js";
 
@@ -154,6 +156,25 @@ When("我拿前 {int} 張用拉格朗日插值算 x = 0", function (count) {
   this.result = lagrangeAtZero(points);
 });
 
+// ── 三種解法（reconstructPixel 的第三個參數）─────────────────────────────────
+
+When("我拿前 {int} 張用 {word} 解 x = 0", function (count, method) {
+  const points = this.result.slice(0, count).map((y, i) => ({ x: i + 1, y }));
+  if (!Object.values(RECONSTRUCT_METHODS).includes(method)) {
+    // 不認識的解法：記下待執行的動作，由「那麼 應該拋出 RangeError」檢查
+    this.pendingFn = () => reconstructPixel(points, count, method);
+    return;
+  }
+  this.result = reconstructPixel(points, count, method);
+});
+
+When("我拿前 {int} 張分別用三種解法解 x = 0", function (count) {
+  const points = this.result.slice(0, count).map((y, i) => ({ x: i + 1, y }));
+  this.result = Object.values(RECONSTRUCT_METHODS).map((method) =>
+    reconstructPixel(points, count, method)
+  );
+});
+
 // ===== 那麼（Then）==========================================================
 
 Then("我應該拿到 {int} 張 share", function (n) {
@@ -211,6 +232,12 @@ Then("我應該還原出 {int}", function (expected) {
 Then("結果不應該是 {int}", function (unexpected) {
   if (this.skipRealGf) return;
   assert.notEqual(this.result, unexpected);
+});
+
+Then("三種解法的結果應該完全相同", function () {
+  assert.equal(this.result.length, 3, "應該有三個結果");
+  const [first, ...rest] = this.result;
+  for (const v of rest) assert.equal(v, first, "三種解法結果不一致");
 });
 
 // ===== @real-gf 專用 ========================================================
